@@ -36,7 +36,7 @@ jobs:
       - name: Build production bundle
         env:
           VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
         run: npm run build
 
       - name: Upload build artifact for GitHub Pages

@@ -43,9 +43,11 @@ export async function graphql(query, variables = {}, options = {}) {
     'User-Agent': 'customReadmeSVG-App',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (!token) {
+    throw new Error('Set GITHUB_TOKEN or VITE_GITHUB_TOKEN (GitHub GraphQL API requires authentication).');
   }
+
+  headers['Authorization'] = `Bearer ${token}`;
 
   const response = await axios.post(
     'https://api.github.com/graphql',

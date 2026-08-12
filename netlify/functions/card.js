@@ -3,26 +3,10 @@ import { handleRequest } from '../../src/runtime/handleRequest.js';
 /**
  * Netlify Function handler for dynamic SVG card generation.
  */
-export default async (req, context) => {
+export default async (req) => {
   try {
     const url = new URL(req.url);
     const pathname = url.pathname;
-
-    // Pass root page and static assets through to Netlify static CDN
-    if (
-      pathname === '/' ||
-      pathname.startsWith('/assets') ||
-      pathname.startsWith('/src') ||
-      pathname.endsWith('.html') ||
-      pathname.endsWith('.js') ||
-      pathname.endsWith('.css') ||
-      pathname.endsWith('.json') ||
-      pathname.endsWith('.ico') ||
-      pathname.endsWith('.png') ||
-      pathname.endsWith('.svg')
-    ) {
-      return context.next();
-    }
 
     const query = Object.fromEntries(url.searchParams.entries());
     const result = await handleRequest(pathname, { query });
@@ -38,8 +22,4 @@ export default async (req, context) => {
   }
 
   return new Response('Not Found', { status: 404 });
-};
-
-export const config = {
-  path: ['/', '/:user', '/:user/:card'],
 };

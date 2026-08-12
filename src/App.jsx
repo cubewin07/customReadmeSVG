@@ -28,7 +28,20 @@ function App() {
   const cleanUser = username.trim() || 'octocat';
 
   // Construct URL
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const getBaseUrl = () => {
+    if (typeof window === 'undefined') return '';
+    let basePath = import.meta.env.BASE_URL || '/';
+    if (basePath === './') {
+      basePath = window.location.pathname;
+      if (!basePath.endsWith('/')) {
+        basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+      }
+    }
+    const cleanBase = ('/' + basePath.replace(/^\/|\/$/g, '')).replace(/\/$/, '');
+    return `${window.location.origin}${cleanBase}`;
+  };
+
+  const baseUrl = getBaseUrl();
   const path = card === 'profile' ? `/${cleanUser}` : `/${cleanUser}/${card}`;
   
   const params = new URLSearchParams();
@@ -40,7 +53,7 @@ function App() {
   }
 
   const queryStr = params.toString() ? `?${params.toString()}` : '';
-  const cardUrl = `${origin}${path}${queryStr}`;
+  const cardUrl = `${baseUrl}${path}${queryStr}`;
   const relativeUrl = `${path}${queryStr}`;
 
   const markdownSnippet = `![${cleanUser}'s GitHub Card](${cardUrl})`;

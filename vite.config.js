@@ -5,5 +5,5 @@ import { vitePluginSvg } from './src/runtime/vitePluginSvg.js'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), vitePluginSvg()],
-  base: './',
+  base: '/',
 })

@@ -30,15 +30,11 @@ function App() {
   // Construct URL
   const getBaseUrl = () => {
     if (typeof window === 'undefined') return '';
-    let basePath = import.meta.env.BASE_URL || '/';
-    if (basePath === './') {
-      basePath = window.location.pathname;
-      if (!basePath.endsWith('/')) {
-        basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-      }
+    const base = import.meta.env.BASE_URL || '/';
+    if (base === '/' || base === './') {
+      return window.location.origin;
     }
-    const cleanBase = ('/' + basePath.replace(/^\/|\/$/g, '')).replace(/\/$/, '');
-    return `${window.location.origin}${cleanBase}`;
+    return `${window.location.origin}${base.replace(/\/$/, '')}`;
   };
 
   const baseUrl = getBaseUrl();

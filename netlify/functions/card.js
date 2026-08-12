@@ -6,9 +6,26 @@ import { handleRequest } from '../../src/runtime/handleRequest.js';
 export default async (req) => {
   try {
     const url = new URL(req.url);
-    const query = Object.fromEntries(url.searchParams.entries());
+    const pathname = url.pathname;
 
-    const result = await handleRequest(url.pathname, { query });
+    // Pass static assets through to Netlify's static file CDN
+    if (
+      pathname.startsWith('/assets') ||
+      pathname.startsWith('/src') ||
+      pathname === '/' ||
+      pathname.endsWith('.html') ||
+      pathname.endsWith('.js') ||
+      pathname.endsWith('.css') ||
+      pathname.endsWith('.json') ||
+      pathname.endsWith('.ico') ||
+      pathname.endsWith('.png') ||
+      pathname.endsWith('.svg')
+    ) {
+      return; // Returning undefined lets Netlify serve the static asset
+    }
+
+    const query = Object.fromEntries(url.searchParams.entries());
+    const result = await handleRequest(pathname, { query });
 
     if (result) {
       return new Response(result.body, {

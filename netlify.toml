@@ -2,21 +2,3 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
-
-# Serve static assets directly from dist
-[[redirects]]
-  from = "/assets/*"
-  to = "/assets/:splat"
-  status = 200
-  force = true
-
-# Route card endpoints to Netlify Function
-[[redirects]]
-  from = "/:user"
-  to = "/.netlify/functions/card"
-  status = 200
-
-[[redirects]]
-  from = "/:user/:card"
-  to = "/.netlify/functions/card"
-  status = 200

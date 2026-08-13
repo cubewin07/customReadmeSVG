@@ -8,6 +8,9 @@ const THEMES = [
   { id: 'nord', name: 'Nord' },
   { id: 'gruvbox', name: 'Gruvbox' },
   { id: 'dracula', name: 'Dracula' },
+  { id: 'tokyonight', name: 'Tokyo Night' },
+  { id: 'catppuccin', name: 'Catppuccin' },
+  { id: 'synthwave', name: 'Synthwave' },
 ];
 
 const CARDS = [
@@ -20,6 +23,12 @@ const CARDS = [
 function App() {
   const [username, setUsername] = useState('octocat');
   const [card, setCard] = useState('profile');
+  const [version, setVersion] = useState('v1');
+  const [profileLayout, setProfileLayout] = useState('classic');
+  const [langLayout, setLangLayout] = useState('polyglot');
+  const [repoLayout, setRepoLayout] = useState('grid');
+  const [statsLayout, setStatsLayout] = useState('ring');
+  const [langsCount, setLangsCount] = useState('12');
   const [theme, setTheme] = useState('dark');
   const [cacheBypass, setCacheBypass] = useState(false);
   const [activeTab, setActiveTab] = useState('markdown');
@@ -41,6 +50,22 @@ function App() {
   const path = card === 'profile' ? `/${cleanUser}` : `/${cleanUser}/${card}`;
   
   const params = new URLSearchParams();
+  if (version) {
+    params.set('version', version);
+  }
+  if (card === 'profile') {
+    if (profileLayout) params.set('layout', profileLayout);
+  }
+  if (card === 'languages') {
+    if (langLayout) params.set('layout', langLayout);
+    if (langsCount) params.set('langs_count', langsCount);
+  }
+  if (card === 'repos') {
+    if (repoLayout) params.set('layout', repoLayout);
+  }
+  if (card === 'stats') {
+    if (statsLayout) params.set('layout', statsLayout);
+  }
   if (theme && theme !== 'light') {
     params.set('theme', theme);
   }
@@ -72,9 +97,9 @@ function App() {
           Dynamic, extensible SVG cards for your GitHub profile README.
         </p>
         <div className="badge-row">
+          <span className="badge">v1 Cards Live</span>
           <span className="badge">Plugin Architecture</span>
           <span className="badge">GraphQL Powered</span>
-          <span className="badge">Zero Heavy Bundles</span>
         </div>
       </header>
 
@@ -127,6 +152,25 @@ function App() {
               </div>
             </div>
 
+            {/* Card Version Switcher */}
+            <div className="control-group">
+              <label className="control-label">Card Design Version</label>
+              <div className="card-type-grid">
+                <button
+                  className={`card-type-btn ${version === 'v1' ? 'active' : ''}`}
+                  onClick={() => setVersion('v1')}
+                >
+                  v1 (Informative & Modern)
+                </button>
+                <button
+                  className={`card-type-btn ${version === 'v0' ? 'active' : ''}`}
+                  onClick={() => setVersion('v0')}
+                >
+                  v0 (Classic Basic)
+                </button>
+              </div>
+            </div>
+
             {/* Card Selection */}
             <div className="control-group">
               <label className="control-label">Card Type</label>
@@ -142,6 +186,174 @@ function App() {
                 ))}
               </div>
             </div>
+
+            {/* Profile Overview Layout Selector (only when card === 'profile') */}
+            {card === 'profile' && (
+              <div className="control-group">
+                <label className="control-label">Profile Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${profileLayout === 'classic' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('classic')}
+                  >
+                    ⚡ Classic Overview
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'hero' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('hero')}
+                  >
+                    🌟 Hero Banner
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'compact' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('compact')}
+                  >
+                    📱 Compact Mini
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'split' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('split')}
+                  >
+                    📐 Vertical Split
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('dashboard')}
+                  >
+                    🗂️ Tech Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Languages Layout Selector (only when card === 'languages') */}
+            {card === 'languages' && (
+              <>
+                <div className="control-group">
+                  <label className="control-label">Languages Layout Style</label>
+                  <div className="card-type-grid">
+                    <button
+                      className={`card-type-btn ${langLayout === 'polyglot' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('polyglot')}
+                    >
+                      ⚡ Polyglot Grid (12+ Languages)
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'donut' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('donut')}
+                    >
+                      Donut Chart
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'compact' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('compact')}
+                    >
+                      Compact Grid
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'list' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('list')}
+                    >
+                      Full Stacked Bars
+                    </button>
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <label className="control-label" htmlFor="langs-count-select">Languages Display Count</label>
+                  <select
+                    id="langs-count-select"
+                    className="select-input"
+                    value={langsCount}
+                    onChange={(e) => setLangsCount(e.target.value)}
+                  >
+                    <option value="6">Top 6 Languages</option>
+                    <option value="10">Top 10 Languages</option>
+                    <option value="12">Top 12 Languages (Polyglot)</option>
+                    <option value="16">Top 16 Languages (Max Multi-Lang)</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Repositories Layout Selector (only when card === 'repos') */}
+            {card === 'repos' && (
+              <div className="control-group">
+                <label className="control-label">Repositories Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${repoLayout === 'grid' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('grid')}
+                  >
+                    ⚡ 2-Column Grid
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'featured' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('featured')}
+                  >
+                    🌟 Featured Project
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'spotlight' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('spotlight')}
+                  >
+                    ✨ Asymmetrical Spotlight
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'timeline' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('timeline')}
+                  >
+                    🌿 Git Timeline
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'leaderboard' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('leaderboard')}
+                  >
+                    🏆 Rank Standings
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Stats Layout Selector (only when card === 'stats') */}
+            {card === 'stats' && (
+              <div className="control-group">
+                <label className="control-label">Stats Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${statsLayout === 'ring' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('ring')}
+                  >
+                    ⚡ Ring Gauge
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'bars' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('bars')}
+                  >
+                    📊 Progress Bars
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'hero' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('hero')}
+                  >
+                    🌟 Rank Hero
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('dashboard')}
+                  >
+                    🗂️ Grid Dashboard
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'compact' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('compact')}
+                  >
+                    📱 Compact Banner
+                  </button>
+                </div>
+              </div>
+            )}
+
 
             {/* Theme Selector */}
             <div className="control-group">

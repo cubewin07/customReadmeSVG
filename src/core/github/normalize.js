@@ -10,6 +10,9 @@
 export function normalizeProfile(rawData) {
   if (!rawData || !rawData.user) return null;
   const user = rawData.user;
+  const repos = user.repositories?.nodes || [];
+  const totalStars = repos.reduce((acc, r) => acc + (r.stargazerCount || 0), 0);
+
   return {
     login: user.login || '',
     name: user.name || user.login || '',
@@ -19,6 +22,7 @@ export function normalizeProfile(rawData) {
     followers: user.followers?.totalCount || 0,
     following: user.following?.totalCount || 0,
     repositories: user.repositories?.totalCount || 0,
+    totalStars,
     createdAt: user.createdAt || '',
     location: user.location || null,
     websiteUrl: user.websiteUrl || null,
@@ -69,6 +73,7 @@ export function normalizeLanguages(rawData) {
   return {
     languages,
     totalSize,
+    totalLanguages: languages.length,
   };
 }
 

@@ -7,9 +7,10 @@ import axios from 'axios';
  */
 export function getGithubToken(tokenOverride) {
   if (tokenOverride) return tokenOverride;
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
-    if (process.env.VITE_GITHUB_TOKEN) return process.env.VITE_GITHUB_TOKEN;
+  const env = typeof globalThis.process !== 'undefined' ? globalThis.process.env : undefined;
+  if (env) {
+    if (env.GITHUB_TOKEN) return env.GITHUB_TOKEN;
+    if (env.VITE_GITHUB_TOKEN) return env.VITE_GITHUB_TOKEN;
   }
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     if (import.meta.env.VITE_GITHUB_TOKEN) return import.meta.env.VITE_GITHUB_TOKEN;

@@ -24,6 +24,7 @@ function App() {
   const [username, setUsername] = useState('octocat');
   const [card, setCard] = useState('profile');
   const [version, setVersion] = useState('v1');
+  const [profileLayout, setProfileLayout] = useState('classic');
   const [langLayout, setLangLayout] = useState('polyglot');
   const [repoLayout, setRepoLayout] = useState('grid');
   const [statsLayout, setStatsLayout] = useState('ring');
@@ -51,6 +52,9 @@ function App() {
   const params = new URLSearchParams();
   if (version) {
     params.set('version', version);
+  }
+  if (card === 'profile') {
+    if (profileLayout) params.set('layout', profileLayout);
   }
   if (card === 'languages') {
     if (langLayout) params.set('layout', langLayout);
@@ -182,6 +186,45 @@ function App() {
                 ))}
               </div>
             </div>
+
+            {/* Profile Overview Layout Selector (only when card === 'profile') */}
+            {card === 'profile' && (
+              <div className="control-group">
+                <label className="control-label">Profile Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${profileLayout === 'classic' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('classic')}
+                  >
+                    ⚡ Classic Overview
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'hero' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('hero')}
+                  >
+                    🌟 Hero Banner
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'compact' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('compact')}
+                  >
+                    📱 Compact Mini
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'split' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('split')}
+                  >
+                    📐 Vertical Split
+                  </button>
+                  <button
+                    className={`card-type-btn ${profileLayout === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setProfileLayout('dashboard')}
+                  >
+                    🗂️ Tech Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Languages Layout Selector (only when card === 'languages') */}
             {card === 'languages' && (

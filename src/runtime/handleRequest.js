@@ -32,10 +32,11 @@ export async function handleRequest(pathname, options = {}) {
 
   const card = resolveCard(cardId);
   const theme = getTheme(query.theme);
+  const version = (query.version || query.v || 'v1').toLowerCase();
 
   const headers = {
     'Content-Type': 'image/svg+xml; charset=utf-8',
-    'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
   };
 
   if (!card) {
@@ -45,7 +46,7 @@ export async function handleRequest(pathname, options = {}) {
 
   try {
     const cacheObj = (query.cache === '0' || query.cache === 'false') ? null : sharedCache;
-    const cacheKey = `gh:${card.id}:${username}`;
+    const cacheKey = `gh:${card.id}:${username}:${version}`;
 
     const data = await card.fetchData(username, {
       cache: cacheObj,
@@ -54,7 +55,7 @@ export async function handleRequest(pathname, options = {}) {
       token: query.token,
     });
 
-    const body = card.renderSvg(data, theme, { username });
+    const body = card.renderSvg(data, theme, { username, version, ...query });
     return { status: 200, headers, body };
   } catch (err) {
     const errorBody = renderErrorSvg(theme, '500 Server Error', err.message);

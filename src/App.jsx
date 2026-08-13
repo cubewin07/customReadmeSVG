@@ -8,6 +8,9 @@ const THEMES = [
   { id: 'nord', name: 'Nord' },
   { id: 'gruvbox', name: 'Gruvbox' },
   { id: 'dracula', name: 'Dracula' },
+  { id: 'tokyonight', name: 'Tokyo Night' },
+  { id: 'catppuccin', name: 'Catppuccin' },
+  { id: 'synthwave', name: 'Synthwave' },
 ];
 
 const CARDS = [
@@ -20,6 +23,9 @@ const CARDS = [
 function App() {
   const [username, setUsername] = useState('octocat');
   const [card, setCard] = useState('profile');
+  const [version, setVersion] = useState('v1');
+  const [langLayout, setLangLayout] = useState('polyglot');
+  const [langsCount, setLangsCount] = useState('12');
   const [theme, setTheme] = useState('dark');
   const [cacheBypass, setCacheBypass] = useState(false);
   const [activeTab, setActiveTab] = useState('markdown');
@@ -41,6 +47,13 @@ function App() {
   const path = card === 'profile' ? `/${cleanUser}` : `/${cleanUser}/${card}`;
   
   const params = new URLSearchParams();
+  if (version) {
+    params.set('version', version);
+  }
+  if (card === 'languages') {
+    if (langLayout) params.set('layout', langLayout);
+    if (langsCount) params.set('langs_count', langsCount);
+  }
   if (theme && theme !== 'light') {
     params.set('theme', theme);
   }
@@ -72,9 +85,9 @@ function App() {
           Dynamic, extensible SVG cards for your GitHub profile README.
         </p>
         <div className="badge-row">
+          <span className="badge">v1 Cards Live</span>
           <span className="badge">Plugin Architecture</span>
           <span className="badge">GraphQL Powered</span>
-          <span className="badge">Zero Heavy Bundles</span>
         </div>
       </header>
 
@@ -127,6 +140,25 @@ function App() {
               </div>
             </div>
 
+            {/* Card Version Switcher */}
+            <div className="control-group">
+              <label className="control-label">Card Design Version</label>
+              <div className="card-type-grid">
+                <button
+                  className={`card-type-btn ${version === 'v1' ? 'active' : ''}`}
+                  onClick={() => setVersion('v1')}
+                >
+                  v1 (Informative & Modern)
+                </button>
+                <button
+                  className={`card-type-btn ${version === 'v0' ? 'active' : ''}`}
+                  onClick={() => setVersion('v0')}
+                >
+                  v0 (Classic Basic)
+                </button>
+              </div>
+            </div>
+
             {/* Card Selection */}
             <div className="control-group">
               <label className="control-label">Card Type</label>
@@ -142,6 +174,56 @@ function App() {
                 ))}
               </div>
             </div>
+
+            {/* Languages Layout Selector (only when card === 'languages') */}
+            {card === 'languages' && (
+              <>
+                <div className="control-group">
+                  <label className="control-label">Languages Layout Style</label>
+                  <div className="card-type-grid">
+                    <button
+                      className={`card-type-btn ${langLayout === 'polyglot' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('polyglot')}
+                    >
+                      ⚡ Polyglot Grid (12+ Languages)
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'donut' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('donut')}
+                    >
+                      Donut Chart
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'compact' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('compact')}
+                    >
+                      Compact Grid
+                    </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'list' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('list')}
+                    >
+                      Full Stacked Bars
+                    </button>
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <label className="control-label" htmlFor="langs-count-select">Languages Display Count</label>
+                  <select
+                    id="langs-count-select"
+                    className="select-input"
+                    value={langsCount}
+                    onChange={(e) => setLangsCount(e.target.value)}
+                  >
+                    <option value="6">Top 6 Languages</option>
+                    <option value="10">Top 10 Languages</option>
+                    <option value="12">Top 12 Languages (Polyglot)</option>
+                    <option value="16">Top 16 Languages (Max Multi-Lang)</option>
+                  </select>
+                </div>
+              </>
+            )}
 
             {/* Theme Selector */}
             <div className="control-group">

@@ -21,8 +21,11 @@ export const PROFILE_QUERY = `
       following {
         totalCount
       }
-      repositories(ownerAffiliations: [OWNER]) {
+      repositories(ownerAffiliations: [OWNER], privacy: PUBLIC, first: 100) {
         totalCount
+        nodes {
+          stargazerCount
+        }
       }
       createdAt
       location
@@ -63,7 +66,7 @@ export const LANGUAGES_QUERY = `
         }
         nodes {
           name
-          languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+          languages(first: 20, orderBy: { field: SIZE, direction: DESC }) {
             edges {
               size
               node {

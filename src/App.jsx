@@ -25,6 +25,7 @@ function App() {
   const [card, setCard] = useState('profile');
   const [version, setVersion] = useState('v1');
   const [langLayout, setLangLayout] = useState('polyglot');
+  const [repoLayout, setRepoLayout] = useState('grid');
   const [langsCount, setLangsCount] = useState('12');
   const [theme, setTheme] = useState('dark');
   const [cacheBypass, setCacheBypass] = useState(false);
@@ -53,6 +54,9 @@ function App() {
   if (card === 'languages') {
     if (langLayout) params.set('layout', langLayout);
     if (langsCount) params.set('langs_count', langsCount);
+  }
+  if (card === 'repos') {
+    if (repoLayout) params.set('layout', repoLayout);
   }
   if (theme && theme !== 'light') {
     params.set('theme', theme);
@@ -224,6 +228,46 @@ function App() {
                 </div>
               </>
             )}
+
+            {/* Repositories Layout Selector (only when card === 'repos') */}
+            {card === 'repos' && (
+              <div className="control-group">
+                <label className="control-label">Repositories Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${repoLayout === 'grid' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('grid')}
+                  >
+                    ⚡ 2-Column Grid
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'featured' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('featured')}
+                  >
+                    🌟 Featured Project
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'spotlight' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('spotlight')}
+                  >
+                    ✨ Asymmetrical Spotlight
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'timeline' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('timeline')}
+                  >
+                    🌿 Git Timeline
+                  </button>
+                  <button
+                    className={`card-type-btn ${repoLayout === 'leaderboard' ? 'active' : ''}`}
+                    onClick={() => setRepoLayout('leaderboard')}
+                  >
+                    🏆 Rank Standings
+                  </button>
+                </div>
+              </div>
+            )}
+
 
             {/* Theme Selector */}
             <div className="control-group">

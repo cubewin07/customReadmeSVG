@@ -26,6 +26,7 @@ function App() {
   const [version, setVersion] = useState('v1');
   const [langLayout, setLangLayout] = useState('polyglot');
   const [repoLayout, setRepoLayout] = useState('grid');
+  const [statsLayout, setStatsLayout] = useState('ring');
   const [langsCount, setLangsCount] = useState('12');
   const [theme, setTheme] = useState('dark');
   const [cacheBypass, setCacheBypass] = useState(false);
@@ -57,6 +58,9 @@ function App() {
   }
   if (card === 'repos') {
     if (repoLayout) params.set('layout', repoLayout);
+  }
+  if (card === 'stats') {
+    if (statsLayout) params.set('layout', statsLayout);
   }
   if (theme && theme !== 'light') {
     params.set('theme', theme);
@@ -263,6 +267,45 @@ function App() {
                     onClick={() => setRepoLayout('leaderboard')}
                   >
                     🏆 Rank Standings
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Stats Layout Selector (only when card === 'stats') */}
+            {card === 'stats' && (
+              <div className="control-group">
+                <label className="control-label">Stats Layout Style</label>
+                <div className="card-type-grid">
+                  <button
+                    className={`card-type-btn ${statsLayout === 'ring' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('ring')}
+                  >
+                    ⚡ Ring Gauge
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'bars' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('bars')}
+                  >
+                    📊 Progress Bars
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'hero' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('hero')}
+                  >
+                    🌟 Rank Hero
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('dashboard')}
+                  >
+                    🗂️ Grid Dashboard
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'compact' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('compact')}
+                  >
+                    📱 Compact Banner
                   </button>
                 </div>
               </div>

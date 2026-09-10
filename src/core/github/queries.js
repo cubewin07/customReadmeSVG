@@ -157,3 +157,99 @@ export const STATS_QUERY = `
     }
   }
 `;
+
+/**
+ * BANNER_REPOS_QUERY
+ * Fetches user's pinned repositories, top starred repositories, language stats, and contribution counts.
+ */
+export const BANNER_REPOS_QUERY = `
+  query GetBannerRepos($login: String!) {
+    user(login: $login) {
+      followers {
+        totalCount
+      }
+      contributionsCollection {
+        totalCommitContributions
+      }
+      pinnedItems(first: 6, types: [REPOSITORY]) {
+        nodes {
+          ... on Repository {
+            name
+            description
+            url
+            stargazerCount
+            forkCount
+            diskUsage
+            pushedAt
+            createdAt
+            repositoryTopics(first: 10) {
+              nodes {
+                topic {
+                  name
+                }
+              }
+            }
+            primaryLanguage {
+              name
+              color
+            }
+            languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+          }
+        }
+      }
+      repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 10
+      ) {
+        totalCount
+        nodes {
+          name
+          description
+          url
+          stargazerCount
+          forkCount
+          diskUsage
+          pushedAt
+          createdAt
+          repositoryTopics(first: 10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          primaryLanguage {
+            name
+            color
+          }
+          languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      limit
+      cost
+      remaining
+      resetAt
+    }
+  }
+`;

@@ -3,16 +3,19 @@ import profileCard from './profile/index.js';
 import languagesCard from './languages/index.js';
 import reposCard from './repos/index.js';
 import statsCard from './stats/index.js';
+import bannerCard from './banner/index.js';
 
 // Register all core SVG card plugins
 registerCard(profileCard);
 registerCard(languagesCard);
 registerCard(reposCard);
 registerCard(statsCard);
+registerCard(bannerCard);
 
 export {
   profileCard,
   languagesCard,
   reposCard,
   statsCard,
+  bannerCard,
 };

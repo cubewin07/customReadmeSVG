@@ -18,6 +18,7 @@ const CARDS = [
   { id: 'languages', name: 'Top Languages', route: '/:user/languages' },
   { id: 'repos', name: 'Top Repositories', route: '/:user/repos' },
   { id: 'stats', name: 'GitHub Stats', route: '/:user/stats' },
+  { id: 'banner', name: 'Animated Fox Banner 🦊', route: '/:user/banner' },
 ];
 
 function App() {
@@ -34,16 +35,20 @@ function App() {
   const [activeTab, setActiveTab] = useState('markdown');
   const [copied, setCopied] = useState(false);
 
-  const cleanUser = username.trim() || 'octocat';
+  const cleanUser = username.trim() || 'cubewin07';
 
-  // Construct URL
+  // Production Netlify serverless backend URL
+  const NETLIFY_BASE_URL = 'https://lucent-sprite-e50312.netlify.app';
+
+  // Construct URL: on GitHub Pages, query Netlify serverless app so previews and embeds work
   const getBaseUrl = () => {
-    if (typeof window === 'undefined') return '';
-    const base = import.meta.env.BASE_URL || '/';
-    if (base === '/' || base === './') {
-      return window.location.origin;
+    if (typeof window !== 'undefined') {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocal) {
+        return window.location.origin;
+      }
     }
-    return `${window.location.origin}${base.replace(/\/$/, '')}`;
+    return NETLIFY_BASE_URL;
   };
 
   const baseUrl = getBaseUrl();
@@ -77,8 +82,10 @@ function App() {
   const cardUrl = `${baseUrl}${path}${queryStr}`;
   const relativeUrl = `${path}${queryStr}`;
 
-  const markdownSnippet = `![${cleanUser}'s GitHub Card](${cardUrl})`;
-  const htmlSnippet = `<img src="${cardUrl}" alt="${cleanUser}'s GitHub Card" />`;
+  // Snippet URL always points to production Netlify serverless host
+  const snippetUrl = `${NETLIFY_BASE_URL}${path}${queryStr}`;
+  const markdownSnippet = `![${cleanUser}'s GitHub Card](${snippetUrl})`;
+  const htmlSnippet = `<img src="${snippetUrl}" alt="${cleanUser}'s GitHub Card" />`;
 
   const currentSnippet = activeTab === 'markdown' ? markdownSnippet : htmlSnippet;
 
@@ -146,6 +153,7 @@ function App() {
                 placeholder="e.g. octocat"
               />
               <div className="presets">
+                <button className="preset-btn" onClick={() => setUsername('cubewin07')}>cubewin07</button>
                 <button className="preset-btn" onClick={() => setUsername('octocat')}>octocat</button>
                 <button className="preset-btn" onClick={() => setUsername('torvalds')}>torvalds</button>
                 <button className="preset-btn" onClick={() => setUsername('gaearon')}>gaearon</button>

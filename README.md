@@ -30,6 +30,7 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 | `/:user/languages` | Top Languages | 6 Hours | Top 5–8 programming languages aggregated by byte size with color dots & percentages |
 | `/:user/repos` | Top Repositories | 2 Hours | Top 6 public non-fork repositories ordered by stargazers |
 | `/:user/stats` | GitHub Stats | 1 Hour | Total stars earned, total forks, commit contributions, repo count, & followers |
+| `/:user/banner` | 2D Platformer Adventure Banner | 2 Hours | Interactive 2D pixel-art platformer with project buildings, collectable skill orbs, and fox gameplay |
 
 ### Query Parameters
 
@@ -39,17 +40,23 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 ### Markdown Embed Examples
 
 ```markdown
+<!-- Looping 2D Platformer Adventure Banner (Static SVG from repository) -->
+![GitHub Profile Banner](./banner.svg)
+
+<!-- Dynamic Live Netlify Serverless Banner Route -->
+![Animated Fox Banner](https://lucent-sprite-e50312.netlify.app/cubewin07/banner?theme=radical)
+
 <!-- Profile Overview -->
-![Profile Overview](https://custom-readme-svg.example.com/octocat?theme=radical)
+![Profile Overview](https://lucent-sprite-e50312.netlify.app/cubewin07?theme=radical)
 
 <!-- Top Languages -->
-![Top Languages](https://custom-readme-svg.example.com/octocat/languages?theme=nord)
+![Top Languages](https://lucent-sprite-e50312.netlify.app/cubewin07/languages?theme=nord)
 
 <!-- Top Repositories -->
-![Top Repositories](https://custom-readme-svg.example.com/octocat/repos?theme=dracula)
+![Top Repositories](https://lucent-sprite-e50312.netlify.app/cubewin07/repos?theme=dracula)
 
 <!-- GitHub Stats -->
-![GitHub Stats](https://custom-readme-svg.example.com/octocat/stats?theme=gruvbox)
+![GitHub Stats](https://lucent-sprite-e50312.netlify.app/cubewin07/stats?theme=gruvbox)
 ```
 
 ---
@@ -137,7 +144,22 @@ npm run dev
 
 # Test SVG endpoint in terminal
 curl -s http://localhost:5173/octocat/stats | head -n 20
+curl -s http://localhost:5173/octocat/banner | head -n 20
+
+# Generate standalone animated banner SVG locally
+npm run generate:banner -- --user=octocat
 
 # Build production SPA bundle for GitHub Pages
 npm run build
 ```
+
+---
+
+## 🦊 Automated Banner Regeneration (GitHub Actions)
+
+Since GitHub strips `<script>` tags and README `<img>` tags cannot make dynamic GraphQL API calls at view-time:
+
+1. **Scheduled Cron**: The `.github/workflows/generate-banner.yml` workflow runs automatically twice daily (`0 0,12 * * *`).
+2. **GraphQL Query**: Queries GitHub's GraphQL API for the user's pinned and top repositories.
+3. **Pure SMIL Generation**: Compiles the pixel-art fox walk cycle, neon signposts, and parallax cityscape into pure SMIL `<animate>` and `<animateTransform>` tags.
+4. **Auto-Commit**: Automatically commits and pushes the updated `banner.svg` to the repository root. GitHub re-renders the updated static file with zero external runtime dependencies.

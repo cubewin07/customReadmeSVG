@@ -21,6 +21,16 @@ Use `CLAUDE.md` as the router and `tooling/skills/REGISTRY.md` as the index.
 
 ---
 
+## Active work — animated banner
+
+Before changing `src/cards/banner/` or `src/core/github/queries.js` banner fields, read and update:
+
+`work/plans/banner-adventure-phases.md`
+
+Current phase is in that file's **Current State** table. Do not start Phase 2/3 while Phase 1 checkboxes are open. After the session, append an **Agent Log** row.
+
+---
+
 ## Baseline Principles (Always Active)
 
 These four principles are always in effect. For the full version, see `tooling/skills/shared/karpathy-coding-principles.md`.

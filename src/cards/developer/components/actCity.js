@@ -1,4 +1,4 @@
-import { anim, sl } from '../utils/timeline.js';
+import { anim, sl, sla } from '../utils/timeline.js';
 
 /**
  * Calculates building stack height (0..4 cubes) from commit count.
@@ -10,10 +10,11 @@ function cubeHeight(count) {
 
 /**
  * Renders Act 3: The 3D Isometric Voxel City (18s - 24s).
+ * - Anti-gravity floating island base with glowing reactor core and floating data particles.
  * - 7x7 isometric grid representing 7 weeks of commits (49 days).
- * - 3D voxel buildings drop down dynamically from the sky with bouncy overshoot landing.
- * - Mini hero stands as an architect / conductor orchestrating the city build with conductor gestures.
- * - Displays 7-week total commit count and CLI status.
+ * - 3D voxel buildings drop down with bouncy elastic landing and impact ground shockwaves.
+ * - Conductor hero at an illuminated holographic console orchestrating the digital world with light arcs.
+ * - Summary commit badge and CLI status.
  */
 export function renderActCity(counts = []) {
   const cData = counts && counts.length >= 49
@@ -24,7 +25,7 @@ export function renderActCity(counts = []) {
         3, 6, 0, 5, 7, 8, 6, 4, 0,
       ];
 
-  // Grid line coordinates
+  // Grid line coordinates with glowing intersection points
   let gridLinesSvg = '';
   for (let i = 0; i < 8; i++) {
     const x1 = i * 13;
@@ -87,45 +88,98 @@ export function renderActCity(counts = []) {
   <g opacity="0">
     ${anim('opacity', [[0, 0], [17.6, 0], [18.2, 1], [23.5, 1], [24, 0]])}
 
-    <!-- 3D Isometric City Stage -->
+    <!-- 3D Isometric City Floating Island Stage -->
     <g transform="translate(352,112) scale(1.6)">
-      <!-- Base Floating Isometric Pedestal -->
+      <!-- Anti-Gravity Reactor Glow Beneath Island -->
+      <ellipse cx="0" cy="115" rx="80" ry="24" fill="url(#antiGravCore)"/>
+
+      <!-- Island Sub-bedrock Layers -->
+      <polygon points="-91,64.5 0,117 0,132 -91,79.5" fill="#06090f"/>
+      <polygon points="91,64.5 0,117 0,132 91,79.5" fill="#080c13"/>
+      <!-- Mid-bedrock with Neon Energy Strata -->
       <polygon points="-91,52.5 0,105 0,117 -91,64.5" fill="#0a0f18"/>
+      <line x1="-91" y1="58.5" x2="0" y2="111" stroke="#38c9a0" stroke-width="1.2" stroke-opacity="0.5"/>
       <polygon points="91,52.5 0,105 0,117 91,64.5" fill="#0c121c"/>
-      <polygon points="0,0 91,52.5 0,105 -91,52.5" fill="#0f1622" stroke="#1f2a3a"/>
+      <line x1="91" y1="58.5" x2="0" y2="111" stroke="#4c8dff" stroke-width="1.2" stroke-opacity="0.5"/>
+
+      <!-- Top Island Surface with Cyber Grid -->
+      <polygon points="0,0 91,52.5 0,105 -91,52.5" fill="#0e1520" stroke="#1f2c3d" stroke-width="1.2"/>
+      <polygon points="0,1 89,52.5 0,103 -89,52.5" fill="none" stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.3"/>
 
       <!-- Isometric Floor Grid Lines -->
       <g stroke="#1c2636" stroke-width="0.6">
         ${gridLinesSvg}
       </g>
 
+      <!-- Impact Shockwave Ripple during City Drop -->
+      <ellipse cx="0" cy="52.5" rx="15" ry="8.5" fill="none" stroke="#4fd1ff" stroke-width="1.5" opacity="0">
+        ${anim('rx', [[19.2, 10], [20.2, 75]])}
+        ${anim('ry', [[19.2, 5], [20.2, 42]])}
+        ${anim('opacity', [[19.2, 0.7], [20.2, 0]])}
+      </ellipse>
+
       <!-- Dropping 3D Voxel Buildings -->
       ${cubesSvg}
     </g>
 
-    <!-- Conductor / Architect Podium & Hero -->
-    <rect x="104" y="299" width="52" height="8" rx="3" fill="#1a2230"/>
-    <g transform="translate(130,299) scale(1.6)">
-      <!-- Legs Grounded on Podium -->
-      <rect x="-7" y="-12" width="6" height="12" rx="2" fill="#15171c"/>
-      <rect x="1" y="-12" width="6" height="12" rx="2" fill="#15171c"/>
-      <use href="#mbody"/>
+    <!-- Conductor / Architect Podium & Holographic Control Console -->
+    <g transform="translate(130,299)">
+      <!-- Multi-tier Illuminated Stage -->
+      <rect x="-32" y="0" width="64" height="8" rx="3" fill="#141a24" stroke="#38bdf8" stroke-width="1"/>
+      <line x1="-30" y1="1" x2="30" y2="1" stroke="#fff" stroke-opacity="0.25"/>
+      <rect x="-26" y="8" width="52" height="6" rx="2" fill="#0a0d14"/>
 
-      <!-- Orchestrating Conductor Arms -->
-      <g>
-        ${sl('rotate', ['150 -11 -26', '112 -11 -26', '150 -11 -26'], 0.72, 0)}
-        <rect x="-14" y="-26" width="6" height="14" rx="2.5" fill="#f2cfae"/>
+      <!-- Character Standing on Stage (scale 1.6) -->
+      <g transform="scale(1.6)">
+        <!-- Grounded Legs -->
+        <rect x="-7" y="-12" width="6" height="12" rx="2" fill="#15171c"/>
+        <rect x="1" y="-12" width="6" height="12" rx="2" fill="#15171c"/>
+        <use href="#mbody"/>
+
+        <!-- Orchestrating Conductor Arms with Glowing Baton Light Arcs -->
+        <g>
+          ${sl('rotate', ['150 -11 -26', '112 -11 -26', '150 -11 -26'], 0.72, 0)}
+          <rect x="-14" y="-26" width="6" height="14" rx="2.5" fill="#f2cfae"/>
+          <!-- Conductor Light Baton -->
+          <line x1="-11" y1="-26" x2="-8" y2="-38" stroke="#38c9a0" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+        <g>
+          ${sl('rotate', ['-150 11 -26', '-112 11 -26', '-150 11 -26'], 0.72, 0.36)}
+          <rect x="8" y="-26" width="6" height="14" rx="2.5" fill="#f2cfae"/>
+          <!-- Conductor Light Baton -->
+          <line x1="11" y1="-26" x2="8" y2="-38" stroke="#4c8dff" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
       </g>
-      <g>
-        ${sl('rotate', ['-150 11 -26', '-112 11 -26', '-150 11 -26'], 0.72, 0.36)}
-        <rect x="8" y="-26" width="6" height="14" rx="2.5" fill="#f2cfae"/>
+
+      <!-- Hologram Equalizer / Synthesizer Console in Front of Conductor -->
+      <g transform="translate(0,-6)">
+        <polygon points="-24,0 24,0 18,6 -18,6" fill="#0d1f30" stroke="#38bdf8" stroke-width="0.8" opacity="0.8"/>
+        <!-- Animated Equalizer Audio Visualizer Bars -->
+        <rect x="-14" y="-8" width="3" height="7" fill="#38c9a0">
+          ${sla('height', ['3', '8', '2', '6', '3'], 0.45)}
+        </rect>
+        <rect x="-8" y="-10" width="3" height="9" fill="#4fd1ff">
+          ${sla('height', ['5', '11', '4', '8', '5'], 0.52)}
+        </rect>
+        <rect x="-2" y="-12" width="3" height="11" fill="#6bdc7a">
+          ${sla('height', ['8', '13', '6', '11', '8'], 0.38)}
+        </rect>
+        <rect x="4" y="-9" width="3" height="8" fill="#ffd76a">
+          ${sla('height', ['4', '10', '3', '7', '4'], 0.48)}
+        </rect>
+        <rect x="10" y="-7" width="3" height="6" fill="#4fd1ff">
+          ${sla('height', ['2', '7', '4', '6', '2'], 0.42)}
+        </rect>
       </g>
     </g>
 
-    <!-- Total Commit Summary Footer -->
-    <text class="m" x="352" y="340" text-anchor="middle" font-size="11" fill="#7d8590">
-      7 weeks • ${totalCommits} commits
-    </text>
+    <!-- Total Commit Summary Footer Pill -->
+    <g transform="translate(352,340)">
+      <rect x="-75" y="-14" width="150" height="22" rx="11" fill="#0a0f18" stroke="#1f2c3d"/>
+      <text class="m" x="0" y="1" text-anchor="middle" font-size="11" font-weight="600" fill="#9db7e8">
+        7 weeks • <tspan fill="#38c9a0">${totalCommits}</tspan> commits
+      </text>
+    </g>
 
     <!-- CLI Step Prompt HUD -->
     <text class="m" x="20" y="27" font-size="11" fill="#7d8590">&gt; build --world</text>

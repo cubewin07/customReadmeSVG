@@ -1,12 +1,20 @@
-import { anim, nightPairs, sl, sla, SW, SH } from '../utils/timeline.js';
+import {
+  anim,
+  tr,
+  nightPairs,
+  sl,
+  sla,
+  SW,
+  SH,
+} from '../utils/timeline.js';
 
 const SKY_COLORS = [
-  [0, '#0a0e17'],    // Midnight deep blue/black
-  [3.6, '#2a3350'],  // Dawn awakening
-  [8.4, '#1c3a5e'],  // Midday vibrant sky
+  [0, '#0a0e17'],    // Midnight deep space
+  [3.6, '#2a3350'],  // Dawn violet/peach awakening
+  [8.4, '#1c3a5e'],  // Midday vibrant cyber sky
   [13.2, '#1c3a5e'], // Afternoon
-  [16.8, '#3a2b4d'], // Sunset dusk violet
-  [20.4, '#0a0e17'], // Nightfall
+  [16.8, '#3a2b4d'], // Sunset dusk magenta/crimson
+  [20.4, '#0a0e17'], // Deep nightfall
 ];
 
 // 20 deterministic stars with seeded positions and durations
@@ -35,11 +43,11 @@ const STAR_DATA = [
 
 /**
  * Renders the always-on sky environment:
- * - 24s Day/Night atmospheric transition
- * - Celestial Sun and Moon orbital arcs
+ * - 24s Day/Night atmospheric transition with sun rays and moon craters
+ * - Drifting daytime clouds and nocturnal shooting star / satellite
  * - Twinkling night stars
- * - Ambient cyber grid
- * - Streak Flame HUD badge
+ * - Volumetric dust motes in desk lamp beam
+ * - Streak Flame HUD badge with rising ember sparks
  */
 export function renderSkyAtmosphere(streak = 14) {
   let starsSvg = '';
@@ -59,6 +67,36 @@ export function renderSkyAtmosphere(streak = 14) {
   <g>
     ${anim('opacity', nightPairs())}
     ${starsSvg}
+
+    <!-- Shooting Star / Satellite Streak (Active at 21.0s - 22.5s) -->
+    <g opacity="0">
+      ${anim('opacity', [[20.9, 0], [21.0, 1], [22.2, 1], [22.5, 0]])}
+      ${tr([[21.0, 520, 20], [22.4, 240, 140]])}
+      <line x1="0" y1="0" x2="36" y2="-18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="60" y2="-30" stroke="#4fd1ff" stroke-width="1" stroke-opacity="0.4" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="2" fill="#fff"/>
+    </g>
+  </g>
+
+  <!-- Drifting Pixel Clouds (Active during Daytime 3.6s - 15.6s) -->
+  <g opacity="0">
+    ${anim('opacity', [[0, 0], [3.2, 0], [4.2, 0.45], [14.8, 0.45], [15.8, 0]])}
+    <!-- Cloud 1 -->
+    <g>
+      ${sl('translate', ['0 0', '-280 0'], 14)}
+      <g transform="translate(480,45)">
+        <rect x="0" y="0" width="48" height="12" rx="6" fill="#fff" opacity="0.3"/>
+        <rect x="8" y="-6" width="28" height="10" rx="5" fill="#fff" opacity="0.4"/>
+      </g>
+    </g>
+    <!-- Cloud 2 -->
+    <g>
+      ${sl('translate', ['0 0', '-340 0'], 18, 3)}
+      <g transform="translate(540,85)">
+        <rect x="0" y="0" width="56" height="14" rx="7" fill="#fff" opacity="0.25"/>
+        <rect x="12" y="-7" width="32" height="12" rx="6" fill="#fff" opacity="0.35"/>
+      </g>
+    </g>
   </g>
 
   <!-- Cyber Matrix Backdrop Grid -->
@@ -66,27 +104,42 @@ export function renderSkyAtmosphere(streak = 14) {
     <path d="M0 90H${SW}M0 150H${SW}M0 210H${SW}M110 0V300M230 0V300M350 0V300M470 0V300"/>
   </g>
 
-  <!-- Celestial Sun Orbit -->
+  <!-- Celestial Sun Orbit with Solar Flares -->
   <g>
     ${anim('opacity', [[0, 0], [2.4, 0], [3.6, 1], [15.6, 1], [17, 0]])}
     <animateMotion dur="24s" repeatCount="indefinite" path="M40 240 Q292 -110 544 240" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.1;0.7;1"/>
-    <!-- Sun Ambient Glow -->
-    <circle r="30" fill="#ffd76a" opacity="0.14"/>
-    <!-- Sun Core -->
-    <circle r="12" fill="#ffd76a"/>
+    <!-- Outer Solar Flare Atmosphere -->
+    <circle r="36" fill="url(#sunGlowGrad)"/>
+    <circle r="14" fill="#ffe885"/>
+    <circle r="10" fill="#ffd76a"/>
   </g>
 
-  <!-- Celestial Crescent Moon Orbit -->
+  <!-- Celestial Crescent Moon Orbit with Subtle Craters -->
   <g>
     ${anim('opacity', [[0, 0], [16.3, 0], [17.5, 1], [22.2, 1], [23.3, 0]])}
     <animateMotion dur="24s" repeatCount="indefinite" path="M60 230 Q292 -100 524 230" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.68;0.97;1"/>
     <!-- Moon Ambient Glow -->
-    <circle r="22" fill="#9db7e8" opacity="0.1"/>
+    <circle r="26" fill="#9db7e8" opacity="0.12"/>
     <!-- Crescent Moon Silhouette -->
-    <path d="M0 -10 A10 10 0 1 0 0 10 A7 7 0 1 1 0 -10Z" fill="#dfe7f5"/>
+    <path d="M0 -11 A11 11 0 1 0 0 11 A8 8 0 1 1 0 -11Z" fill="#dfe7f5"/>
+    <circle cx="-3" cy="2" r="1.6" fill="#b0c4de" opacity="0.5"/>
+    <circle cx="1" cy="-4" r="1.2" fill="#b0c4de" opacity="0.4"/>
   </g>
 
-  <!-- HUD: Streak Flame Badge -->
+  <!-- Volumetric Lamp Dust Motes (Active when lamp is illuminated at Night) -->
+  <g opacity="0">
+    ${anim('opacity', nightPairs(0.7))}
+    <circle cx="548" cy="275" r="0.8" fill="#ffd76a">
+      ${sl('translate', ['0 0', '-8 -12', '0 0'], 3.2)}
+      ${sla('opacity', ['0.3', '0.9', '0.3'], 3.2)}
+    </circle>
+    <circle cx="560" cy="285" r="1.0" fill="#ffd76a">
+      ${sl('translate', ['0 0', '-12 -16', '0 0'], 4.1, 1.2)}
+      ${sla('opacity', ['0.2', '0.8', '0.2'], 4.1, 1.2)}
+    </circle>
+  </g>
+
+  <!-- HUD: Streak Flame Badge with Rising Ember Particles -->
   <g transform="translate(486,26)">
     <g>
       ${sl('scale', ['1 1', '1.07 .93', '.95 1.06', '1 1'], 0.9)}
@@ -95,6 +148,15 @@ export function renderSkyAtmosphere(streak = 14) {
       <!-- Inner Flame Core -->
       <path d="M0 -3 C2 0 5 2 4 6 C3 9 1 10 0 10 C-2 10 -4 9 -4 6 C-4 3 -1 2 0 -3Z" fill="#ffd76a"/>
     </g>
+    <!-- Floating Embers -->
+    <circle cx="0" cy="-14" r="0.9" fill="#ffd76a">
+      ${sl('translate', ['0 0', '2 -10'], 1.6)}
+      ${sla('opacity', ['1', '0'], 1.6)}
+    </circle>
+    <circle cx="-3" cy="-12" r="0.7" fill="#ff8a3d">
+      ${sl('translate', ['0 0', '-3 -8'], 1.4, 0.4)}
+      ${sla('opacity', ['1', '0'], 1.4, 0.4)}
+    </circle>
     <text class="t" x="14" y="4" font-size="12" font-weight="700" fill="#ffb86b">${streak}-day streak</text>
   </g>`;
 }

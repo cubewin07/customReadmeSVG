@@ -12,10 +12,11 @@ import {
 
 /**
  * Renders Act 1: The Workstation Desk & Hologram Showcase (0s - 12s).
- * - "Ship-it" story: Live commit typing, bug crawl, surprise alert, zap, build passed badge, rocket launch, confetti.
- * - Coffee mug refill and steaming ribbons.
- * - Pinned repositories hologram projector with live stats and sparkline polyline.
- * - Polished character likeness with typing arms and gesture toward hologram.
+ * - "Ship-it" story: Live commit typing, bug crawl, electric zap arc, build passed badge, rocket launch with smoke puff rings, confetti shower.
+ * - Tactile Cyber Desk Mat with neon edge, RGB chroma underglow, and plasma typing sparks.
+ * - Physical metallic hologram projector emitter with pulsing concentric rings.
+ * - Pinned repositories hologram with glowing sparkline area fill and repo badges.
+ * - Polished character likeness with natural breathing and gesture toward hologram.
  */
 export function renderActDesk(data, theme = {}) {
   const accent = theme.accent || '#58a6ff';
@@ -28,27 +29,27 @@ export function renderActDesk(data, theme = {}) {
     ? data.repos
     : [
         {
-          name: 'svg-engine',
-          language: 'TypeScript',
-          color: '#3178c6',
-          stars: 24,
-          description: 'Game-inspired SVG engine',
+          name: 'customReadmeSVG',
+          language: 'JavaScript',
+          color: '#f1e05a',
+          stars: 32,
+          description: 'Dynamic, game-inspired SVG cards',
           sparkline: [2, 4, 3, 6, 5, 8, 7, 9],
         },
         {
-          name: 'reactive-ui',
-          language: 'JavaScript',
-          color: '#f1e05a',
-          stars: 17,
-          description: 'Reactive UI systems kit',
+          name: 'financial-management',
+          language: 'TypeScript',
+          color: '#3178c6',
+          stars: 18,
+          description: 'Full-stack reactive finance platform',
           sparkline: [1, 2, 5, 3, 4, 6, 8, 7],
         },
         {
-          name: 'data-quest',
+          name: 'creative-engine',
           language: 'Python',
           color: '#3572A5',
-          stars: 9,
-          description: 'Playful data explorer',
+          stars: 14,
+          description: 'Algorithmic artwork & visual tools',
           sparkline: [3, 3, 4, 2, 5, 4, 6, 9],
         },
       ];
@@ -83,7 +84,7 @@ export function renderActDesk(data, theme = {}) {
       </g>`;
   }
 
-  // Zap debris particles
+  // Electric arc zap particles
   let zapParticlesSvg = '';
   for (let k = 0; k < 6; k++) {
     const a = (k * Math.PI) / 3 + 0.3;
@@ -105,6 +106,7 @@ export function renderActDesk(data, theme = {}) {
     const a = starts[k];
     const b = ends[k];
     const pts = r.sparkline.map((v, i) => `${(-68 + i * 19.4).toFixed(1)},${(44 - v * 2.2).toFixed(1)}`).join(' ');
+    const areaPts = `-68,44 ${pts} ${( -68 + (r.sparkline.length - 1) * 19.4).toFixed(1)},44`;
 
     repoSlidesSvg += `
       <g opacity="0">
@@ -116,14 +118,17 @@ export function renderActDesk(data, theme = {}) {
           [b - 0.2, 0, 0],
           [b + 0.05, -14, 0],
         ])}
-        <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1" fill="#4fd1ff" opacity="0.85">PINNED</text>
-        <text class="m" x="-68" y="-15" font-size="13" font-weight="700" fill="#eaf6ff">${escapeXml(r.name)}</text>
+        <!-- Corner Tech Brackets -->
+        <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
+        <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
+        <text class="m" x="-68" y="-15" font-size="13.5" font-weight="700" fill="#eaf6ff">${escapeXml(r.name)}</text>
         <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(r.description)}</text>
         <circle cx="-64" cy="14" r="4" fill="${r.color}"/>
         <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language)}</text>
-        <text class="t" x="68" y="17.5" text-anchor="end" font-size="10" font-weight="700" fill="#ffd76a">★ ${r.stars}</text>
-        <!-- Sparkline Polyline -->
-        <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+        <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars}</text>
+        <!-- Sparkline Area Glow & Polyline -->
+        <polygon points="${areaPts}" fill="url(#holoAreaGrad)"/>
+        <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       </g>
       <!-- Pagination Dot Indicator -->
       <circle cx="${(k - 1) * 12}" cy="66" r="2.6" fill="#4fd1ff" opacity="0.3">
@@ -131,23 +136,23 @@ export function renderActDesk(data, theme = {}) {
       </circle>`;
   }
 
-  // Keyboard keycaps matrix
+  // Keyboard keycaps matrix with RGB Chroma underglow
   let keycapsSvg = '';
   for (let row = 0; row < 3; row++) {
     for (let kx = 0; kx < 8; kx++) {
       const x = HX - 52 + kx * 13 + row * 1.5;
       const y = 306 + row * 9;
       if ((kx + row) % 2 === 0) {
-        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="#58a6ff" opacity="0.25">
+        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25">
           ${sla('opacity', ['.25', '1', '.25'], 0.5, ((kx * 0.1) % 0.5))}
         </rect>`;
       } else {
-        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="#58a6ff" opacity="0.25"/>`;
+        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25"/>`;
       }
     }
   }
 
-  // Right arm gesture schedule: types at keyboard, lifts to point at hologram at 7.5s, lowers back at 12s
+  // Right arm gesture schedule
   const grest = [
     [0, 0],
     [6.9, 0],
@@ -169,19 +174,19 @@ export function renderActDesk(data, theme = {}) {
     <!-- Character Ambient Glow Aura -->
     <circle cx="${HX}" cy="196" r="160" fill="url(#glowGrad)"/>
 
-    <!-- Hero Character (Standing at Desk) -->
+    <!-- Hero Character Likeness (Standing at Desk) -->
     <g transform="translate(${HX},${HY})">
       <!-- Torso & Black Crew Neck -->
-      <path d="M-64 24 Q-64 4 -44 2 L44 2 Q64 4 64 24 L66 132 L-66 132Z" fill="#1d2027"/>
-      <!-- Collar Band -->
-      <rect x="-30" y="2" width="60" height="7" rx="3" fill="#2a2f39"/>
-      <!-- Side Seams -->
-      <rect x="-66" y="44" width="10" height="88" fill="#171a20"/>
-      <rect x="56" y="44" width="10" height="88" fill="#171a20"/>
+      <path d="M-64 24 Q-64 4 -44 2 L44 2 Q64 4 64 24 L66 132 L-66 132Z" fill="#181b22"/>
+      <!-- Collar Rib -->
+      <rect x="-30" y="2" width="60" height="7" rx="3" fill="#2d3340"/>
+      <!-- Shoulder Seams -->
+      <rect x="-66" y="44" width="10" height="88" fill="#14171d"/>
+      <rect x="56" y="44" width="10" height="88" fill="#14171d"/>
       <!-- Warm Skin Neck -->
-      <rect x="-9" y="-10" width="18" height="16" fill="#dcb08d"/>
+      <rect x="-9" y="-10" width="18" height="16" fill="#e4bb98"/>
 
-      <!-- Head & Hair with Idle Breathing Bob -->
+      <!-- Head & Voluminous Textured Wavy/Curly Hair with Idle Breathing Bob -->
       <g>
         ${sl('translate', ['0 0', '0 -2', '0 0'], 2.6)}
         <!-- Hair Volume Base -->
@@ -199,9 +204,12 @@ export function renderActDesk(data, theme = {}) {
         <!-- Sideburn Curls -->
         <rect x="-31" y="-56" width="12" height="14" fill="#221e30"/>
         <rect x="19" y="-56" width="12" height="14" fill="#221e30"/>
+        <!-- Hair Specular Highlight Swirls -->
+        <path d="M-22 -80 Q-15 -84 -8 -80" stroke="#483f60" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M6 -80 Q13 -84 20 -80" stroke="#483f60" stroke-width="1.8" fill="none" stroke-linecap="round"/>
         <!-- Warm Cheek Highlights -->
-        <rect x="-27" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.55"/>
-        <rect x="17" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.55"/>
+        <rect x="-27" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.65"/>
+        <rect x="17" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.65"/>
 
         <!-- Eyes with Realistic Blinking -->
         <g>
@@ -225,27 +233,67 @@ export function renderActDesk(data, theme = {}) {
       </g>
     </g>
 
-    <!-- Hologram Projection Beam -->
-    <g>
-      ${anim('opacity', [[0, 0], [7.0, 0], [7.5, 1], [11.9, 1], [12.4, 0]])}
-      <polygon points="392,300 424,300 574,162 426,162" fill="url(#beamGrad)"/>
-    </g>
-
-    <!-- Workstation Desk Surface -->
+    <!-- Workstation Desk Surface & Cyber Mat -->
     <polygon points="40,298 544,298 570,366 14,366" fill="url(#deskGrad)" stroke="#2a3140"/>
-    <line x1="40" y1="298" x2="544" y2="298" stroke="#3a4557"/>
+    <!-- LED Highlight Edge Strip on Desk Rim -->
+    <line x1="40" y1="298" x2="544" y2="298" stroke="${accent}" stroke-width="1.5" stroke-opacity="0.65"/>
+    <line x1="40" y1="299" x2="544" y2="299" stroke="#fff" stroke-width="0.8" stroke-opacity="0.3"/>
 
-    <!-- Mechanical Keyboard -->
-    <ellipse cx="${HX}" cy="344" rx="98" ry="8" fill="${accent}" opacity="0.22"/>
+    <!-- Cyber Desk Mat under Keyboard -->
+    <polygon points="${HX - 88},299 ${HX + 88},299 ${HX + 104},346 ${HX - 104},346" fill="url(#deskMatGrad)" stroke="${accent}" stroke-width="1" stroke-opacity="0.35"/>
+
+    <!-- Mechanical Keyboard with Underglow -->
+    <ellipse cx="${HX}" cy="344" rx="98" ry="8" fill="${accent}" opacity="0.25"/>
     <polygon points="${HX - 60},300 ${HX + 60},300 ${HX + 76},336 ${HX - 76},336" fill="#0d1520" stroke="${accent}" stroke-width="2"/>
     <g>
       ${anim('opacity', [[0, 1], [6.9, 1], [7.3, 0.3], [11.9, 0.3], [12.4, 1]])}
       ${keycapsSvg}
+      <!-- Spacebar -->
+      <rect x="${HX - 24}" y="331" width="48" height="4" rx="1.5" fill="${accent}" opacity="0.6"/>
     </g>
 
-    <!-- Desk Lamp -->
+    <!-- Plasma Typing Keystroke Sparks -->
+    <g opacity="0">
+      ${anim('opacity', [[0, 0], [0.5, 0.8], [6.8, 0.8], [7.2, 0], [12.2, 0.8]])}
+      <g transform="translate(${HX - 18},312)">
+        <circle cx="0" cy="0" r="1.5" fill="${accent}">
+          ${sl('translate', ['0 0', '-4 -12'], 1.2)}
+          ${sla('opacity', ['1', '0'], 1.2)}
+        </circle>
+      </g>
+      <g transform="translate(${HX + 16},314)">
+        <circle cx="0" cy="0" r="1.5" fill="#38c9a0">
+          ${sl('translate', ['0 0', '6 -14'], 1.4, 0.3)}
+          ${sla('opacity', ['1', '0'], 1.4, 0.3)}
+        </circle>
+      </g>
+    </g>
+
+    <!-- Physical Metallic Hologram Projector Emitter Base on Desk -->
+    <g transform="translate(410,299)">
+      <g>
+        ${anim('opacity', [[0, 0.4], [7.0, 1], [11.9, 1], [12.4, 0.4]])}
+        <!-- Metal Puck -->
+        <ellipse cx="0" cy="1" rx="20" ry="5.5" fill="#182230" stroke="#38bdf8" stroke-width="1.2"/>
+        <!-- Glowing Cyan Emitter Lens -->
+        <ellipse cx="0" cy="0" rx="14" ry="4" fill="#4fd1ff"/>
+        <!-- Pulsing Optical Lens Core -->
+        <ellipse cx="0" cy="0" rx="6" ry="2" fill="#fff"/>
+      </g>
+    </g>
+
+    <!-- Hologram Projection Beam with Energy Cone -->
+    <g>
+      ${anim('opacity', [[0, 0], [7.0, 0], [7.5, 1], [11.9, 1], [12.4, 0]])}
+      <polygon points="392,300 428,300 574,162 426,162" fill="url(#beamGrad)"/>
+      <!-- Concentric Energy Wave Rings -->
+      <ellipse cx="440" cy="245" rx="36" ry="10" fill="none" stroke="#4fd1ff" stroke-width="1.2" opacity="0.45"/>
+      <ellipse cx="475" cy="205" rx="55" ry="14" fill="none" stroke="#4fd1ff" stroke-width="1.2" opacity="0.3"/>
+    </g>
+
+    <!-- Desk Lamp with Cohesive Volumetric Beam -->
     <polygon points="552,258 568,262 600,300 522,300" fill="url(#lampGrad)" opacity="0">
-      ${anim('opacity', nightPairs(0.9))}
+      ${anim('opacity', nightPairs(0.95))}
     </polygon>
     <rect x="524" y="292" width="22" height="6" rx="2" fill="#2a3140"/>
     <polyline points="535,292 535,262 552,246" stroke="#566073" stroke-width="3" fill="none"/>
@@ -254,11 +302,15 @@ export function renderActDesk(data, theme = {}) {
       ${anim('opacity', nightPairs())}
     </circle>
 
-    <!-- Coffee Mug with Steam and Liquid Refill -->
+    <!-- Coffee Mug with Coaster, Reflection, and Liquid Refill -->
     <g transform="translate(466,272)">
+      <!-- Coaster -->
+      <ellipse cx="13" cy="28" rx="18" ry="4.5" fill="#0f1622" stroke="#253142" stroke-width="1"/>
       <!-- Ceramic Cup Body & Handle -->
-      <rect x="0" y="0" width="26" height="28" rx="4" fill="#0f1b2b" stroke="#58a6ff" stroke-width="2"/>
-      <path d="M26 6 h6 a5 5 0 0 1 0 14 h-6" stroke="#58a6ff" stroke-width="2" fill="none"/>
+      <rect x="0" y="0" width="26" height="28" rx="4" fill="#0f1b2b" stroke="${accent}" stroke-width="2"/>
+      <path d="M26 6 h6 a5 5 0 0 1 0 14 h-6" stroke="${accent}" stroke-width="2" fill="none"/>
+      <!-- Ceramic Gloss Highlight -->
+      <line x1="3" y1="2" x2="3" y2="26" stroke="#fff" stroke-opacity="0.25" stroke-linecap="round"/>
       <!-- Liquid Level Animated Refill -->
       <rect x="2" y="20" width="22" height="6" fill="#7a4a2b">
         ${anim('y', [[0, 20], [6.0, 20], [6.9, 4], [23.5, 4], [24, 20]])}
@@ -360,10 +412,14 @@ export function renderActDesk(data, theme = {}) {
         </g>
       </g>
 
-      <!-- Bug Zap Shockwave -->
+      <!-- Electric Bug Zap Shockwave -->
       <circle cx="128" cy="59" r="2" fill="none" stroke="#ffd76a" stroke-width="2" opacity="0">
-        ${anim('r', [[3.59, 2], [4.0, 18]])}
+        ${anim('r', [[3.59, 2], [4.0, 22]])}
         ${anim('opacity', [[3.58, 0], [3.6, 1], [4.0, 0]])}
+      </circle>
+      <circle cx="128" cy="59" r="2" fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0">
+        ${anim('r', [[3.59, 1], [4.0, 28]])}
+        ${anim('opacity', [[3.58, 0], [3.6, 0.8], [4.0, 0]])}
       </circle>
       <!-- Debris -->
       ${zapParticlesSvg}
@@ -380,7 +436,7 @@ export function renderActDesk(data, theme = {}) {
     <!-- Character Arms (Front of Desk Layer) -->
     <g transform="translate(${HX},${HY})">
       <!-- Left Typing Arm -->
-      <rect x="-74" y="14" width="24" height="56" rx="11" fill="#1d2027"/>
+      <rect x="-74" y="14" width="24" height="56" rx="11" fill="#181b22"/>
       <g>
         ${sl('rotate', ['-20 -62 66', '-28 -62 66', '-20 -62 66'], 0.34)}
         <rect x="-71" y="60" width="18" height="64" rx="8" fill="#f2cfae"/>
@@ -390,7 +446,7 @@ export function renderActDesk(data, theme = {}) {
       <!-- Right Arm: Typing -> Gesturing to Hologram -->
       <g>
         ${rot(grest, 62, 22)}
-        <rect x="50" y="14" width="24" height="56" rx="11" fill="#1d2027"/>
+        <rect x="50" y="14" width="24" height="56" rx="11" fill="#181b22"/>
         <g>
           ${rot([[0, 20], [6.9, 20], [7.6, 0], [11.7, 0], [12.4, 20]], 62, 66)}
           ${sl('rotate', ['0 62 66', '7 62 66', '0 62 66'], 0.34, 0, true)}
@@ -414,7 +470,7 @@ export function renderActDesk(data, theme = {}) {
         <g>
           ${sl('translate', ['0 0', '0 -3', '0 0'], 3.2)}
           <!-- Hologram Glass Card Frame -->
-          <rect x="-76" y="-52" width="152" height="104" rx="8" fill="#0c2233" fill-opacity="0.62" stroke="#4fd1ff" stroke-width="1.5"/>
+          <rect x="-76" y="-52" width="152" height="104" rx="8" fill="#0c2233" fill-opacity="0.68" stroke="#4fd1ff" stroke-width="1.5"/>
           <!-- Moving Laser Scanline -->
           <rect x="-76" y="-52" width="152" height="3" fill="#4fd1ff" opacity="0.35">
             ${sla('y', ['-50', '48'], 1.8)}
@@ -425,10 +481,15 @@ export function renderActDesk(data, theme = {}) {
       </g>
     </g>
 
-    <!-- Launching Rocket Ship -->
+    <!-- Launching Rocket Ship with Launch Clouds -->
     <g opacity="0">
       ${anim('opacity', [[4.7, 0], [4.85, 1], [6.3, 1], [6.45, 0]])}
       ${tr([[4.8, 244, 262], [5.2, 244, 232], [6.4, 250, 24], [6.5, 250, -40]])}
+      <!-- Launch Cloud Rings Expanding -->
+      <circle cx="0" cy="18" r="6" fill="#fff" opacity="0.4">
+        ${anim('r', [[4.8, 4], [5.3, 18]])}
+        ${anim('opacity', [[4.8, 0.5], [5.3, 0]])}
+      </circle>
       <!-- Exhaust Trail -->
       <rect x="-1.5" y="8" width="3" height="46" fill="url(#rocketTrailGrad)"/>
       <!-- Fins -->
@@ -448,7 +509,7 @@ export function renderActDesk(data, theme = {}) {
       </g>
     </g>
 
-    <!-- Confetti Explosion -->
+    <!-- Confetti Shower Explosion -->
     ${confettiSvg}
 
     <!-- CLI Step Prompt HUD -->

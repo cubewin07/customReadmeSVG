@@ -1,20 +1,17 @@
 /**
  * Workspace Scene Component
- * Renders the cyber developer workstation:
- * - Mechanical keyboard with glowing RGB underglow
- * - Dual displays: left code editor terminal, right cyber metric HUD
- * - Steaming coffee mug with animated vapors
- * - Orbiting tech stack orbs (React atom spinning, TypeScript, Python, Git)
- * - Cyber grid & ambient lighting matching theme
+ * Separated into background and foreground layers for strict paint-order layering:
+ * Layer 1 (Background): Cyber grid, spotlight, floating tech orbs, left terminal.
+ * Layer 3 (Foreground): Desk surface (covers legs), neon strip, mug, keyboard, front monitor.
  */
 
-export function renderWorkspaceScene(theme) {
+export function renderWorkspaceBackground(theme) {
   const accent = theme.accent || '#38bdf8';
   const titleColor = theme.title || '#58a6ff';
 
   return `
-  <!-- ==================== WORKSPACE SCENE & ENVIRONMENT ==================== -->
-  <g id="workspace-scene">
+  <!-- ==================== WORKSPACE LAYER 1: BACKGROUND & ORBS ==================== -->
+  <g id="workspace-background">
     <!-- Ambient Cyber Lighting & Radial Glow -->
     <radialGradient id="desk-spotlight" cx="625" cy="145" r="175" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="${titleColor}" stop-opacity="0.22" />
@@ -90,7 +87,6 @@ export function renderWorkspaceScene(theme) {
         <animateTransform attributeName="transform" type="translate"
           values="0 0; 0 -3; 0 0" dur="2.9s" repeatCount="indefinite" />
         <circle cx="0" cy="0" r="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.3" opacity="0.95" />
-        <!-- Python icon -->
         <path d="M -5 -6 Q -6 -2 -2 -2 L 1 -2 Q 4 -2 4 1 L 4 3 L -1 3 Q -4 3 -4 -1 Z" fill="#38bdf8" />
         <path d="M 5 6 Q 6 2 2 2 L -1 2 Q -4 2 -4 -1 L -4 -3 L 1 -3 Q 4 -3 4 1 Z" fill="#facc15" />
       </g>
@@ -102,7 +98,6 @@ export function renderWorkspaceScene(theme) {
         <animateTransform attributeName="transform" type="translate"
           values="0 0; 0 3; 0 0" dur="3.4s" repeatCount="indefinite" />
         <rect x="-12" y="-12" width="24" height="24" rx="5.5" fill="#0f172a" stroke="#f43f5e" stroke-width="1.3" opacity="0.95" />
-        <!-- Branch Line & Nodes -->
         <circle cx="-3" cy="4.5" r="2.2" fill="#f43f5e" />
         <circle cx="-3" cy="-4.5" r="2.2" fill="#f43f5e" />
         <circle cx="4.5" cy="-1" r="2.2" fill="#fb7185" />
@@ -149,8 +144,19 @@ export function renderWorkspaceScene(theme) {
       <!-- Monitor Stand -->
       <path d="M -4 14 L 4 14 L 8 22 L -8 22 Z" fill="#1e293b" />
     </g>
+  </g>
+  `;
+}
 
-    <!-- ==================== THE WORKSTATION DESK ==================== -->
+export function renderWorkspaceForeground(theme) {
+  const accent = theme.accent || '#38bdf8';
+  const titleColor = theme.title || '#58a6ff';
+
+  return `
+  <!-- ==================== WORKSPACE LAYER 3: FOREGROUND DESK & HARDWARE ==================== -->
+  <!-- Painted over character body so world y=214 down completely covers the legs -->
+  <g id="workspace-foreground">
+    <!-- Desk Surface (Tilted Cyber Desk) -->
     <g id="desk-surface">
       <!-- Main Desk Plane -->
       <polygon points="440,214 810,214 822,274 428,274" fill="#0f121a" stroke="${theme.border}" stroke-width="1" />
@@ -274,7 +280,6 @@ export function renderWorkspaceScene(theme) {
         <animate attributeName="opacity" values="0.28;0.5;0.28" dur="1.8s" repeatCount="indefinite" />
       </ellipse>
     </g>
-
   </g>
   `;
 }

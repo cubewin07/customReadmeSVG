@@ -3,8 +3,8 @@ import { PROFILE_QUERY } from '../../core/github/queries.js';
 import { normalizeProfile } from '../../core/github/normalize.js';
 import { DEFAULT_DEVELOPER_PROFILE } from './data/defaultProfile.js';
 import { renderInfoCards } from './components/infoCards.js';
-import { renderWorkspaceScene } from './components/workspaceScene.js';
-import { renderPixelCharacter } from './components/pixelCharacter.js';
+import { renderWorkspaceBackground, renderWorkspaceForeground } from './components/workspaceScene.js';
+import { renderCharacterBody, renderCharacterArms } from './components/pixelCharacter.js';
 
 export const developerCard = {
   id: 'developer',
@@ -96,9 +96,16 @@ export const developerCard = {
   <!-- Vertical Divider Between Columns -->
   <line x1="416" y1="24" x2="416" y2="246" stroke="${theme.subtleBorder || theme.border}" stroke-width="1" stroke-dasharray="3 4" opacity="0.65" />
 
-  <!-- Right Column: Interactive Cyber Workspace Scene & Handcrafted Pixel Character -->
-  ${renderWorkspaceScene(theme)}
-  ${renderPixelCharacter(options.action)}
+  <!-- Right Column Paint Order:
+       1. Background cyber lighting, grid, tech orbs, left terminal
+       2. Character body, legs, torso, head & hair
+       3. Foreground desk, keyboard, front monitor (covering legs below y=214)
+       4. Character arms (left hand on keys, right kinematic waving arm)
+  -->
+  ${renderWorkspaceBackground(theme)}
+  ${renderCharacterBody()}
+  ${renderWorkspaceForeground(theme)}
+  ${renderCharacterArms()}
 </svg>`;
   },
 };

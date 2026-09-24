@@ -157,3 +157,108 @@ export const STATS_QUERY = `
     }
   }
 `;
+
+/**
+ * DEVELOPER_QUERY
+ * Comprehensive query for the animated Developer Showcase card.
+ * Fetches user profile, pinned items, top repositories with sparklines,
+ * latest commit message, and full contribution calendar for runner and voxel city acts.
+ */
+export const DEVELOPER_QUERY = `
+  query GetDeveloperData($login: String!) {
+    user(login: $login) {
+      name
+      login
+      bio
+      location
+      company
+      status {
+        emoji
+        message
+      }
+      followers {
+        totalCount
+      }
+      repositories(ownerAffiliations: [OWNER], privacy: PUBLIC, first: 100) {
+        totalCount
+        nodes {
+          stargazerCount
+          forkCount
+        }
+      }
+      pinnedItems(first: 6, types: [REPOSITORY]) {
+        nodes {
+          ... on Repository {
+            name
+            description
+            stargazerCount
+            primaryLanguage {
+              name
+              color
+            }
+            defaultBranchRef {
+              target {
+                ... on Commit {
+                  history(first: 8) {
+                    nodes {
+                      message
+                      committedDate
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      topRepos: repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 6
+      ) {
+        nodes {
+          name
+          description
+          stargazerCount
+          primaryLanguage {
+            name
+            color
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 8) {
+                  nodes {
+                    message
+                    committedDate
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+              weekday
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      limit
+      cost
+      remaining
+      resetAt
+    }
+  }
+`;
+

@@ -1,111 +1,110 @@
 import { graphql } from '../../core/github/client.js';
-import { PROFILE_QUERY } from '../../core/github/queries.js';
-import { normalizeProfile } from '../../core/github/normalize.js';
+import { DEVELOPER_QUERY } from '../../core/github/queries.js';
+import { normalizeDeveloperData } from '../../core/github/normalize.js';
+import { escapeXml } from '../../svg/escape.js';
 import { DEFAULT_DEVELOPER_PROFILE } from './data/defaultProfile.js';
-import { renderInfoCards } from './components/infoCards.js';
-import { renderWorkspaceBackground, renderWorkspaceForeground } from './components/workspaceScene.js';
-import { renderCharacterBody, renderCharacterArms } from './components/pixelCharacter.js';
+import { tr, W, H, SX, SY } from './utils/timeline.js';
+import { renderSharedDefs } from './components/sharedDefs.js';
+import { renderInfoPanel } from './components/infoPanel.js';
+import { renderSkyAtmosphere } from './components/skyAtmosphere.js';
+import { renderActDesk } from './components/actDesk.js';
+import { renderActRunner } from './components/actRunner.js';
+import { renderActCity } from './components/actCity.js';
 
 export const developerCard = {
   id: 'developer',
   title: 'Developer Showcase',
   aliases: ['about', 'me', 'character'],
-  cacheTtlMs: 3600000,
+  cacheTtlMs: 3600000, // 1 hour
 
   async fetchData(username, options = {}) {
     try {
-      const data = await graphql(PROFILE_QUERY, { login: username }, {
+      const data = await graphql(DEVELOPER_QUERY, { login: username }, {
         ...options,
         cacheKey: options.cacheKey || `gh:developer:${username}`,
         ttlMs: options.ttlMs || this.cacheTtlMs,
       });
 
-      const normalized = normalizeProfile(data);
+      const normalized = normalizeDeveloperData(data);
       if (normalized) {
         return {
           ...DEFAULT_DEVELOPER_PROFILE,
           ...normalized,
-          stats: {
-            repos: normalized.repositories,
-            stars: normalized.totalStars,
-            followers: normalized.followers,
-          },
+          name: options.name || normalized.name || DEFAULT_DEVELOPER_PROFILE.name,
+          role: options.role || normalized.role || DEFAULT_DEVELOPER_PROFILE.role,
+          status: options.status || normalized.status || DEFAULT_DEVELOPER_PROFILE.status,
+          focus: options.bio ? [options.bio] : normalized.focus,
+          streak: normalized.streak || DEFAULT_DEVELOPER_PROFILE.streak,
+          counts: normalized.counts && normalized.counts.length >= 49 ? normalized.counts : DEFAULT_DEVELOPER_PROFILE.counts,
         };
       }
     } catch {
-      // Graceful fallback to default profile on error or unauthenticated environment
+      // Graceful fallback to default developer profile on unauthenticated/offline environments
     }
 
     return {
       ...DEFAULT_DEVELOPER_PROFILE,
       login: username || DEFAULT_DEVELOPER_PROFILE.login,
+      handle: username ? `@${username}` : DEFAULT_DEVELOPER_PROFILE.handle,
+      role: options.role || DEFAULT_DEVELOPER_PROFILE.role,
+      status: options.status || DEFAULT_DEVELOPER_PROFILE.status,
+      focus: options.bio ? [options.bio] : DEFAULT_DEVELOPER_PROFILE.focus,
     };
   },
 
   renderSvg(data, theme, options = {}) {
-    const width = 840;
-    const height = 270;
+    const profile = {
+      ...DEFAULT_DEVELOPER_PROFILE,
+      ...data,
+      role: options.role || data?.role || DEFAULT_DEVELOPER_PROFILE.role,
+      status: options.status || data?.status || DEFAULT_DEVELOPER_PROFILE.status,
+      focus: options.bio ? [options.bio] : (data?.focus || DEFAULT_DEVELOPER_PROFILE.focus),
+    };
 
-    const accent = theme.accent || '#38bdf8';
-    const titleColor = theme.title || '#58a6ff';
+    const cardBg = theme.bg || '#12161d';
+    const borderColor = theme.border || '#2a313c';
+    const name = escapeXml(profile.name || 'Le Tan Thang');
+    const role = escapeXml(profile.role || 'Full-Stack Engineer & Creative Coder');
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="dev-card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="60%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">${name} - developer card</title>
+  <desc id="dsc">${name}, ${role}. Animated scene: shipping code, pinned repos, a runner on the contribution graph and a voxel city built from commits.</desc>
 
-    <!-- Top Accent Bar Gradient -->
-    <linearGradient id="top-accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="${titleColor}" />
-      <stop offset="50%" stop-color="${accent}" />
-      <stop offset="100%" stop-color="${titleColor}" />
-    </linearGradient>
+  ${renderSharedDefs(theme)}
 
-    <!-- Name Header Gradient -->
-    <linearGradient id="name-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="${titleColor}" />
-      <stop offset="100%" stop-color="${accent}" />
-    </linearGradient>
+  <g clip-path="url(#card)">
+    <!-- Main Card Body Background -->
+    <rect width="${W}" height="${H}" fill="${cardBg}"/>
 
-    <!-- Character Aura Radial Gradient -->
-    <radialGradient id="char-aura-grad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="${titleColor}" stop-opacity="0.35" />
-      <stop offset="70%" stop-color="${accent}" stop-opacity="0.1" />
-      <stop offset="100%" stop-color="${theme.bg}" stop-opacity="0" />
-    </radialGradient>
+    <!-- Top Glow Accent Bar -->
+    <rect width="${W}" height="4" fill="url(#barGrad)"/>
 
-    <!-- Front Monitor Clip Path -->
-    <clipPath id="monitor-clip">
-      <polygon points="-71, -26  71, -26  62, -2  -62, -2" />
-    </clipPath>
-  </defs>
+    <!-- Light Shimmer Beam Across Top Bar -->
+    <rect y="0" width="200" height="4" fill="url(#shimGrad)">
+      ${tr([[0, -200, 0], [0.4, -200, 0], [2.6, 1150, 0]])}
+    </rect>
 
-  <!-- Card Background Container -->
-  <rect x="0.5" y="0.5" rx="14" width="${width - 1}" height="${height - 1}" fill="url(#dev-card-bg)" stroke="${theme.border}" stroke-width="1" />
-  
-  <!-- Subtle Top Glowing Accent Line -->
-  <rect x="1" y="1" width="${width - 2}" height="3.5" rx="2" fill="url(#top-accent-grad)" />
+    <!-- Left Column: Identity, Status, Focus, Arsenal, and Mechanical Rolling Stats -->
+    ${renderInfoPanel(profile, theme)}
 
-  <!-- Left Column: Info & About Me Cards -->
-  ${renderInfoCards(data, theme, options)}
+    <!-- Right Column: 24s Master Timeline Cyber World -->
+    <g transform="translate(${SX},${SY})" clip-path="url(#scene)">
+      <!-- Always-on Day/Night Sky & Celestial Paths -->
+      ${renderSkyAtmosphere(profile.streak)}
 
-  <!-- Vertical Divider Between Columns -->
-  <line x1="416" y1="24" x2="416" y2="246" stroke="${theme.subtleBorder || theme.border}" stroke-width="1" stroke-dasharray="3 4" opacity="0.65" />
+      <!-- Act 1 (0s - 12s): Workstation Desk, Ship-it Story & Hologram Pinned Repos -->
+      ${renderActDesk(profile, theme)}
 
-  <!-- Right Column Paint Order:
-       1. Background cyber lighting, grid, tech orbs, left terminal
-       2. Character body, legs, torso, head & hair
-       3. Foreground desk, keyboard, front monitor (covering legs below y=214)
-       4. Character arms (left hand on keys, right kinematic waving arm)
-  -->
-  ${renderWorkspaceBackground(theme)}
-  ${renderCharacterBody()}
-  ${renderWorkspaceForeground(theme)}
-  ${renderCharacterArms()}
+      <!-- Act 2 (12s - 18s): Platformer Runner on Real Contribution Terrain -->
+      ${renderActRunner(profile.counts)}
+
+      <!-- Act 3 (18s - 24s): 3D Isometric Voxel City Built from Commits -->
+      ${renderActCity(profile.counts)}
+    </g>
+  </g>
+
+  <!-- Outer Card Bezel Stroke -->
+  <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="17.5" fill="none" stroke="${borderColor}"/>
 </svg>`;
   },
 };

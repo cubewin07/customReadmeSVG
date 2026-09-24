@@ -41,21 +41,35 @@ export function renderInfoPanel(data, theme) {
     : ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'];
 
   let techPills = '';
-  let cx = 48;
-  for (const tname of techList) {
-    const brandCol = BRAND_COLORS[tname.toLowerCase()] || accent;
-    const w = Math.round(tname.length * 7.4 + 28);
-    techPills += `
-      <g>
-        <rect x="${cx}" y="246" width="${w}" height="26" rx="7" fill="${badgeBg}" stroke="${badgeBorder}"/>
-        <!-- Top Glass Bevel -->
-        <line x1="${cx + 4}" y1="247" x2="${cx + w - 4}" y2="247" stroke="#fff" stroke-opacity="0.12"/>
-        <!-- Brand Indicator Dot with Glow -->
-        <circle cx="${cx + 10}" cy="259" r="3.2" fill="${brandCol}"/>
-        <circle cx="${cx + 10}" cy="259" r="3.2" fill="${brandCol}" opacity="0.35"/>
-        <text class="t" x="${cx + 18}" y="263.5" font-size="12" font-weight="600" fill="${text}">${escapeXml(tname)}</text>
-      </g>`;
-    cx += w + 8;
+  const isMultiRow = techList.length > 4;
+  const row1 = isMultiRow ? techList.slice(0, Math.ceil(techList.length / 2)) : techList;
+  const row2 = isMultiRow ? techList.slice(Math.ceil(techList.length / 2)) : [];
+
+  const rows = [
+    { items: row1, cy: isMultiRow ? 236 : 246, h: isMultiRow ? 21 : 25 },
+    { items: row2, cy: 261, h: 21 },
+  ];
+
+  for (const { items, cy, h } of rows) {
+    if (!items || items.length === 0) continue;
+    let cx = 48;
+    for (const tname of items) {
+      const brandCol = BRAND_COLORS[tname.toLowerCase()] || accent;
+      const w = Math.round(tname.length * 6.8 + 24);
+      if (cx + w > 526) break; // Hard safety boundary: never exceed card width
+
+      techPills += `
+        <g>
+          <rect x="${cx}" y="${cy}" width="${w}" height="${h}" rx="6" fill="${badgeBg}" stroke="${badgeBorder}"/>
+          <!-- Top Glass Bevel -->
+          <line x1="${cx + 3}" y1="${cy + 1}" x2="${cx + w - 3}" y2="${cy + 1}" stroke="#fff" stroke-opacity="0.12"/>
+          <!-- Brand Indicator Dot with Glow -->
+          <circle cx="${cx + 9}" cy="${cy + h / 2}" r="2.8" fill="${brandCol}"/>
+          <circle cx="${cx + 9}" cy="${cy + h / 2}" r="2.8" fill="${brandCol}" opacity="0.35"/>
+          <text class="t" x="${cx + 17}" y="${cy + h / 2 + 4}" font-size="11" font-weight="600" fill="${text}">${escapeXml(tname)}</text>
+        </g>`;
+      cx += w + 8;
+    }
   }
 
   // Stats setup
@@ -128,28 +142,28 @@ export function renderInfoPanel(data, theme) {
 
   <!-- Core Focus Card with Glassmorphic Highlight Line -->
   <g>
-    <rect x="32" y="140" width="508" height="68" rx="10" fill="${cardBg}" stroke="${border}"/>
+    <rect x="32" y="136" width="508" height="68" rx="10" fill="${cardBg}" stroke="${border}"/>
     <!-- Inner Top Glass Specular Line -->
-    <line x1="33" y1="141" x2="539" y2="141" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
+    <line x1="33" y1="137" x2="539" y2="137" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
     <!-- Left Accent Pill -->
-    <rect x="32" y="140" width="5" height="68" rx="2.5" fill="${accent}"/>
-    <text class="t" x="52" y="161" font-size="11" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
-    <text class="t" x="52" y="181" font-size="13.5" fill="${text}">${escapeXml(focus1)}</text>
-    ${focus2 ? `<text class="t" x="52" y="199" font-size="13.5" fill="${text}">${escapeXml(focus2)}</text>` : ''}
+    <rect x="32" y="136" width="5" height="68" rx="2.5" fill="${accent}"/>
+    <text class="t" x="52" y="156" font-size="11" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
+    <text class="t" x="52" y="176" font-size="13.5" fill="${text}">${escapeXml(focus1)}</text>
+    ${focus2 ? `<text class="t" x="52" y="194" font-size="13.5" fill="${text}">${escapeXml(focus2)}</text>` : ''}
   </g>
 
   <!-- Tech Arsenal Card with Glassmorphic Specular Line -->
   <g>
-    <rect x="32" y="218" width="508" height="66" rx="10" fill="${cardBg}" stroke="${border}"/>
-    <line x1="33" y1="219" x2="539" y2="219" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
-    <text class="t" x="48" y="238" font-size="11" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
+    <rect x="32" y="214" width="508" height="72" rx="10" fill="${cardBg}" stroke="${border}"/>
+    <line x1="33" y1="215" x2="539" y2="215" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
+    <text class="t" x="48" y="230" font-size="10.5" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
     ${techPills}
   </g>
 
   <!-- Stats Card with Inset Wells and Mechanical Rolling Counters -->
   <g>
-    <rect x="32" y="294" width="508" height="64" rx="10" fill="${cardBg}" stroke="${border}"/>
-    <line x1="33" y1="295" x2="539" y2="295" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
+    <rect x="32" y="295" width="508" height="63" rx="10" fill="${cardBg}" stroke="${border}"/>
+    <line x1="33" y1="296" x2="539" y2="296" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
     ${statsMarkup}
   </g>
 

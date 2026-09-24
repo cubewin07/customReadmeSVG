@@ -15,26 +15,29 @@ const THEMES = [
 
 const CARDS = [
   { id: 'profile', name: 'Profile Overview', route: '/:user' },
+  { id: 'developer', name: 'Developer Showcase', route: '/:user/developer' },
   { id: 'languages', name: 'Top Languages', route: '/:user/languages' },
   { id: 'repos', name: 'Top Repositories', route: '/:user/repos' },
   { id: 'stats', name: 'GitHub Stats', route: '/:user/stats' },
 ];
 
 function App() {
-  const [username, setUsername] = useState('octocat');
-  const [card, setCard] = useState('profile');
+  const [username, setUsername] = useState('cubewin07');
+  const [card, setCard] = useState('developer');
   const [version, setVersion] = useState('v1');
   const [profileLayout, setProfileLayout] = useState('classic');
   const [langLayout, setLangLayout] = useState('polyglot');
   const [repoLayout, setRepoLayout] = useState('grid');
   const [statsLayout, setStatsLayout] = useState('ring');
   const [langsCount, setLangsCount] = useState('12');
+  const [devRole, setDevRole] = useState('Full-Stack Engineer & Creative Coder');
+  const [devStatus, setDevStatus] = useState('Building cool things 🚀');
   const [theme, setTheme] = useState('dark');
   const [cacheBypass, setCacheBypass] = useState(false);
   const [activeTab, setActiveTab] = useState('markdown');
   const [copied, setCopied] = useState(false);
 
-  const cleanUser = username.trim() || 'octocat';
+  const cleanUser = username.trim() || 'cubewin07';
 
   // Construct URL
   const getBaseUrl = () => {
@@ -50,11 +53,15 @@ function App() {
   const path = card === 'profile' ? `/${cleanUser}` : `/${cleanUser}/${card}`;
   
   const params = new URLSearchParams();
-  if (version) {
+  if (version && card !== 'developer') {
     params.set('version', version);
   }
   if (card === 'profile') {
     if (profileLayout) params.set('layout', profileLayout);
+  }
+  if (card === 'developer') {
+    if (devRole && devRole !== 'Full-Stack Engineer & Creative Coder') params.set('role', devRole);
+    if (devStatus && devStatus !== 'Building cool things 🚀') params.set('status', devStatus);
   }
   if (card === 'languages') {
     if (langLayout) params.set('layout', langLayout);
@@ -224,6 +231,55 @@ function App() {
                   </button>
                 </div>
               </div>
+            )}
+
+            {/* Developer Showcase Controls (only when card === 'developer') */}
+            {card === 'developer' && (
+              <>
+                <div className="control-group">
+                  <label className="control-label" htmlFor="dev-role-input">Role / Title</label>
+                  <input
+                    id="dev-role-input"
+                    type="text"
+                    className="text-input"
+                    value={devRole}
+                    onChange={(e) => setDevRole(e.target.value)}
+                    placeholder="e.g. Full-Stack Engineer & Creative Coder"
+                  />
+                  <div className="card-type-grid" style={{ marginTop: '8px' }}>
+                    <button
+                      className="card-type-btn"
+                      onClick={() => setDevRole('Full-Stack Engineer & Creative Coder')}
+                    >
+                      🚀 Full-Stack
+                    </button>
+                    <button
+                      className="card-type-btn"
+                      onClick={() => setDevRole('Creative Technologist & UI Engineer')}
+                    >
+                      ✨ Creative Tech
+                    </button>
+                    <button
+                      className="card-type-btn"
+                      onClick={() => setDevRole('Frontend Architect & SVG Crafter')}
+                    >
+                      🎨 Frontend/SVG
+                    </button>
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <label className="control-label" htmlFor="dev-status-input">Live Status Message</label>
+                  <input
+                    id="dev-status-input"
+                    type="text"
+                    className="text-input"
+                    value={devStatus}
+                    onChange={(e) => setDevStatus(e.target.value)}
+                    placeholder="e.g. Building cool things 🚀"
+                  />
+                </div>
+              </>
             )}
 
             {/* Languages Layout Selector (only when card === 'languages') */}

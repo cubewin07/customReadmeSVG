@@ -1,4 +1,4 @@
-import { anim, sl, sla } from '../utils/timeline.js';
+import { anim, tr, sl, sla } from '../utils/timeline.js';
 
 /**
  * Calculates building stack height (0..4 cubes) from commit count.
@@ -10,10 +10,11 @@ function cubeHeight(count) {
 
 /**
  * Renders Act 3: The 3D Isometric Voxel City (18s - 24s).
- * - Anti-gravity floating island base with glowing reactor core and floating data particles.
+ * - Anti-gravity floating island base with glowing reactor core and floating data crystals.
  * - 7x7 isometric grid representing 7 weeks of commits (49 days).
- * - 3D voxel buildings drop down with bouncy elastic landing and impact ground shockwaves.
- * - Conductor hero at an illuminated holographic console orchestrating the digital world with light arcs.
+ * - 3D voxel buildings drop down with bouncy elastic landing, rooftop beacons, and impact shockwaves.
+ * - Flying cyber hoverships cruising between towers with plasma trails.
+ * - Conductor hero at an illuminated holographic console orchestrating the digital world with symphony light waves.
  * - Summary commit badge and CLI status.
  */
 export function renderActCity(counts = []) {
@@ -67,6 +68,8 @@ export function renderActCity(counts = []) {
     const px = (c.i - c.j) * 13;
     const py = (c.i + c.j) * 7.5 - (c.k + 1) * 12;
     const ts = parseFloat((18.6 + (c.i + c.j) * 0.17 + c.k * 0.1).toFixed(2));
+    const isRoof = c.k === c.hh - 1;
+    const isSkyscraper = c.hh >= 3;
 
     cubesSvg += `<use href="#c${c.hh}" x="${px}" y="${py}" opacity="0">
       ${anim('opacity', [[ts, 0], [ts + 0.06, 1]])}
@@ -76,6 +79,36 @@ export function renderActCity(counts = []) {
         [ts + 0.38, parseFloat(py.toFixed(1))],
       ])}
     </use>`;
+
+    if (isRoof && isSkyscraper) {
+      cubesSvg += `
+        <!-- Rooftop Satellite Relay Antenna & Warning Beacon -->
+        <g opacity="0">
+          ${anim('opacity', [[ts + 0.38, 0], [ts + 0.44, 1]])}
+          <line x1="${px}" y1="${py}" x2="${px}" y2="${py - 9}" stroke="#ffffff" stroke-width="0.9"/>
+          <circle cx="${px}" cy="${py - 9}" r="1.6" fill="#ff5f56">
+            <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+          </circle>
+        </g>`;
+    }
+  }
+
+  // Floating Anti-Gravity Data Shards / Crystals around Island
+  const crystalCoords = [
+    [-110, 70, 2.8, 0],
+    [-80, 126, 3.4, 0.8],
+    [92, 76, 3.1, 0.4],
+    [114, 120, 2.6, 1.2],
+    [0, 138, 3.8, 1.6],
+  ];
+  let crystalsSvg = '';
+  for (const [cx, cy, cDur, cDel] of crystalCoords) {
+    crystalsSvg += `
+      <g transform="translate(${cx},${cy})">
+        ${sl('translate', ['0 0', '0 -6', '0 0'], cDur, cDel)}
+        <polygon points="0,-7 5,0 0,7 -5,0" fill="url(#antiGravCrystalGrad)" stroke="#38bdf8" stroke-width="0.6"/>
+        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-opacity="0.6" stroke-width="0.5"/>
+      </g>`;
   }
 
   // Calculate 7-week commit total
@@ -92,6 +125,9 @@ export function renderActCity(counts = []) {
     <g transform="translate(352,112) scale(1.6)">
       <!-- Anti-Gravity Reactor Glow Beneath Island -->
       <ellipse cx="0" cy="115" rx="80" ry="24" fill="url(#antiGravCore)"/>
+
+      <!-- Levitating Data Shards / Crystals -->
+      ${crystalsSvg}
 
       <!-- Island Sub-bedrock Layers -->
       <polygon points="-91,64.5 0,117 0,132 -91,79.5" fill="#06090f"/>
@@ -118,8 +154,42 @@ export function renderActCity(counts = []) {
         ${anim('opacity', [[19.2, 0.7], [20.2, 0]])}
       </ellipse>
 
-      <!-- Dropping 3D Voxel Buildings -->
+      <!-- Dropping 3D Voxel Buildings with Rooftop Beacons -->
       ${cubesSvg}
+    </g>
+
+    <!-- Flying Cyber Speedcraft 1 (Cruising Right to Left across Skyscrapers) -->
+    <g>
+      ${tr([[18.4, 520, 138], [23.6, -40, 152]])}
+      <ellipse cx="0" cy="0" rx="9" ry="3" fill="#0d1b2a" stroke="#38bdf8" stroke-width="0.8"/>
+      <!-- Tail Light Trail -->
+      <line x1="9" y1="0" x2="22" y2="0" stroke="#ff5f56" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+      <!-- Headlight Beam -->
+      <circle cx="-9" cy="0" r="1.5" fill="#38bdf8"/>
+    </g>
+
+    <!-- Flying Cyber Speedcraft 2 (Cruising Left to Right High Altitude) -->
+    <g>
+      ${tr([[18.6, -30, 85], [23.8, 540, 75]])}
+      <ellipse cx="0" cy="0" rx="10" ry="3.5" fill="#0f172a" stroke="#a78bfa" stroke-width="0.8"/>
+      <!-- Tail Light Trail -->
+      <line x1="-10" y1="0" x2="-24" y2="0" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+      <!-- Headlight Beam -->
+      <circle cx="10" cy="0" r="1.5" fill="#ffd76a"/>
+    </g>
+
+    <!-- Conductor Holographic Symphony Resonance Waves -->
+    <g transform="translate(130,265)">
+      <ellipse cx="20" cy="-10" rx="10" ry="16" fill="none" stroke="#38c9a0" stroke-width="1.2" opacity="0">
+        ${anim('rx', [[18.6, 10], [19.8, 55], [21.0, 10], [22.2, 55]])}
+        ${anim('ry', [[18.6, 16], [19.8, 80], [21.0, 16], [22.2, 80]])}
+        ${anim('opacity', [[18.6, 0.6], [19.8, 0], [21.0, 0.6], [22.2, 0]])}
+      </ellipse>
+      <ellipse cx="20" cy="-10" rx="10" ry="16" fill="none" stroke="#4c8dff" stroke-width="1.2" opacity="0">
+        ${anim('rx', [[19.2, 10], [20.4, 65], [21.6, 10], [22.8, 65]])}
+        ${anim('ry', [[19.2, 16], [20.4, 90], [21.6, 16], [22.8, 90]])}
+        ${anim('opacity', [[19.2, 0.6], [20.4, 0], [21.6, 0.6], [22.8, 0]])}
+      </ellipse>
     </g>
 
     <!-- Conductor / Architect Podium & Holographic Control Console -->

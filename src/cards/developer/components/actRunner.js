@@ -156,6 +156,7 @@ export function renderActRunner(counts = []) {
 
   // Runner vertical animation points (jumping across pits)
   const ry = [[12.0, X0, getTop(6)]];
+  const pitPairs = [];
   for (let c = 6; c < 36 && c < N; c++) {
     let yv;
     if (lvl(cData[c]) === 0) {
@@ -163,10 +164,40 @@ export function renderActRunner(counts = []) {
       const prevY = c > 0 ? getTop(c - 1) : 322;
       const nextY = c < N - 1 ? getTop(c + 1) : 322;
       yv = Math.min(prevY, nextY) - 44;
+      const tc = getTc(c);
+      pitPairs.push([parseFloat((tc - 0.16).toFixed(3)), parseFloat((tc + 0.16).toFixed(3))]);
     } else {
       yv = getTop(c);
     }
     ry.push([parseFloat(getTc(c).toFixed(3)), X0, yv]);
+  }
+
+  // Jetpack Thruster Flame keyframes
+  const jetpackOpacity = [[12.0, 0]];
+  for (const [t1, t2] of pitPairs) {
+    jetpackOpacity.push([parseFloat((t1 - 0.02).toFixed(3)), 0], [t1, 1], [t2, 1], [parseFloat((t2 + 0.02).toFixed(3)), 0]);
+  }
+  jetpackOpacity.push([18.0, 0]);
+
+  // Real-Time HUD Star Score Steps
+  let hudScoreSteps = '';
+  if (starsAt.length > 0) {
+    const tFirst = getTc(starsAt[0]);
+    hudScoreSteps += `<g>${anim('opacity', [[12.0, 1], [tFirst - 0.01, 1], [tFirst, 0]])}<text class="m" x="146" y="16" text-anchor="end" font-size="10.5" font-weight="800" fill="#ffd76a">0/${starsAt.length}</text></g>`;
+    for (let si = 0; si < starsAt.length; si++) {
+      const tStart = getTc(starsAt[si]);
+      const tEnd = si < starsAt.length - 1 ? getTc(starsAt[si + 1]) : 18.0;
+      hudScoreSteps += `<g opacity="0">${anim('opacity', [[tStart - 0.01, 0], [tStart, 1], [tEnd - 0.01, 1], [tEnd, 0]])}<text class="m" x="146" y="16" text-anchor="end" font-size="10.5" font-weight="800" fill="#ffd76a">${si + 1}/${starsAt.length}</text></g>`;
+    }
+  }
+
+  // Foreground Speed Pylons / Mile Markers
+  let mileMarkersSvg = '';
+  for (let m = 0; m < 16; m++) {
+    const mx = m * 105;
+    mileMarkersSvg += `
+      <rect x="${mx}" y="341" width="3" height="8" rx="1.5" fill="#38bdf8" opacity="0.8"/>
+      <circle cx="${mx + 1.5}" cy="339" r="1.6" fill="#ffe885"/>`;
   }
 
   return `<!-- ============================= ACT 2: RUNNER (12s - 18s) ============================= -->
@@ -198,6 +229,12 @@ export function renderActRunner(counts = []) {
       ${terrainSvg}
     </g>
 
+    <!-- Foreground Fast-Moving Mile Markers -->
+    <g>
+      ${tr([[12, 0, 0], [18, -SPEED * 8.5, 0]])}
+      ${mileMarkersSvg}
+    </g>
+
     <!-- Star Collection Score Popups -->
     ${starPopsSvg}
 
@@ -215,6 +252,18 @@ export function renderActRunner(counts = []) {
         <g>
           ${sl('rotate', ['38 4 -12', '-38 4 -12', '38 4 -12'], 0.34)}
           <rect x="1" y="-12" width="6" height="12" rx="2" fill="#15171c"/>
+        </g>
+
+        <!-- Cyber Jetpack with Thruster Boost on Pit Leaps -->
+        <g transform="translate(-10,-24)">
+          <rect x="-2" y="0" width="5" height="11" rx="2" fill="#0f1724" stroke="#38bdf8" stroke-width="0.8"/>
+          <!-- Dynamic Thruster Plasma Jet Flames -->
+          <g opacity="0">
+            ${anim('opacity', jetpackOpacity)}
+            <polygon points="-3,11 0.5,23 -1.5,11" fill="url(#jetpackFlameGrad)"/>
+            <polygon points="0.5,11 1.5,23 3,11" fill="url(#jetpackFlameGrad)"/>
+            <circle cx="0.5" cy="20" r="1.5" fill="#ffe885"/>
+          </g>
         </g>
 
         <!-- Torso & Head Bob -->
@@ -247,9 +296,19 @@ export function renderActRunner(counts = []) {
       </g>
     </g>
 
-    <!-- CLI Step Prompt HUD -->
-    <text class="m" x="20" y="27" font-size="11" fill="#7d8590">
-      &gt; run --commits <tspan fill="#ffd76a">★ x${starsAt.length}</tspan>
-    </text>
+    <!-- Real-Time Interactive Game HUD Tracker (Top-Left) -->
+    <g transform="translate(20, 16)">
+      <rect x="0" y="0" width="154" height="24" rx="6" fill="#080e18" stroke="#38bdf8" stroke-width="1.2" opacity="0.92"/>
+      <line x1="2" y1="1" x2="152" y2="1" stroke="#fff" stroke-opacity="0.25"/>
+      <circle cx="12" cy="12" r="3" fill="#3fb950">
+        <animate attributeName="opacity" values="1;0.4;1" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <text class="m" x="22" y="16" font-size="9" font-weight="700" letter-spacing="1" fill="#9db7e8">RUNNER</text>
+      <g transform="translate(86,12) scale(0.65)">
+        ${sl('rotate', ['0', '360'], 2.4)}
+        <polygon points="${star(0, 0, 7)}" fill="#ffd76a"/>
+      </g>
+      ${hudScoreSteps}
+    </g>
   </g>`;
 }

@@ -35,6 +35,32 @@ export function renderInfoPanel(data, theme) {
     focus2 = parts.slice(1).join('.').trim();
   }
 
+  // Developer Level & Tier calculation
+  const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 64;
+  const totalReposVal = data.stats?.[0]?.value ?? data.stats?.repos ?? 28;
+  const devLvl = Math.min(99, Math.max(10, Math.floor(totalStarsVal * 0.45 + totalReposVal * 0.35 + (data.streak || 14))));
+  const devTier = devLvl >= 50 ? 'LEGENDARY ARCHITECT' : (devLvl >= 35 ? 'SENIOR ARCHITECT' : 'CORE BUILDER');
+
+  // Deterministic 7-character commit SHA
+  const commitSha = data.commitSha || 'ea77b7c';
+
+  // 14-day Heatmap Mini Strip
+  const recentCounts = Array.isArray(data.counts) && data.counts.length >= 14
+    ? data.counts.slice(-14)
+    : [2, 4, 3, 5, 0, 4, 6, 8, 5, 3, 0, 4, 6, 7];
+
+  const heatColors = isLight
+    ? ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']
+    : ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
+
+  let heatmapSvg = '';
+  for (let hi = 0; hi < 14; hi++) {
+    const cnt = recentCounts[hi] || 0;
+    const lvi = cnt === 0 ? 0 : Math.min(4, Math.ceil(cnt / 2.5));
+    const hx = 398 + hi * 9.5;
+    heatmapSvg += `<rect x="${hx}" y="222" width="7.5" height="7.5" rx="1.8" fill="${heatColors[lvi]}"/>`;
+  }
+
   // Tech tags with branded glowing indicator dots
   const techList = Array.isArray(data.tech) && data.tech.length > 0
     ? data.tech
@@ -124,20 +150,35 @@ export function renderInfoPanel(data, theme) {
     <tspan fill="${subtext}"> • ${role}</tspan>
   </text>
 
-  <!-- Pulsating Radar Status Pill -->
+  <!-- Status & Rank Row (y=100) -->
   <g>
-    <rect x="32" y="100" width="254" height="28" rx="14" fill="${isLight ? '#ebf3ff' : '#0f1f38'}" stroke="${isLight ? '#b8d5ff' : '#1f3b66'}"/>
+    <!-- Pulsating Radar Status Pill -->
+    <rect x="32" y="100" width="248" height="28" rx="14" fill="${isLight ? '#ebf3ff' : '#0f1f38'}" stroke="${isLight ? '#b8d5ff' : '#1f3b66'}"/>
     <!-- Radar Waves -->
-    <circle cx="50" cy="114" r="5" fill="#3fb950"/>
-    <circle cx="50" cy="114" r="5" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.6">
-      <animate attributeName="r" values="5;14" dur="2s" repeatCount="indefinite"/>
+    <circle cx="48" cy="114" r="4.5" fill="#3fb950"/>
+    <circle cx="48" cy="114" r="4.5" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="r" values="4.5;13" dur="2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.6;0" dur="2s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="50" cy="114" r="5" fill="none" stroke="#3fb950" stroke-width="1" opacity="0.4">
-      <animate attributeName="r" values="5;19" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+    <circle cx="48" cy="114" r="4.5" fill="none" stroke="#3fb950" stroke-width="1" opacity="0.4">
+      <animate attributeName="r" values="4.5;18" dur="2s" begin="0.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.4;0" dur="2s" begin="0.6s" repeatCount="indefinite"/>
     </circle>
-    <text class="t" x="65" y="119" font-size="12.5" font-weight="700" fill="${isLight ? '#0969da' : '#dbe6f5'}">${status}</text>
+    <text class="t" x="62" y="119" font-size="12" font-weight="700" fill="${isLight ? '#0969da' : '#dbe6f5'}">${status}</text>
+
+    <!-- Developer Rank & Tier Badge -->
+    <g transform="translate(290, 100)">
+      <rect x="0" y="0" width="250" height="28" rx="14" fill="${isLight ? '#f6f8fa' : '#111724'}" stroke="${isLight ? '#d0d7de' : '#232f42'}"/>
+      <!-- Inner Glowing Tint -->
+      <rect x="1" y="1" width="248" height="26" rx="13" fill="url(#rankBadgeGrad)"/>
+      <!-- Level Icon Shield -->
+      <polygon points="17,6 25,10 25,19 17,23 9,19 9,10" fill="${accent}" opacity="0.25"/>
+      <polygon points="17,8 23,11 23,18 17,21 11,18 11,11" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <text class="m" x="17" y="17.5" text-anchor="middle" font-size="7.5" font-weight="900" fill="#fff">${devLvl}</text>
+      <!-- Rank Label -->
+      <text class="t" x="32" y="18" font-size="11" font-weight="800" letter-spacing="0.8" fill="${title}">${devTier}</text>
+      <circle cx="236" cy="14" r="2.5" fill="#3fb950"/>
+    </g>
   </g>
 
   <!-- Core Focus Card with Glassmorphic Highlight Line -->
@@ -148,6 +189,17 @@ export function renderInfoPanel(data, theme) {
     <!-- Left Accent Pill -->
     <rect x="32" y="136" width="5" height="68" rx="2.5" fill="${accent}"/>
     <text class="t" x="52" y="156" font-size="11" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
+    
+    <!-- Git Branch & SHA Badge (Top-Right) -->
+    <g transform="translate(416, 143)">
+      <rect x="0" y="0" width="114" height="18" rx="9" fill="${isLight ? '#eaeef2' : '#141c28'}" stroke="${border}" stroke-width="0.8"/>
+      <!-- Git Branch Icon -->
+      <circle cx="10" cy="9" r="2" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <circle cx="17" cy="5.5" r="2" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <path d="M10 9 v-4 M10 7 a2 2 0 0 1 2 -2 h3" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <text class="m" x="24" y="12.5" font-size="8.5" font-weight="600" fill="${subtext}">main@<tspan fill="${accent}">${commitSha}</tspan></text>
+    </g>
+
     <text class="t" x="52" y="176" font-size="13.5" fill="${text}">${escapeXml(focus1)}</text>
     ${focus2 ? `<text class="t" x="52" y="194" font-size="13.5" fill="${text}">${escapeXml(focus2)}</text>` : ''}
   </g>
@@ -157,6 +209,11 @@ export function renderInfoPanel(data, theme) {
     <rect x="32" y="214" width="508" height="72" rx="10" fill="${cardBg}" stroke="${border}"/>
     <line x1="33" y1="215" x2="539" y2="215" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
     <text class="t" x="48" y="230" font-size="10.5" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
+    
+    <!-- Mini 14-Day Commit Activity Heatmap Strip -->
+    <text class="m" x="330" y="229" font-size="8" font-weight="700" letter-spacing="0.6" fill="${subtext}">14D ACTIVITY</text>
+    ${heatmapSvg}
+
     ${techPills}
   </g>
 

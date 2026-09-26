@@ -148,6 +148,35 @@ export function renderSharedDefs(theme) {
       <stop offset="100%" stop-color="#ffd76a" stop-opacity="0"/>
     </radialGradient>
 
+    <!-- Jetpack Thruster Flame Gradient -->
+    <linearGradient id="jetpackFlameGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#ffd76a"/>
+      <stop offset="70%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Levitating Crystal Shard Gradient -->
+    <linearGradient id="antiGravCrystalGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Mini Droid Visor Gradient -->
+    <linearGradient id="droidVisorGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Left Panel Rank Badge Gradient -->
+    <linearGradient id="rankBadgeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.2"/>
+    </linearGradient>
+
     <!-- 3D Voxel Cubes for City Act -->
     ${cubeDefs}
 

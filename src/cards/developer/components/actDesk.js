@@ -211,7 +211,15 @@ export function renderActDesk(data, theme = {}) {
         <rect x="-27" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.65"/>
         <rect x="17" y="-24" width="10" height="5" rx="2" fill="#f0a99b" opacity="0.65"/>
 
-        <!-- Eyes with Realistic Blinking -->
+        <!-- Eyebrows with Dynamic Story Reactions -->
+        <rect x="-21" y="-45" width="11" height="3" rx="1.5" fill="#201e28">
+          ${anim('y', [[0, -45], [2.0, -45], [2.15, -51], [3.6, -51], [4.1, -46], [12, -46]])}
+        </rect>
+        <rect x="10" y="-45" width="11" height="3" rx="1.5" fill="#201e28">
+          ${anim('y', [[0, -45], [2.0, -45], [2.15, -51], [3.6, -51], [4.1, -46], [12, -46]])}
+        </rect>
+
+        <!-- Eyes with Realistic Blinking and Celebratory Wink -->
         <g>
           <!-- Left Eye -->
           <rect x="-19" y="-38" width="8" height="10" rx="2" fill="#2a2230">
@@ -220,16 +228,28 @@ export function renderActDesk(data, theme = {}) {
           </rect>
           <rect x="-17" y="-37" width="3" height="3" fill="#fff" opacity="0.9"/>
 
-          <!-- Right Eye -->
+          <!-- Right Eye (with wink at rocket launch 4.6s - 5.4s) -->
           <rect x="11" y="-38" width="8" height="10" rx="2" fill="#2a2230">
             <animate attributeName="height" values="10;10;1;10" keyTimes="0;0.93;0.96;1" dur="4.2s" repeatCount="indefinite"/>
             <animate attributeName="y" values="-38;-38;-29;-38" keyTimes="0;0.93;0.96;1" dur="4.2s" repeatCount="indefinite"/>
+            ${anim('height', [[0, 10], [4.5, 10], [4.7, 2], [5.3, 2], [5.5, 10], [12, 10]])}
           </rect>
           <rect x="13" y="-37" width="3" height="3" fill="#fff" opacity="0.9"/>
         </g>
 
-        <!-- Smile Mouth -->
-        <path d="M-9 -16 Q0 -8 9 -16" stroke="#a0524a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Mouth with Story Expressions: Neutral Smile -> Surprised 'O' -> Triumphant Smile -->
+        <g>
+          <!-- Normal Focused Smile -->
+          <path d="M-8 -16 Q0 -9 8 -16" stroke="#a0524a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <!-- Surprised 'O' (Active when bug appears 2.05s - 3.6s) -->
+          <ellipse cx="0" cy="-14" rx="4.5" ry="5.5" fill="#581e18" stroke="#a0524a" stroke-width="1.8" opacity="0">
+            ${anim('opacity', pulse(2.05, 3.6, 0.08))}
+          </ellipse>
+          <!-- Triumphant Broad Smile (Active during build passed & rocket launch 4.0s - 6.8s) -->
+          <path d="M-11 -16 Q0 -4 11 -16 Z" fill="#fff" stroke="#a0524a" stroke-width="2" opacity="0">
+            ${anim('opacity', pulse(4.0, 6.8, 0.1))}
+          </path>
+        </g>
       </g>
     </g>
 
@@ -239,8 +259,105 @@ export function renderActDesk(data, theme = {}) {
     <line x1="40" y1="298" x2="544" y2="298" stroke="${accent}" stroke-width="1.5" stroke-opacity="0.65"/>
     <line x1="40" y1="299" x2="544" y2="299" stroke="#fff" stroke-width="0.8" stroke-opacity="0.3"/>
 
-    <!-- Cyber Desk Mat under Keyboard -->
+    <!-- Subtle Desk Circuit Glow Etchings -->
+    <path d="M48 310 h28 l14 14 h36 M534 310 h-28 l-14 14 h-32" stroke="${accent}" stroke-width="0.8" stroke-opacity="0.2" fill="none"/>
+
+    <!-- Cyber Desk Mat under Keyboard with Stitched Rim & Octocat Decal -->
     <polygon points="${HX - 88},299 ${HX + 88},299 ${HX + 104},346 ${HX - 104},346" fill="url(#deskMatGrad)" stroke="${accent}" stroke-width="1" stroke-opacity="0.35"/>
+    <polygon points="${HX - 85},301 ${HX + 85},301 ${HX + 100},344 ${HX - 100},344" fill="none" stroke="${accent}" stroke-width="0.8" stroke-dasharray="2 3" stroke-opacity="0.35"/>
+
+    <!-- Octocat Decal on Desk Mat -->
+    <g transform="translate(${HX - 92},332) scale(0.7)" opacity="0.45" fill="${accent}">
+      <path d="M0 0 c-2 -4 -6 -4 -6 0 c0 3 2 6 6 8 c4 -2 6 -5 6 -8 c0 -4 -4 -4 -6 0Z"/>
+      <circle cx="-2" cy="2" r="0.8" fill="#fff"/>
+      <circle cx="2" cy="2" r="0.8" fill="#fff"/>
+    </g>
+
+    <!-- Adorable Cyber Droid Desk Companion (x=286, y=286) -->
+    <g transform="translate(286,286)">
+      <ellipse cx="0" cy="12" rx="14" ry="4" fill="#000" opacity="0.35"/>
+      <g>
+        ${anim('transform', [
+          [0, 'translate(0,0)'],
+          [2.05, 'translate(0,0)'],
+          [2.15, 'translate(0,-6)'],
+          [2.3, 'translate(0,0)'],
+          [4.8, 'translate(0,0)'],
+          [4.95, 'translate(0,-7)'],
+          [5.1, 'translate(0,0)'],
+          [5.25, 'translate(0,-5)'],
+          [5.4, 'translate(0,0)'],
+          [12, 'translate(0,0)'],
+        ])}
+        <!-- Droid Metallic Chassis -->
+        <rect x="-11" y="-8" width="22" height="20" rx="9" fill="#131b26" stroke="#38bdf8" stroke-width="1.3"/>
+        <!-- Droid Antenna with Blinking Tip -->
+        <line x1="0" y1="-8" x2="0" y2="-15" stroke="#38bdf8" stroke-width="1.2"/>
+        <circle cx="0" cy="-16" r="2" fill="#ffd76a">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Curved OLED Visor Screen -->
+        <rect x="-8" y="-3" width="16" height="9" rx="3.5" fill="#070c14"/>
+        <!-- State 1 (0s-2.0s & 6.9s-12s): Happy Idling Cyan Eyes -->
+        <g opacity="1">
+          ${anim('opacity', [[0, 1], [2.0, 1], [2.05, 0], [4.0, 0], [6.8, 0], [6.9, 1], [12, 1]])}
+          <circle cx="-3.5" cy="1.5" r="1.5" fill="#38bdf8"/>
+          <circle cx="3.5" cy="1.5" r="1.5" fill="#38bdf8"/>
+        </g>
+        <!-- State 2 (2.05s-3.8s): Surprised Alert Amber Eyes [!] -->
+        <g opacity="0">
+          ${anim('opacity', pulse(2.05, 3.8, 0.05))}
+          <text class="m" x="0" y="4" text-anchor="middle" font-size="7" font-weight="900" fill="#ffd76a">!!</text>
+        </g>
+        <!-- State 3 (4.0s-6.8s): Celebratory Happy Arcs [^^] -->
+        <g opacity="0">
+          ${anim('opacity', pulse(4.0, 6.8, 0.05))}
+          <path d="M-5 3 Q-3.5 0 -2 3 M2 3 Q3.5 0 5 3" stroke="#34d399" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- Succulent Desk Plant in Geometric Obsidian Pot (x=248, y=284) -->
+    <g transform="translate(248,284)">
+      <ellipse cx="0" cy="12" rx="13" ry="3.5" fill="#000" opacity="0.3"/>
+      <polygon points="-11,0 11,0 8,12 -8,12" fill="#151b26" stroke="#253245" stroke-width="1"/>
+      <polygon points="-11,0 0,0 0,12 -8,12" fill="#1b2332"/>
+      <rect x="-12" y="-2" width="24" height="3" rx="1" fill="#a0523d"/>
+      <path d="M0 -2 Q-7 -7 -3 -12 Q0 -7 0 -2" fill="#2ea043"/>
+      <path d="M0 -2 Q7 -7 3 -12 Q0 -7 0 -2" fill="#3fb950"/>
+      <path d="M0 -2 Q-10 -3 -8 -8 Q-3 -5 0 -2" fill="#238636"/>
+      <path d="M0 -2 Q10 -3 8 -8 Q3 -5 0 -2" fill="#56d364"/>
+      <circle cx="0" cy="-6" r="3" fill="#3fb950"/>
+      <circle cx="0" cy="-6" r="1.2" fill="#ffd76a" opacity="0.8"/>
+    </g>
+
+    <!-- Secondary Mini-Display Tablet with Live Visualizer Waves (x=222, y=242) -->
+    <g transform="translate(222,242)">
+      <rect x="18" y="48" width="6" height="12" rx="2" fill="#111620"/>
+      <rect width="42" height="50" rx="4" fill="#0c111a" stroke="#2a3547" stroke-width="1.2"/>
+      <rect x="3" y="3" width="36" height="44" rx="2" fill="#06090e"/>
+      <text class="m" x="21" y="10" text-anchor="middle" font-size="5" fill="#6e7681">TELEMETRY</text>
+      <rect x="6" y="28" width="4" height="14" rx="1" fill="#38bdf8">
+        ${sla('height', ['6', '16', '4', '12', '6'], 0.42)}
+        ${sla('y', ['36', '26', '38', '30', '36'], 0.42)}
+      </rect>
+      <rect x="13" y="24" width="4" height="18" rx="1" fill="#34d399">
+        ${sla('height', ['10', '20', '8', '16', '10'], 0.38)}
+        ${sla('y', ['32', '22', '34', '26', '32'], 0.38)}
+      </rect>
+      <rect x="20" y="26" width="4" height="16" rx="1" fill="#a78bfa">
+        ${sla('height', ['8', '18', '5', '14', '8'], 0.46)}
+        ${sla('y', ['34', '24', '37', '28', '34'], 0.46)}
+      </rect>
+      <rect x="27" y="30" width="4" height="12" rx="1" fill="#ffd76a">
+        ${sla('height', ['5', '14', '7', '11', '5'], 0.52)}
+        ${sla('y', ['37', '28', '35', '31', '37'], 0.52)}
+      </rect>
+      <rect x="34" y="28" width="4" height="14" rx="1" fill="#38bdf8">
+        ${sla('height', ['7', '15', '4', '13', '7'], 0.36)}
+        ${sla('y', ['35', '27', '38', '29', '35'], 0.36)}
+      </rect>
+    </g>
 
     <!-- Mechanical Keyboard with Underglow -->
     <ellipse cx="${HX}" cy="344" rx="98" ry="8" fill="${accent}" opacity="0.25"/>

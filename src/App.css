@@ -251,12 +251,21 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .preview-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-heading);
+}
+
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .url-badge {
@@ -267,6 +276,27 @@ body {
   padding: 4px 10px;
   border-radius: 4px;
   color: var(--primary-color);
+}
+
+.action-btn {
+  background: #21262d;
+  border: 1px solid var(--panel-border);
+  color: var(--text-heading);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.action-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-color);
+  color: #ffffff;
 }
 
 .card-display-box {

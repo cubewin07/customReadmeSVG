@@ -44,6 +44,7 @@ export const developerCard = {
 
     return {
       ...DEFAULT_DEVELOPER_PROFILE,
+      name: options.name || (username && username !== DEFAULT_DEVELOPER_PROFILE.login ? username : DEFAULT_DEVELOPER_PROFILE.name),
       login: username || DEFAULT_DEVELOPER_PROFILE.login,
       handle: username ? `@${username}` : DEFAULT_DEVELOPER_PROFILE.handle,
       role: options.role || DEFAULT_DEVELOPER_PROFILE.role,
@@ -56,6 +57,8 @@ export const developerCard = {
     const profile = {
       ...DEFAULT_DEVELOPER_PROFILE,
       ...data,
+      name: options.name || data?.name || (options.username && options.username !== DEFAULT_DEVELOPER_PROFILE.login ? options.username : DEFAULT_DEVELOPER_PROFILE.name),
+      handle: data?.handle || (options.username ? `@${options.username}` : DEFAULT_DEVELOPER_PROFILE.handle),
       role: options.role || data?.role || DEFAULT_DEVELOPER_PROFILE.role,
       status: options.status || data?.status || DEFAULT_DEVELOPER_PROFILE.status,
       focus: options.bio ? [options.bio] : (data?.focus || DEFAULT_DEVELOPER_PROFILE.focus),

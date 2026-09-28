@@ -95,6 +95,23 @@ function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(cardUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cleanUser}-${card}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to download SVG:', e);
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -446,7 +463,26 @@ function App() {
           <div className="preview-panel">
             <div className="preview-header">
               <span className="preview-title">Live SVG Card Preview</span>
-              <span className="url-badge">{relativeUrl}</span>
+              <div className="preview-actions">
+                <span className="url-badge">{relativeUrl}</span>
+                <a
+                  href={cardUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="action-btn"
+                  title="Open SVG in new tab"
+                >
+                  Open ↗
+                </a>
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="action-btn"
+                  title="Download animated SVG file"
+                >
+                  Download ⬇
+                </button>
+              </div>
             </div>
 
             <div className="card-display-box">

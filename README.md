@@ -16,7 +16,7 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 * **GraphQL Data Layer**: Efficiently fetches profile, repository, language byte count, and metric data via GitHub GraphQL API.
 * **Pluggable Caching**: Built-in memory cache engine with customizable TTLs to stay well within GitHub API rate limits.
 * **Dev Server Middleware**: Seamless local development experience serving raw SVG requests directly via Vite dev server.
-* **Theme System**: Supports built-in color themes (`dark`, `light`, `radical`, `nord`, `gruvbox`, `dracula`).
+* **Theme System**: Supports built-in color themes (`dark`, `light`, `radical`, `nord`, `gruvbox`, `dracula`, `tokyonight`, `catppuccin`, `synthwave`).
 
 ---
 
@@ -27,18 +27,25 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 | Route | Card Plugin | Default TTL | Description |
 |---|---|---|---|
 | `/:user` or `/:user/profile` | Profile Overview | 1 Hour | Name, bio, repository count, follower/following counts, location, & company |
+| `/:user/developer` | Developer Showcase | 1 Hour | 24s 3-act animated cyber world: Workstation Desk & Pinned Repos Hologram, Contribution Graph Platformer Runner, and 3D Isometric Voxel City |
 | `/:user/languages` | Top Languages | 6 Hours | Top 5–8 programming languages aggregated by byte size with color dots & percentages |
 | `/:user/repos` | Top Repositories | 2 Hours | Top 6 public non-fork repositories ordered by stargazers |
 | `/:user/stats` | GitHub Stats | 1 Hour | Total stars earned, total forks, commit contributions, repo count, & followers |
 
 ### Query Parameters
 
-* `theme`: `dark` | `light` | `radical` | `nord` | `gruvbox` | `dracula` (Default: `dark`)
+* `theme`: `dark` | `light` | `radical` | `nord` | `gruvbox` | `dracula` | `tokyonight` | `catppuccin` | `synthwave` (Default: `dark`)
+* `role`: Custom role / title override for the Developer Showcase card (e.g. `?role=Senior+Software+Engineer`)
+* `status`: Custom status message for the Developer Showcase card (e.g. `?status=Shipping+v2.0+🚀`)
+* `bio`: Custom focus description override for the Developer Showcase card
 * `cache`: Set `?cache=0` to bypass server-side cache.
 
 ### Markdown Embed Examples
 
 ```markdown
+<!-- Developer Showcase (24s 3-Act Story Card) -->
+![Developer Showcase](https://custom-readme-svg.example.com/octocat/developer?theme=tokyonight)
+
 <!-- Profile Overview -->
 ![Profile Overview](https://custom-readme-svg.example.com/octocat?theme=radical)
 

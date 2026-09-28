@@ -463,8 +463,26 @@ function renderV1SplitSvg(data, theme, options = {}) {
     <!-- Bio Container Box -->
     <g transform="translate(0, 0)">
       <rect x="0" y="0" width="310" height="54" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-      <text x="12" y="18" class="bio-title">ABOUT</text>
-      <text x="12" y="36" class="bio-text">${p.bio || 'GitHub developer profile.'}</text>
+      <text x="12" y="16" class="bio-title">ABOUT</text>
+      <text x="12" y="32" class="bio-text">
+        ${(() => {
+          const raw = p.bio || 'GitHub developer profile.';
+          const words = raw.split(/\s+/);
+          const lines = [];
+          let cur = '';
+          for (const w of words) {
+            if ((cur ? cur + ' ' + w : w).length <= 42) {
+              cur = cur ? cur + ' ' + w : w;
+            } else {
+              if (cur) lines.push(cur);
+              cur = w;
+              if (lines.length === 1) break;
+            }
+          }
+          if (cur && lines.length < 2) lines.push(cur);
+          return lines.map((l, idx) => `<tspan x="12" dy="${idx === 0 ? 0 : 15}">${escapeXml(l)}</tspan>`).join('');
+        })()}
+      </text>
     </g>
 
     <!-- 2x2 Metric Grid Cards -->

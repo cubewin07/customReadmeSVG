@@ -4,6 +4,7 @@ import { PROFILE_QUERY } from '../../core/github/queries.js';
 import { normalizeProfile } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { icons } from '../../svg/icons.js';
+import { renderCardHeader } from '../../svg/header.js';
 
 async function fetchAvatarBase64(url) {
   if (!url) return null;
@@ -538,7 +539,7 @@ function renderV1DashboardSvg(data, theme, options = {}) {
     </linearGradient>
   </defs>
   <style>
-    .header-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 16px; fill: ${theme.title}; }
+    .header-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 17px; fill: ${theme.title}; }
     .header-handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
     .bio-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11.5px; fill: ${theme.text}; }
     .tile-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 16px; fill: ${theme.title}; }
@@ -549,6 +550,8 @@ function renderV1DashboardSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-dash-bg)" stroke="${theme.border}"/>
   
+  ${options.show_header === 'true' ? renderCardHeader({ title: p.name, badgeText: p.createdAtYear ? `Joined ${p.createdAtYear}` : undefined, width, theme }) : ''}
+
   <g transform="translate(24, 20)">
     <!-- Top Header Summary Card -->
     <g transform="translate(0, 0)">

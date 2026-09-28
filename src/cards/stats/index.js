@@ -4,6 +4,7 @@ import { normalizeStats } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { icons } from '../../svg/icons.js';
 import { calculateRank } from '../../core/stats/rank.js';
+import { renderCardHeader } from '../../svg/header.js';
 
 export const statsCard = {
   id: 'stats',
@@ -98,9 +99,14 @@ function renderV1RingSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#stats-ring-bg)" stroke="${theme.border}"/>
   
+  ${renderCardHeader({
+    title: `${name}'s GitHub Stats`,
+    badgeText: `🏆 Rank ${rank.level}`,
+    width,
+    theme,
+  })}
+
   <g transform="translate(25, 24)">
-    <!-- Header -->
-    <text x="0" y="0" class="header">${name}'s GitHub Stats</text>
     <line x1="0" y1="14" x2="${width - 50}" y2="14" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
 
     <!-- Left Column: Metrics -->
@@ -174,16 +180,15 @@ function renderV1BarsSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#stats-bars-bg)" stroke="${theme.border}"/>
   
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">${name}'s Stats Progress</text>
-      <rect x="310" y="-14" width="137" height="22" rx="11" fill="${theme.badgeBg}"/>
-      <text x="378.5" y="1" text-anchor="middle" class="badge-text">🏆 Rank ${rank.level} • Score ${rank.score}/100</text>
-    </g>
+  ${renderCardHeader({
+    title: `${name}'s Stats Progress`,
+    badgeText: `🏆 Rank ${rank.level} • Score ${rank.score}/100`,
+    width,
+    theme,
+  })}
 
+  <g transform="translate(24, 46)">
     <!-- Progress Bars List -->
-    <g transform="translate(0, 24)">
       ${metrics.map((m, idx) => {
         const y = idx * 32;
         const fillW = Math.max(6, Math.round((m.perc / 100) * barMaxW));
@@ -248,14 +253,15 @@ function renderV1HeroSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#stats-hero-bg)" stroke="${theme.border}"/>
   
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">${name}'s GitHub Overview</text>
-    </g>
+  ${renderCardHeader({
+    title: `${name}'s GitHub Overview`,
+    badgeText: `Score ${rank.score}/100`,
+    width,
+    theme,
+  })}
 
-    <g transform="translate(0, 16)">
-      <!-- Left Hero Grade Badge Card -->
+  <g transform="translate(24, 38)">
+    <!-- Left Hero Grade Badge Card -->
       <g transform="translate(0, 0)">
         <rect x="0" y="0" width="140" height="146" rx="10" fill="url(#hero-badge-gradient)" stroke="${theme.border}" stroke-width="1.5"/>
         <text x="70" y="55" text-anchor="middle" class="hero-level">${rank.level}</text>
@@ -283,7 +289,6 @@ function renderV1HeroSvg(data, theme, options = {}) {
         }).join('')}
       </g>
     </g>
-  </g>
 </svg>`;
 }
 
@@ -326,36 +331,36 @@ function renderV1DashboardSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#stats-dash-bg)" stroke="${theme.border}"/>
   
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">${name}'s Metrics Dashboard</text>
-    </g>
+  ${renderCardHeader({
+    title: `${name}'s Metrics Dashboard`,
+    badgeText: `Rank ${rank.level}`,
+    width,
+    theme,
+  })}
 
-    <!-- 3x2 Grid Tiles -->
-    <g transform="translate(0, 16)">
-      ${tiles.map((t, idx) => {
-        const col = idx % 3;
-        const row = Math.floor(idx / 3);
-        const x = col * 152;
-        const y = row * 72;
+  <!-- 3x2 Grid Tiles -->
+  <g transform="translate(24, 38)">
+    ${tiles.map((t, idx) => {
+      const col = idx % 3;
+      const row = Math.floor(idx / 3);
+      const x = col * 152;
+      const y = row * 72;
 
-        return `
-        <g transform="translate(${x}, ${y})">
-          <rect x="0" y="0" width="143" height="64" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-          <g transform="translate(12, 14)">
-            ${t.isRankTile ? `
-              <text x="0" y="0" class="tile-lbl">Rank Grade</text>
-              <text x="0" y="24" class="rank-val">${t.value}</text>
-            ` : `
-              <g transform="translate(0, -10)">${t.icon}</g>
-              <text x="20" y="0" class="tile-lbl">${t.label}</text>
-              <text x="0" y="24" class="tile-val">${t.value}</text>
-            `}
-          </g>
-        </g>`;
-      }).join('')}
-    </g>
+      return `
+      <g transform="translate(${x}, ${y})">
+        <rect x="0" y="0" width="143" height="64" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
+        <g transform="translate(12, 14)">
+          ${t.isRankTile ? `
+            <text x="0" y="0" class="tile-lbl">Rank Grade</text>
+            <text x="0" y="24" class="rank-val">${t.value}</text>
+          ` : `
+            <g transform="translate(0, -10)">${t.icon}</g>
+            <text x="20" y="0" class="tile-lbl">${t.label}</text>
+            <text x="0" y="24" class="tile-val">${t.value}</text>
+          `}
+        </g>
+      </g>`;
+    }).join('')}
   </g>
 </svg>`;
 }
@@ -397,28 +402,26 @@ function renderV1CompactSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#stats-cmp-bg)" stroke="${theme.border}"/>
   
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">${name}'s Stats</text>
-      <rect x="310" y="-14" width="137" height="22" rx="11" fill="${theme.badgeBg}"/>
-      <text x="378.5" y="1" text-anchor="middle" class="badge-text">Grade ${rank.level} • Score ${rank.score}</text>
-    </g>
+  ${renderCardHeader({
+    title: `${name}'s Stats`,
+    badgeText: `Grade ${rank.level} • Score ${rank.score}`,
+    width,
+    theme,
+  })}
 
-    <!-- Inline Metric Chips Row -->
-    <g transform="translate(0, 36)">
-      ${items.map((it, idx) => {
-        const x = idx * 90;
-        return `
-        <g transform="translate(${x}, 0)">
-          <rect x="0" y="0" width="82" height="34" rx="6" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-          <g transform="translate(10, 12)">
-            <g transform="translate(0, -9)">${it.icon}</g>
-            <text x="18" y="0" class="chip-val">${it.value}</text>
-          </g>
-        </g>`;
-      }).join('')}
-    </g>
+  <!-- Inline Metric Chips Row -->
+  <g transform="translate(24, 58)">
+    ${items.map((it, idx) => {
+      const x = idx * 90;
+      return `
+      <g transform="translate(${x}, 0)">
+        <rect x="0" y="0" width="82" height="34" rx="6" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
+        <g transform="translate(10, 12)">
+          <g transform="translate(0, -9)">${it.icon}</g>
+          <text x="18" y="0" class="chip-val">${it.value}</text>
+        </g>
+      </g>`;
+    }).join('')}
   </g>
 </svg>`;
 }

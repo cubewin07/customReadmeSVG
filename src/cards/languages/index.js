@@ -2,6 +2,7 @@ import { graphql } from '../../core/github/client.js';
 import { LANGUAGES_QUERY } from '../../core/github/queries.js';
 import { normalizeLanguages } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
+import { renderCardHeader } from '../../svg/header.js';
 
 export const languagesCard = {
   id: 'languages',
@@ -101,14 +102,14 @@ function renderPolyglotLayout(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#lang-poly-bg)" stroke="${theme.border}"/>
 
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Polyglot Languages (${username})</text>
-      <rect x="330" y="-14" width="117" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="388" y="0" text-anchor="middle" class="badge-text">⚡ ${totalLangsCount} Languages Used</text>
-    </g>
+  ${renderCardHeader({
+    title: `Polyglot Languages (${username})`,
+    badgeText: `⚡ ${totalLangsCount} Languages Used`,
+    width,
+    theme,
+  })}
 
+  <g transform="translate(24, 22)">
     <!-- Header Progress Bar -->
     <g transform="translate(0, 14)">
       <rect x="0" y="0" width="${barWidth}" height="8" rx="4" fill="${theme.barBg}" />
@@ -198,14 +199,14 @@ function renderDonutLayout(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#lang-donut-bg)" stroke="${theme.border}"/>
 
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Most Used Languages (${username})</text>
-      <rect x="290" y="-14" width="157" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="368" y="0" text-anchor="middle" class="badge-text">⚡ ${totalLangsCount} Languages (${formatBytes(totalSize)})</text>
-    </g>
+  ${renderCardHeader({
+    title: `Most Used Languages (${username})`,
+    badgeText: `⚡ ${totalLangsCount} Languages (${formatBytes(totalSize)})`,
+    width,
+    theme,
+  })}
 
+  <g transform="translate(24, 22)">
     <!-- Donut Chart (Left Side) -->
     <g transform="translate(0, 20)">
       <!-- Donut Base Ring -->
@@ -266,14 +267,14 @@ function renderListLayout(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#lang-list-bg)" stroke="${theme.border}"/>
 
-  <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Most Used Languages (${username})</text>
-      <rect x="290" y="-14" width="157" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="368" y="0" text-anchor="middle" class="badge-text">⚡ ${totalLangsCount} Languages (${formatBytes(totalSize)})</text>
-    </g>
+  ${renderCardHeader({
+    title: `Most Used Languages (${username})`,
+    badgeText: `⚡ ${totalLangsCount} Languages (${formatBytes(totalSize)})`,
+    width,
+    theme,
+  })}
 
+  <g transform="translate(24, 22)">
     <!-- Stacked Full Width Progress Bars -->
     <g transform="translate(0, 26)">
       ${topLangs.map((lang, idx) => {
@@ -336,14 +337,14 @@ function renderCompactLayout(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#lang-gradient)" stroke="${theme.border}"/>
   
-  <g transform="translate(25, 24)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Most Used Languages (${username})</text>
-      <rect x="330" y="-14" width="117" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="388" y="0" text-anchor="middle" class="badge-text">${totalLangsCount} Languages Used</text>
-    </g>
-    
+  ${renderCardHeader({
+    title: `Most Used Languages (${username})`,
+    badgeText: `${totalLangsCount} Languages Used`,
+    width,
+    theme,
+  })}
+
+  <g transform="translate(24, 22)">
     <!-- Top Progress Bar -->
     <g transform="translate(0, 16)">
       <rect x="0" y="0" width="${barWidth}" height="10" rx="5" fill="${theme.barBg}" />

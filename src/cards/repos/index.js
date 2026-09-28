@@ -3,6 +3,7 @@ import { REPOS_QUERY } from '../../core/github/queries.js';
 import { normalizeRepos } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { icons } from '../../svg/icons.js';
+import { renderCardHeader } from '../../svg/header.js';
 
 export const reposCard = {
   id: 'repos',
@@ -104,14 +105,14 @@ function renderV1GridSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${cardHeight - 1}" fill="url(#repos-grid-bg)" stroke="${theme.border}"/>
   
-  <g transform="translate(25, 24)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Top Repositories (${username})</text>
-    </g>
-    
-    <!-- Repos Grid -->
-    <g transform="translate(0, 20)">
+  ${renderCardHeader({
+    title: `Top Repositories (${username})`,
+    width,
+    theme,
+  })}
+  
+  <!-- Repos Grid -->
+  <g transform="translate(25, 44)">
       ${reposList.length === 0 ? `
         <text x="0" y="20" class="empty-msg">No repositories found.</text>
       ` : reposList.map((repo, idx) => {
@@ -172,7 +173,6 @@ function renderV1GridSvg(data, theme, options = {}) {
         </g>`;
       }).join('')}
     </g>
-  </g>
 </svg>`;
 }
 
@@ -229,14 +229,14 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${cardHeight - 1}" fill="url(#repos-feat-bg)" stroke="${theme.border}"/>
   
+  ${renderCardHeader({
+    title: `Top Repositories (${username})`,
+    badgeText: '🌟 Featured Project',
+    width,
+    theme,
+  })}
+
   <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Top Repositories (${username})</text>
-      <rect x="332" y="-14" width="115" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="390" y="0" text-anchor="middle" class="badge-text">🌟 Featured Project</text>
-    </g>
-    
     ${!heroRepo ? `<text x="0" y="40" class="empty-msg">No repositories found.</text>` : `
       <!-- Featured Hero Card -->
       <g transform="translate(0, 16)">
@@ -368,14 +368,14 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${cardHeight - 1}" fill="url(#repos-spot-bg)" stroke="${theme.border}"/>
   
+  ${renderCardHeader({
+    title: `Top Repositories (${username})`,
+    badgeText: '✨ Spotlight',
+    width,
+    theme,
+  })}
+
   <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Top Repositories (${username})</text>
-      <rect x="330" y="-14" width="117" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="388" y="0" text-anchor="middle" class="badge-text">✨ Spotlight</text>
-    </g>
-    
     <!-- Spotlight Magazine Layout (2 Columns) -->
     <g transform="translate(0, 20)">
       ${!heroRepo ? `<text x="0" y="20" class="empty-msg">No repositories found.</text>` : `
@@ -480,14 +480,14 @@ function renderV1TimelineSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${cardHeight - 1}" fill="url(#repos-time-bg)" stroke="${theme.border}"/>
   
+  ${renderCardHeader({
+    title: `Top Repositories (${username})`,
+    badgeText: '🌿 Git Timeline',
+    width,
+    theme,
+  })}
+
   <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Top Repositories (${username})</text>
-      <rect x="330" y="-14" width="117" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="388" y="0" text-anchor="middle" class="badge-text">🌿 Git Timeline</text>
-    </g>
-    
     <!-- Timeline Branch -->
     <g transform="translate(0, 24)">
       ${reposList.length === 0 ? `
@@ -608,14 +608,14 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
   <!-- Background -->
   <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${cardHeight - 1}" fill="url(#repos-rank-bg)" stroke="${theme.border}"/>
   
+  ${renderCardHeader({
+    title: `Top Repositories (${username})`,
+    badgeText: '🏆 Rank Standings',
+    width,
+    theme,
+  })}
+
   <g transform="translate(24, 22)">
-    <!-- Header -->
-    <g transform="translate(0, 0)">
-      <text x="0" y="0" class="header">Top Repositories (${username})</text>
-      <rect x="330" y="-14" width="117" height="20" rx="10" fill="${theme.badgeBg}"/>
-      <text x="388" y="0" text-anchor="middle" class="badge-text">🏆 Rank Standings</text>
-    </g>
-    
     <!-- Leaderboard Rows -->
     <g transform="translate(0, 20)">
       ${reposList.length === 0 ? `

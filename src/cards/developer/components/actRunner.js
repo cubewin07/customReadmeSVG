@@ -179,17 +179,6 @@ export function renderActRunner(counts = []) {
   }
   jetpackOpacity.push([18.0, 0]);
 
-  // Real-Time HUD Star Score Steps
-  let hudScoreSteps = '';
-  if (starsAt.length > 0) {
-    const tFirst = getTc(starsAt[0]);
-    hudScoreSteps += `<g>${anim('opacity', [[12.0, 1], [tFirst - 0.01, 1], [tFirst, 0]])}<text class="m" x="146" y="16" text-anchor="end" font-size="10.5" font-weight="800" fill="#ffd76a">0/${starsAt.length}</text></g>`;
-    for (let si = 0; si < starsAt.length; si++) {
-      const tStart = getTc(starsAt[si]);
-      const tEnd = si < starsAt.length - 1 ? getTc(starsAt[si + 1]) : 18.0;
-      hudScoreSteps += `<g opacity="0">${anim('opacity', [[tStart - 0.01, 0], [tStart, 1], [tEnd - 0.01, 1], [tEnd, 0]])}<text class="m" x="146" y="16" text-anchor="end" font-size="10.5" font-weight="800" fill="#ffd76a">${si + 1}/${starsAt.length}</text></g>`;
-    }
-  }
 
   // Foreground Speed Pylons / Mile Markers
   let mileMarkersSvg = '';
@@ -296,19 +285,5 @@ export function renderActRunner(counts = []) {
       </g>
     </g>
 
-    <!-- Real-Time Interactive Game HUD Tracker (Top-Left) -->
-    <g transform="translate(20, 16)">
-      <rect x="0" y="0" width="154" height="24" rx="6" fill="#080e18" stroke="#38bdf8" stroke-width="1.2" opacity="0.92"/>
-      <line x1="2" y1="1" x2="152" y2="1" stroke="#fff" stroke-opacity="0.25"/>
-      <circle cx="12" cy="12" r="3" fill="#3fb950">
-        <animate attributeName="opacity" values="1;0.4;1" dur="1s" repeatCount="indefinite"/>
-      </circle>
-      <text class="m" x="22" y="16" font-size="9" font-weight="700" letter-spacing="1" fill="#9db7e8">RUNNER</text>
-      <g transform="translate(86,12) scale(0.65)">
-        ${sl('rotate', ['0', '360'], 2.4)}
-        <polygon points="${star(0, 0, 7)}" fill="#ffd76a"/>
-      </g>
-      ${hudScoreSteps}
-    </g>
   </g>`;
 }

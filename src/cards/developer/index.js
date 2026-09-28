@@ -10,6 +10,7 @@ import { renderSkyAtmosphere } from './components/skyAtmosphere.js';
 import { renderActDesk } from './components/actDesk.js';
 import { renderActRunner } from './components/actRunner.js';
 import { renderActCity } from './components/actCity.js';
+import { renderChapterTracker } from './components/chapterTracker.js';
 
 export const developerCard = {
   id: 'developer',
@@ -103,6 +104,9 @@ export const developerCard = {
 
       <!-- Act 3 (18s - 24s): 3D Isometric Voxel City Built from Commits -->
       ${renderActCity(profile.counts)}
+
+      <!-- Unified 3-Act Chapter Tracker HUD (3 pips + progress bar + fact per act) -->
+      ${renderChapterTracker(profile, theme)}
     </g>
   </g>
 

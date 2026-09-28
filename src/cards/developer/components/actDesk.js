@@ -632,13 +632,5 @@ export function renderActDesk(data, theme = {}) {
 
     <!-- Confetti Shower Explosion -->
     ${confettiSvg}
-
-    <!-- CLI Step Prompt HUD -->
-    <text class="m" x="20" y="27" font-size="11" fill="#7d8590" opacity="0">
-      ${anim('opacity', pulse(0, 6.9))}&gt; ship_it.sh
-    </text>
-    <text class="m" x="20" y="27" font-size="11" fill="#7d8590" opacity="0">
-      ${anim('opacity', pulse(7.0, 11.9))}&gt; pinned --repos
-    </text>
   </g>`;
 }

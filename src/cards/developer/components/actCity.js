@@ -251,7 +251,5 @@ export function renderActCity(counts = []) {
       </text>
     </g>
 
-    <!-- CLI Step Prompt HUD -->
-    <text class="m" x="20" y="27" font-size="11" fill="#7d8590">&gt; build --world</text>
   </g>`;
 }

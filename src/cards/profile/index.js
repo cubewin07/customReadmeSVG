@@ -85,6 +85,8 @@ function extractProfileFields(data, options = {}) {
   const location = (!hideMeta && data?.location) ? escapeXml(data.location) : null;
   const website = (!hideMeta && data?.websiteUrl) ? escapeXml(data.websiteUrl.replace(/^https?:\/\//, '')) : null;
   const createdAtYear = data?.createdAt ? new Date(data.createdAt).getFullYear() : null;
+  const currentYear = new Date().getFullYear();
+  const accountAgeYears = createdAtYear ? Math.max(1, currentYear - createdAtYear) : null;
 
   return {
     name,
@@ -102,6 +104,7 @@ function extractProfileFields(data, options = {}) {
     location,
     website,
     createdAtYear,
+    accountAgeYears,
   };
 }
 
@@ -197,16 +200,16 @@ function renderV1ClassicSvg(data, theme, options = {}) {
           <text x="0" y="18" class="stat-val">${p.repos.toLocaleString()}</text>
         </g>
         <g transform="translate(130, 0)">
-          <text x="0" y="0" class="stat-lbl">STARS</text>
-          <text x="0" y="18" class="stat-val">${p.stars.toLocaleString()}</text>
-        </g>
-        <g transform="translate(240, 0)">
           <text x="0" y="0" class="stat-lbl">FOLLOWERS</text>
           <text x="0" y="18" class="stat-val">${p.followers.toLocaleString()}</text>
         </g>
+        <g transform="translate(240, 0)">
+          <text x="0" y="0" class="stat-lbl">JOINED</text>
+          <text x="0" y="18" class="stat-val">${p.createdAtYear ? p.createdAtYear : 'Active'}</text>
+        </g>
         <g transform="translate(350, 0)">
-          <text x="0" y="0" class="stat-lbl">FOLLOWING</text>
-          <text x="0" y="18" class="stat-val">${p.following.toLocaleString()}</text>
+          <text x="0" y="0" class="stat-lbl">ACCOUNT AGE</text>
+          <text x="0" y="18" class="stat-val">${p.accountAgeYears ? `${p.accountAgeYears}y active` : 'Active'}</text>
         </g>
       </g>
     </g>

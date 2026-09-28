@@ -43,7 +43,7 @@ function formatRelativeTime(isoString) {
   if (diffDays <= 0) return 'today';
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 30) return `${diffDays}d ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}m ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
   return `${Math.floor(diffDays / 365)}y ago`;
 }
 
@@ -184,7 +184,7 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
 
   const width = 495;
   const subRows = Math.ceil(subRepos.length / 2) || 0;
-  const cardHeight = Math.max(220, 65 + 86 + (subRepos.length > 0 ? 14 + subRows * 72 : 0));
+  const cardHeight = subRepos.length > 0 ? Math.max(220, 65 + 86 + 14 + subRows * 72) : 175;
 
   const heroLangColor = heroRepo?.primaryLanguage?.color || '#858585';
   const heroLangName = heroRepo?.primaryLanguage?.name ? escapeXml(heroRepo.primaryLanguage.name) : null;

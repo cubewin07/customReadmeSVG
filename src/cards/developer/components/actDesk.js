@@ -105,6 +105,10 @@ export function renderActDesk(data, theme = {}) {
     const r = repos[k];
     const a = starts[k];
     const b = ends[k];
+    const repoName = r.name || '';
+    const nameFontSize = repoName.length > 15 ? '11.5' : '13.5';
+    const truncatedName = repoName.length > 21 ? repoName.slice(0, 18) + '...' : repoName;
+    const descText = r.description ? (r.description.length > 32 ? r.description.slice(0, 29) + '...' : r.description) : '';
     const pts = r.sparkline.map((v, i) => `${(-68 + i * 19.4).toFixed(1)},${(44 - v * 2.2).toFixed(1)}`).join(' ');
     const areaPts = `-68,44 ${pts} ${( -68 + (r.sparkline.length - 1) * 19.4).toFixed(1)},44`;
 
@@ -121,8 +125,8 @@ export function renderActDesk(data, theme = {}) {
         <!-- Corner Tech Brackets -->
         <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
         <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
-        <text class="m" x="-68" y="-15" font-size="13.5" font-weight="700" fill="#eaf6ff">${escapeXml(r.name)}</text>
-        <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(r.description)}</text>
+        <text class="m" x="-68" y="-15" font-size="${nameFontSize}" font-weight="700" fill="#eaf6ff">${escapeXml(truncatedName)}</text>
+        <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(descText)}</text>
         <circle cx="-64" cy="14" r="4" fill="${r.color}"/>
         <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language)}</text>
         <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars}</text>

@@ -49,7 +49,8 @@ export function calculateRank({ totalCommits = 0, totalStars = 0, totalForks = 0
 
   // Refine percentile based on continuous composite score
   const percentile = Math.round(Math.min(99.9, Math.max(1, score * 0.99)) * 10) / 10;
+  const scoreText = `${roundedScore}/100`;
 
-  return { level, score: roundedScore, percentile };
+  return { level, score: roundedScore, scoreText, percentile };
 }
 

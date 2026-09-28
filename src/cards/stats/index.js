@@ -128,7 +128,7 @@ function renderV1RingSvg(data, theme, options = {}) {
       
       <!-- Rank Labels below Circle -->
       <text x="0" y="58" text-anchor="middle" class="rank-title">Overall Rank</text>
-      <text x="0" y="72" text-anchor="middle" class="rank-sub">Top ${(100 - rank.percentile).toFixed(1)}%</text>
+      <text x="0" y="72" text-anchor="middle" class="rank-sub">Score ${rank.score}/100</text>
     </g>
   </g>
 </svg>`;
@@ -179,7 +179,7 @@ function renderV1BarsSvg(data, theme, options = {}) {
     <g transform="translate(0, 0)">
       <text x="0" y="0" class="header">${name}'s Stats Progress</text>
       <rect x="310" y="-14" width="137" height="22" rx="11" fill="${theme.badgeBg}"/>
-      <text x="378.5" y="1" text-anchor="middle" class="badge-text">🏆 Rank ${rank.level} • Top ${(100 - rank.percentile).toFixed(1)}%</text>
+      <text x="378.5" y="1" text-anchor="middle" class="badge-text">🏆 Rank ${rank.level} • Score ${rank.score}/100</text>
     </g>
 
     <!-- Progress Bars List -->
@@ -260,7 +260,7 @@ function renderV1HeroSvg(data, theme, options = {}) {
         <rect x="0" y="0" width="140" height="146" rx="10" fill="url(#hero-badge-gradient)" stroke="${theme.border}" stroke-width="1.5"/>
         <text x="70" y="55" text-anchor="middle" class="hero-level">${rank.level}</text>
         <text x="70" y="85" text-anchor="middle" class="hero-title">Overall Rank</text>
-        <text x="70" y="105" text-anchor="middle" class="hero-top">Top ${(100 - rank.percentile).toFixed(1)}%</text>
+        <text x="70" y="105" text-anchor="middle" class="hero-top">Score ${rank.score}/100</text>
       </g>
 
       <!-- Right 2x2 Stats Grid -->
@@ -306,7 +306,7 @@ function renderV1DashboardSvg(data, theme, options = {}) {
     { icon: icons.fork(theme.iconColor), label: 'Forks', value: totalForks.toLocaleString() },
     { icon: icons.repo(theme.iconColor), label: 'Repos', value: totalRepos.toLocaleString() },
     { icon: icons.followers(theme.iconColor), label: 'Followers', value: followers.toLocaleString() },
-    { isRankTile: true, label: 'Rank Grade', value: `${rank.level} (Top ${(100 - rank.percentile).toFixed(1)}%)` },
+    { isRankTile: true, label: 'Rank Grade', value: `${rank.level} (Score ${rank.score})` },
   ];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
@@ -402,7 +402,7 @@ function renderV1CompactSvg(data, theme, options = {}) {
     <g transform="translate(0, 0)">
       <text x="0" y="0" class="header">${name}'s Stats</text>
       <rect x="310" y="-14" width="137" height="22" rx="11" fill="${theme.badgeBg}"/>
-      <text x="378.5" y="1" text-anchor="middle" class="badge-text">Grade ${rank.level} • Top ${(100 - rank.percentile).toFixed(1)}%</text>
+      <text x="378.5" y="1" text-anchor="middle" class="badge-text">Grade ${rank.level} • Score ${rank.score}</text>
     </g>
 
     <!-- Inline Metric Chips Row -->

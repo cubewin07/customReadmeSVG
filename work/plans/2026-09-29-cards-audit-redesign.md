@@ -560,7 +560,7 @@ git commit -m "feat(languages): remove inline byte clutter and differentiate don
 - Consumes: Act timing and facts (SHIP: latest commit & pinned repo; RUN: streak & best day; BUILD: 7-week contribution volume)
 - Produces: Unified 3-pip chapter tracker with consistent progress bar and large-type fact headings.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 Create `tests/developer-chapter-tracker.test.js`:
 ```javascript
 import test from 'node:test';
@@ -585,11 +585,11 @@ test('developerCard renders unified 3-act chapter tracker instead of disconnecte
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `node --test tests/developer-chapter-tracker.test.js`
 Expected: FAIL
 
-- [ ] **Step 3: Implement Chapter Tracker HUD**
+- [x] **Step 3: Implement Chapter Tracker HUD**
 Create a unified chapter tracker component in `src/cards/developer/components/chapterTracker.js` (or integrate into `sharedDefs.js` / acts):
 - Three pips at top of scene (x: 24, y: 24):
   - Act 1 (0s-12s): Pip 1 active, Caption: `ACT 01 // SHIP • LATEST COMMIT & PINNED REPO`
@@ -597,11 +597,11 @@ Create a unified chapter tracker component in `src/cards/developer/components/ch
   - Act 3 (18s-24s): Pip 3 active, Caption: `ACT 03 // BUILD • 7-WEEK VOXEL CITY`
 - Remove discordant legacy prompts `> ship_it.sh` and `RUNNER 1/6`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `node --test tests/developer-chapter-tracker.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit changes**
+- [x] **Step 5: Commit changes**
 ```bash
 git add src/cards/developer/ tests/developer-chapter-tracker.test.js
 git commit -m "feat(developer): add unified 3-act chapter tracker with one clear fact per act"
@@ -618,7 +618,7 @@ git commit -m "feat(developer): add unified 3-act chapter tracker with one clear
 - Consumes: Profile info, stats, tech arsenal
 - Produces: Left panel with font sizes >= 11px (at 1150px canvas width), removing duplicate 14D activity strip so Act 2 has exclusive ownership of heatmap streak.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 Create `tests/developer-info-panel.test.js`:
 ```javascript
 import test from 'node:test';
@@ -642,20 +642,20 @@ test('renderInfoPanel removes redundant 14D strip and uses legible font sizes', 
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `node --test tests/developer-info-panel.test.js`
 Expected: FAIL
 
-- [ ] **Step 3: Implement minimal fix in `src/cards/developer/components/infoPanel.js`**
+- [x] **Step 3: Implement minimal fix in `src/cards/developer/components/infoPanel.js`**
 1. Remove `heatmapSvg` and `14D ACTIVITY` label. Give the Tech Arsenal card cleaner padding and larger tag badges.
 2. Bump `commitSha` badge font size from 8.5px to 10.5px.
 3. Replace arbitrary "Level 52 / LEGENDARY ARCHITECT" formula with an honest metric (e.g. `ANNUAL CONTRIBUTIONS` or certified tier).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `node --test tests/developer-info-panel.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit changes**
+- [x] **Step 5: Commit changes**
 ```bash
 git add src/cards/developer/components/infoPanel.js tests/developer-info-panel.test.js
 git commit -m "feat(developer): slim left panel, remove duplicate 14D strip, and enhance text scaling"
@@ -673,7 +673,7 @@ git commit -m "feat(developer): slim left panel, remove duplicate 14D strip, and
 - Consumes: `{ title, badgeText, badgeIcon, width, theme }`
 - Produces: Consistent SVG `<g>` header block with standardized font size (17px), vertical alignment, and pill badge.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 Create `tests/unified-header.test.js`:
 ```javascript
 import test from 'node:test';
@@ -694,11 +694,11 @@ test('renderCardHeader outputs consistent header title and pill badge', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `node --test tests/unified-header.test.js`
 Expected: FAIL
 
-- [ ] **Step 3: Implement `src/svg/header.js` and adopt across cards**
+- [x] **Step 3: Implement `src/svg/header.js` and adopt across cards**
 Create `src/svg/header.js`:
 ```javascript
 import { escapeXml } from './escape.js';
@@ -721,11 +721,11 @@ export function renderCardHeader({ title, badgeText, width = 495, theme }) {
 ```
 Adopt in `stats`, `repos`, `profile`, and `languages`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `node --test tests/unified-header.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit changes**
+- [x] **Step 5: Commit changes**
 ```bash
 git add src/svg/header.js src/cards/ tests/unified-header.test.js
 git commit -m "refactor(cards): unify header layout and design tokens across all secondary cards"
@@ -743,7 +743,7 @@ git commit -m "refactor(cards): unify header layout and design tokens across all
 - Consumes: All 5 cards (`profile`, `languages`, `repos`, `stats`, `developer`), themes (`dark`, `light`), all layouts, and mock datasets (`normal`, `long_names_overflow`, `empty_data`).
 - Produces: Renders all cards and verifies no unescaped strings, no broken tags, and validates SVG well-formedness.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 Create `tests/snapshot-runner.test.js`:
 ```javascript
 import test from 'node:test';
@@ -757,11 +757,11 @@ test('runSnapshotAudit renders all cards without crashing across extreme data an
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `node --test tests/snapshot-runner.test.js`
 Expected: FAIL
 
-- [ ] **Step 3: Implement `tooling/scripts/snapshot_cards.js` and add package.json scripts**
+- [x] **Step 3: Implement `tooling/scripts/snapshot_cards.js` and add package.json scripts**
 Implement snapshot audit script that tests:
 - Cards: `profile`, `languages`, `repos`, `stats`, `developer`
 - Layouts: `classic`, `hero`, `compact`, `split`, `dashboard`, `donut`, `list`, `polyglot`, `grid`, `featured`, `spotlight`, `timeline`, `leaderboard`, `ring`, `bars`
@@ -772,15 +772,15 @@ Implement snapshot audit script that tests:
 - Themes: `dark`, `light`
 Add `"test": "node --test tests/**/*.test.js"` and `"snapshot": "node tooling/scripts/snapshot_cards.js"` to `package.json`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `node --test tests/snapshot-runner.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Run full test suite, lint, and build**
+- [x] **Step 5: Run full test suite, lint, and build**
 Run: `npm test && npm run lint && npm run build`
 Expected: All tests pass, lint passes with 0 errors, build succeeds.
 
-- [ ] **Step 6: Commit changes**
+- [x] **Step 6: Commit changes**
 ```bash
 git add tooling/scripts/snapshot_cards.js package.json tests/snapshot-runner.test.js
 git commit -m "feat(testing): add automated snapshot audit script and npm test script"

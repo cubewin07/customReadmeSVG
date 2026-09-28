@@ -11,6 +11,15 @@ export function getGithubToken(tokenOverride) {
   if (env) {
     if (env.GITHUB_TOKEN) return env.GITHUB_TOKEN;
     if (env.VITE_GITHUB_TOKEN) return env.VITE_GITHUB_TOKEN;
+    if (typeof globalThis.process?.loadEnvFile === 'function') {
+      try {
+        globalThis.process.loadEnvFile();
+        if (env.GITHUB_TOKEN) return env.GITHUB_TOKEN;
+        if (env.VITE_GITHUB_TOKEN) return env.VITE_GITHUB_TOKEN;
+      } catch {
+        // .env file not present or already loaded
+      }
+    }
   }
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     if (import.meta.env.VITE_GITHUB_TOKEN) return import.meta.env.VITE_GITHUB_TOKEN;

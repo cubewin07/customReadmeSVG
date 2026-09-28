@@ -196,6 +196,15 @@ export const DEVELOPER_QUERY = `
               name
               color
             }
+            languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
             defaultBranchRef {
               target {
                 ... on Commit {
@@ -203,6 +212,7 @@ export const DEVELOPER_QUERY = `
                     nodes {
                       message
                       committedDate
+                      abbreviatedOid
                     }
                   }
                 }
@@ -226,6 +236,15 @@ export const DEVELOPER_QUERY = `
             name
             color
           }
+          languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
           defaultBranchRef {
             target {
               ... on Commit {
@@ -233,6 +252,7 @@ export const DEVELOPER_QUERY = `
                   nodes {
                     message
                     committedDate
+                    abbreviatedOid
                   }
                 }
               }
@@ -241,6 +261,7 @@ export const DEVELOPER_QUERY = `
         }
       }
       contributionsCollection {
+        totalCommitContributions
         contributionCalendar {
           totalContributions
           weeks {

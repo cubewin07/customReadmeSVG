@@ -35,31 +35,13 @@ export function renderInfoPanel(data, theme) {
     focus2 = parts.slice(1).join('.').trim();
   }
 
-  // Developer Level & Tier calculation
+  // Developer Activity Badge (honest metric)
+  const annualCommitsVal = data.annualCommits || (data.counts ? data.counts.reduce((a, b) => a + (b || 0), 0) : 0);
   const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 64;
-  const totalReposVal = data.stats?.[0]?.value ?? data.stats?.repos ?? 28;
-  const devLvl = Math.min(99, Math.max(10, Math.floor(totalStarsVal * 0.45 + totalReposVal * 0.35 + (data.streak || 14))));
-  const devTier = devLvl >= 50 ? 'LEGENDARY ARCHITECT' : (devLvl >= 35 ? 'SENIOR ARCHITECT' : 'CORE BUILDER');
+  const devBadgeText = annualCommitsVal > 0 ? `${annualCommitsVal.toLocaleString()} COMMITS / YR` : `${totalStarsVal} TOTAL STARS`;
 
-  // Deterministic 7-character commit SHA
+  // Deterministic commit SHA
   const commitSha = data.commitSha || 'ea77b7c';
-
-  // 14-day Heatmap Mini Strip
-  const recentCounts = Array.isArray(data.counts) && data.counts.length >= 14
-    ? data.counts.slice(-14)
-    : [2, 4, 3, 5, 0, 4, 6, 8, 5, 3, 0, 4, 6, 7];
-
-  const heatColors = isLight
-    ? ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']
-    : ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
-
-  let heatmapSvg = '';
-  for (let hi = 0; hi < 14; hi++) {
-    const cnt = recentCounts[hi] || 0;
-    const lvi = cnt === 0 ? 0 : Math.min(4, Math.ceil(cnt / 2.5));
-    const hx = 398 + hi * 9.5;
-    heatmapSvg += `<rect x="${hx}" y="222" width="7.5" height="7.5" rx="1.8" fill="${heatColors[lvi]}"/>`;
-  }
 
   // Tech tags with branded glowing indicator dots
   const techList = Array.isArray(data.tech) && data.tech.length > 0
@@ -174,9 +156,9 @@ export function renderInfoPanel(data, theme) {
       <!-- Level Icon Shield -->
       <polygon points="17,6 25,10 25,19 17,23 9,19 9,10" fill="${accent}" opacity="0.25"/>
       <polygon points="17,8 23,11 23,18 17,21 11,18 11,11" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <text class="m" x="17" y="17.5" text-anchor="middle" font-size="7.5" font-weight="900" fill="#fff">${devLvl}</text>
+      <text class="m" x="17" y="17.5" text-anchor="middle" font-size="7.5" font-weight="900" fill="#fff">★</text>
       <!-- Rank Label -->
-      <text class="t" x="32" y="18" font-size="11" font-weight="800" letter-spacing="0.8" fill="${title}">${devTier}</text>
+      <text class="t" x="32" y="18" font-size="11.5" font-weight="800" letter-spacing="0.8" fill="${title}">${devBadgeText}</text>
       <circle cx="236" cy="14" r="2.5" fill="#3fb950"/>
     </g>
   </g>
@@ -191,13 +173,13 @@ export function renderInfoPanel(data, theme) {
     <text class="t" x="52" y="156" font-size="11" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
     
     <!-- Git Branch & SHA Badge (Top-Right) -->
-    <g transform="translate(416, 143)">
-      <rect x="0" y="0" width="114" height="18" rx="9" fill="${isLight ? '#eaeef2' : '#141c28'}" stroke="${border}" stroke-width="0.8"/>
+    <g transform="translate(398, 142)">
+      <rect x="0" y="0" width="132" height="20" rx="10" fill="${isLight ? '#eaeef2' : '#141c28'}" stroke="${border}" stroke-width="0.8"/>
       <!-- Git Branch Icon -->
-      <circle cx="10" cy="9" r="2" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <circle cx="17" cy="5.5" r="2" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <path d="M10 9 v-4 M10 7 a2 2 0 0 1 2 -2 h3" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <text class="m" x="24" y="12.5" font-size="8.5" font-weight="600" fill="${subtext}">main@<tspan fill="${accent}">${commitSha}</tspan></text>
+      <circle cx="12" cy="10" r="2.2" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <circle cx="20" cy="6.5" r="2.2" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <path d="M12 10 v-4 M12 8 a2 2 0 0 1 2 -2 h4" fill="none" stroke="${accent}" stroke-width="1.2"/>
+      <text class="m" x="28" y="14" font-size="10.5" font-weight="600" fill="${subtext}">main@<tspan fill="${accent}">${commitSha}</tspan></text>
     </g>
 
     <text class="t" x="52" y="176" font-size="13.5" fill="${text}">${escapeXml(focus1)}</text>
@@ -208,12 +190,7 @@ export function renderInfoPanel(data, theme) {
   <g>
     <rect x="32" y="214" width="508" height="72" rx="10" fill="${cardBg}" stroke="${border}"/>
     <line x1="33" y1="215" x2="539" y2="215" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
-    <text class="t" x="48" y="230" font-size="10.5" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
-    
-    <!-- Mini 14-Day Commit Activity Heatmap Strip -->
-    <text class="m" x="330" y="229" font-size="8" font-weight="700" letter-spacing="0.6" fill="${subtext}">14D ACTIVITY</text>
-    ${heatmapSvg}
-
+    <text class="t" x="48" y="232" font-size="11" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
     ${techPills}
   </g>
 

@@ -152,11 +152,13 @@ export function normalizeDeveloperData(rawData) {
     const historyNodes = r.defaultBranchRef?.target?.history?.nodes || [];
     let sparkline = [2, 4, 3, 5, 4, 7, 6, 8];
     if (historyNodes.length >= 4) {
-      const counts = [1, 2, 2, 3, 2, 4, 3, 5];
-      for (let i = 0; i < Math.min(historyNodes.length, 8); i++) {
-        counts[i] = Math.max(1, Math.min(9, Math.round(1 + (r.stargazerCount % 5) + (i % 3))));
+      sparkline = historyNodes.slice(0, 8).map((node) => {
+        const charCode = node.message ? node.message.charCodeAt(0) : 5;
+        return Math.max(1, Math.min(9, Math.round(2 + (charCode % 7))));
+      });
+      while (sparkline.length < 8) {
+        sparkline.push(5);
       }
-      sparkline = counts;
     }
 
     return {
@@ -169,21 +171,51 @@ export function normalizeDeveloperData(rawData) {
     };
   });
 
-  // 2. Latest Commit Message
+  // 2. Latest Commit Message & Real Commit SHA
   let latestCommit = 'feat: update developer card engine';
+  let commitSha = 'ea77b7c';
   for (const r of [...rawRepos, ...topNodes]) {
     const history = r.defaultBranchRef?.target?.history?.nodes || [];
-    if (history.length > 0 && history[0].message) {
-      latestCommit = history[0].message.split('\n')[0].trim();
-      if (latestCommit.length > 36) {
-        latestCommit = latestCommit.slice(0, 33) + '...';
+    if (history.length > 0) {
+      if (history[0].abbreviatedOid) {
+        commitSha = history[0].abbreviatedOid;
+      }
+      if (history[0].message) {
+        latestCommit = history[0].message.split('\n')[0].trim();
+        if (latestCommit.length > 36) {
+          latestCommit = latestCommit.slice(0, 33) + '...';
+        }
       }
       break;
     }
   }
 
-  // 3. Contribution Calendar -> 60 days of counts and Streak
-  const weeks = user.contributionsCollection?.contributionCalendar?.weeks || [];
+  // 3. Live Tech Arsenal aggregation from repositories & language nodes
+  const langCountMap = new Map();
+  for (const r of [...repos, ...pinnedNodes, ...topNodes]) {
+    if (r.primaryLanguage?.name) {
+      langCountMap.set(r.primaryLanguage.name, (langCountMap.get(r.primaryLanguage.name) || 0) + 10);
+    }
+    const edges = r.languages?.edges || [];
+    for (const { node, size } of edges) {
+      if (node?.name) {
+        langCountMap.set(node.name, (langCountMap.get(node.name) || 0) + (size || 1));
+      }
+    }
+  }
+  const extractedTech = Array.from(langCountMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([tname]) => tname)
+    .slice(0, 6);
+
+  const tech = extractedTech.length > 0
+    ? extractedTech
+    : ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'];
+
+  // 4. Contribution Calendar -> 60 days of counts and Streak
+  const contribs = user.contributionsCollection || {};
+  const annualCommits = contribs.totalCommitContributions || contribs.contributionCalendar?.totalContributions || 0;
+  const weeks = contribs.contributionCalendar?.weeks || [];
   const allDays = [];
   for (const w of weeks) {
     for (const d of (w.contributionDays || [])) {
@@ -228,13 +260,15 @@ export function normalizeDeveloperData(rawData) {
       user.bio || 'Crafting interactive web apps & reactive UI systems',
       'with dynamic, game-inspired SVG animation engines.',
     ],
-    tech: ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'],
+    tech,
     stats: [
       { label: 'REPOSITORIES', value: totalRepos },
       { label: 'TOTAL STARS', value: totalStars },
       { label: 'FOLLOWERS', value: followers },
     ],
     commit: latestCommit,
+    commitSha,
+    annualCommits,
     streak: streak > 0 ? streak : 12,
     repos: normalizedRepos.length > 0 ? normalizedRepos : undefined,
     counts,

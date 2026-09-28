@@ -228,7 +228,7 @@ function renderDonutLayout(data, theme, options = {}) {
         <g transform="translate(0, ${y})">
           <circle cx="5" cy="5" r="4.5" fill="${lang.color}" />
           <text x="16" y="9" class="lang-name">${escapeXml(lang.name)}</text>
-          <text x="260" y="9" text-anchor="end" class="lang-perc">${lang.percentage}% <tspan fill="${theme.secondaryText}">(${formatBytes(lang.size)})</tspan></text>
+          <text x="260" y="9" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
           <rect x="16" y="14" width="244" height="4" rx="2" fill="${theme.barBg}" />
           <rect x="16" y="14" width="${miniBarW}" height="4" rx="2" fill="${lang.color}" />
         </g>`;
@@ -259,7 +259,7 @@ function renderListLayout(data, theme, options = {}) {
   <style>
     .header { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 17px; fill: ${theme.title}; }
     .lang-name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 13px; fill: ${theme.text}; }
-    .lang-perc { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
+    .lang-perc { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 12px; fill: ${theme.title}; }
     .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.title}; }
   </style>
 
@@ -282,8 +282,8 @@ function renderListLayout(data, theme, options = {}) {
         return `
         <g transform="translate(0, ${y})">
           <circle cx="5" cy="5" r="4.5" fill="${lang.color}" />
-          <text x="16" y="9" class="lang-name">${escapeXml(lang.name)}</text>
-          <text x="447" y="9" text-anchor="end" class="lang-perc">${lang.percentage}% <tspan fill="${theme.secondaryText}">(${formatBytes(lang.size)})</tspan></text>
+          <text x="16" y="9" class="lang-name">#${idx + 1} ${escapeXml(lang.name)}</text>
+          <text x="447" y="9" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
           <rect x="0" y="14" width="447" height="6" rx="3" fill="${theme.barBg}" />
           <rect x="0" y="14" width="${barW}" height="6" rx="3" fill="${lang.color}" />
         </g>`;

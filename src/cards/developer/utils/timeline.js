@@ -181,7 +181,7 @@ export function rollCounter(x, y, val, color = '#e6edf3') {
       strip += `<tspan x="6.5" dy="${n === 0 ? 0 : 24}">${n % 10}</tspan>`;
     }
     out += `<svg x="${x + 13 * k}" y="${y}" width="13" height="24" overflow="hidden">
-      <g>
+      <g transform="translate(0, -${tgt})">
         <animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite"
           keyTimes="0;0.0083;0.075;1" values="0 0;0 0;0 -${tgt};0 -${tgt}" calcMode="spline" keySplines="0 0 1 1;0.16 0.8 0.3 1;0 0 1 1"/>
         <text class="t" y="18" text-anchor="middle" font-size="21" font-weight="800" fill="${color}">${strip}</text>

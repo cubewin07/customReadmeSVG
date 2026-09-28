@@ -169,7 +169,7 @@ export function renderActDesk(data, theme = {}) {
 
   return `<!-- ============================= ACT 1: DESK & HOLOGRAM (0s - 12s) ============================= -->
   <g>
-    ${anim('opacity', [[0, 0], [0.5, 1], [11.7, 1], [12.4, 0]])}
+    ${anim('opacity', [[0, 1], [11.7, 1], [12.4, 0]])}
 
     <!-- Character Ambient Glow Aura -->
     <circle cx="${HX}" cy="196" r="160" fill="url(#glowGrad)"/>

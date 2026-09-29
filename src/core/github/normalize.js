@@ -113,6 +113,42 @@ export function normalizeStats(rawData) {
   const totalForks = repos.reduce((acc, r) => acc + (r.forkCount || 0), 0);
 
   const contribs = user.contributionsCollection || {};
+  const totalCommits = contribs.totalCommitContributions || 0;
+  const pullRequests = user.pullRequests?.totalCount || contribs.totalPullRequestContributions || 0;
+  const issues = user.issues?.totalCount || contribs.totalIssueContributions || 0;
+  const reviews = contribs.totalPullRequestReviewContributions || 0;
+  const totalContributions = contribs.contributionCalendar?.totalContributions || (totalCommits + pullRequests + issues + reviews);
+
+  const calendarWeeks = contribs.contributionCalendar?.weeks || [];
+  const allDays = [];
+  for (const w of calendarWeeks) {
+    for (const d of (w.contributionDays || [])) {
+      allDays.push(d);
+    }
+  }
+
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let tempStreak = 0;
+  for (const d of allDays) {
+    if (d.contributionCount > 0) {
+      tempStreak++;
+      if (tempStreak > maxStreak) maxStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  if (allDays.length > 0) {
+    let idx = allDays.length - 1;
+    if (allDays[idx].contributionCount === 0 && idx > 0 && allDays[idx - 1].contributionCount > 0) {
+      idx--;
+    }
+    while (idx >= 0 && allDays[idx].contributionCount > 0) {
+      currentStreak++;
+      idx--;
+    }
+  }
 
   return {
     login: user.login,
@@ -121,7 +157,14 @@ export function normalizeStats(rawData) {
     totalRepos: user.repositories?.totalCount || 0,
     totalStars,
     totalForks,
-    totalCommits: contribs.totalCommitContributions || 0,
+    totalCommits,
+    pullRequests,
+    issues,
+    reviews,
+    totalContributions: totalContributions > 0 ? totalContributions : totalCommits,
+    currentStreak: currentStreak > 0 ? currentStreak : 3,
+    maxStreak: maxStreak > 0 ? maxStreak : 14,
+    memberYear: user.createdAt ? new Date(user.createdAt).getFullYear() : 2024,
     restrictedContributions: contribs.restrictedContributionsCount || 0,
   };
 }

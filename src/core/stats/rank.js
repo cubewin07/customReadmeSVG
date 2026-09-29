@@ -3,29 +3,52 @@
  * Evaluates commits, stars, forks, repos, and followers.
  */
 
-export function calculateRank({ totalCommits = 0, totalStars = 0, totalForks = 0, totalRepos = 0, followers = 0 }) {
+export function calculateRank({
+  totalCommits = 0,
+  totalStars = 0,
+  totalForks = 0,
+  totalRepos = 0,
+  followers = 0,
+  pullRequests = 0,
+  totalContributions = 0,
+}) {
   const COMMITS_SCALE = 1000;
   const STARS_SCALE = 100;
   const FORKS_SCALE = 35;
   const FOLLOWERS_SCALE = 50;
   const REPOS_SCALE = 30;
+  const PRS_SCALE = 20;
 
+  const effectiveContribs = Math.max(totalCommits, totalContributions);
   // Non-linear exponential CDF score per metric (0 to 100)
-  const commitsScore = 100 * (1 - Math.exp(-totalCommits / COMMITS_SCALE));
+  const commitsScore = 100 * (1 - Math.exp(-effectiveContribs / COMMITS_SCALE));
+  const prsScore = 100 * (1 - Math.exp(-pullRequests / PRS_SCALE));
   const starsScore = 100 * (1 - Math.exp(-totalStars / STARS_SCALE));
   const forksScore = 100 * (1 - Math.exp(-totalForks / FORKS_SCALE));
   const followersScore = 100 * (1 - Math.exp(-followers / FOLLOWERS_SCALE));
   const reposScore = 100 * (1 - Math.exp(-totalRepos / REPOS_SCALE));
 
   // Weighted composite score out of 100
-  const score = Math.min(
-    100,
-    starsScore * 0.35 +
-    commitsScore * 0.25 +
-    forksScore * 0.15 +
-    followersScore * 0.15 +
-    reposScore * 0.10
-  );
+  let score;
+  if (pullRequests > 0 || totalContributions > 0) {
+    score = Math.min(
+      100,
+      commitsScore * 0.40 +
+      prsScore * 0.25 +
+      starsScore * 0.15 +
+      reposScore * 0.15 +
+      (followersScore + forksScore) * 0.05
+    );
+  } else {
+    score = Math.min(
+      100,
+      starsScore * 0.35 +
+      commitsScore * 0.25 +
+      forksScore * 0.15 +
+      followersScore * 0.15 +
+      reposScore * 0.10
+    );
+  }
 
   const roundedScore = Math.round(score * 10) / 10;
 

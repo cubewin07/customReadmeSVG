@@ -137,6 +137,12 @@ export const STATS_QUERY = `
       followers {
         totalCount
       }
+      pullRequests(states: [OPEN, CLOSED, MERGED]) {
+        totalCount
+      }
+      issues(states: [OPEN, CLOSED]) {
+        totalCount
+      }
       repositories(ownerAffiliations: [OWNER], privacy: PUBLIC, first: 100) {
         totalCount
         nodes {
@@ -146,7 +152,20 @@ export const STATS_QUERY = `
       }
       contributionsCollection(from: $from, to: $to) {
         totalCommitContributions
+        totalIssueContributions
+        totalPullRequestContributions
+        totalPullRequestReviewContributions
         restrictedContributionsCount
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+              weekday
+            }
+          }
+        }
       }
     }
     rateLimit {

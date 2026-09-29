@@ -53,4 +53,19 @@ export const icons = {
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="${color}" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M4.72 3.22a.75.75 0 011.06 1.06L2.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L.47 8.53a.75.75 0 010-1.06l4.25-4.25zm6.56 0a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L13.94 8l-3.72-3.72a.75.75 0 010-1.06z"></path>
     </svg>`,
+
+  pullRequest: (color = 'currentColor') => `
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M7.177 3.073L9.573.677A.25.25 0 0110 .854v4.792a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354zM3.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zM11 2.5h-1V4h1a1 1 0 011 1v5.628a2.251 2.251 0 101.5 0V5A2.5 2.5 0 0011 2.5zm1 10.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM3.75 12a.75.75 0 100 1.5.75.75 0 000-1.5z"></path>
+    </svg>`,
+
+  flame: (color = '#f59e0b') => `
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 0c-.23 0-.45.09-.61.26-.74.78-1.5 1.76-2.17 2.87C4.1 4.97 3.5 7.02 3.5 9.07c0 2.53 1.96 4.93 4.5 4.93s4.5-2.4 4.5-4.93c0-1.63-.5-3.32-1.32-4.9-.74-1.42-1.74-2.73-2.61-3.7A.868.868 0 008 0zm0 3.26c.71.86 1.48 1.93 2.03 3.03.62 1.25 1 2.53 1 3.71 0 1.78-1.35 3.43-3.03 3.43-1.68 0-3.03-1.65-3.03-3.43 0-1.65.5-3.34 1.34-4.83.52-.92 1.15-1.91 1.69-2.91z"></path>
+    </svg>`,
+
+  zap: (color = '#00f2fe') => `
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M7.75 0a.75.75 0 01.68.44l3.5 7.5a.75.75 0 01-.68 1.06H7.75l1.5 6a.75.75 0 01-1.36.56l-5.5-8.5a.75.75 0 01.63-1.16h3.5L5.02.44A.75.75 0 015.75 0h2z"></path>
+    </svg>`,
 };

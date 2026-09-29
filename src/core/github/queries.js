@@ -169,6 +169,7 @@ export const DEVELOPER_QUERY = `
     user(login: $login) {
       name
       login
+      createdAt
       bio
       location
       company

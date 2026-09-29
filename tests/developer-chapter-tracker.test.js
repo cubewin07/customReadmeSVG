@@ -17,4 +17,9 @@ test('developerCard renders unified 3-act chapter tracker instead of disconnecte
   assert.ok(svg.includes('ACT 03 // BUILD'), 'Must include Act 3 Build tracker title');
   // Disconnected CLI prompt replaced
   assert.ok(!svg.includes('> ship_it.sh'), 'Old disconnected > ship_it.sh prompt should be removed');
+
+  // Capsule width must be at least 480 to contain longest titles without overflowing
+  assert.ok(svg.includes('width="484"'), 'HUD glass capsule width must be at least 484 to contain titles fully');
+  // Redundant scrubber translation overlapping pip 1 removed
+  assert.ok(!svg.includes('[12, 24, 0]'), 'Scrubber translation keyframe overlapping Pip 1 must be removed');
 });

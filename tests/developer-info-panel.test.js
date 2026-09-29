@@ -18,4 +18,8 @@ test('renderInfoPanel removes redundant 14D strip and uses legible font sizes', 
   assert.ok(!panel.includes('font-size="8.5"'), 'Small 8.5px text should be scaled up');
   // Arbitrary LEGENDARY ARCHITECT formula replaced with honest activity metric
   assert.ok(!panel.includes('LEGENDARY ARCHITECT'));
+  // Personalized member since tenure badge rendered
+  assert.ok(panel.includes('MEMBER SINCE'), 'Should render personalized MEMBER SINCE badge');
+  assert.ok(panel.includes('2024'), 'Should render member joined year');
+  assert.ok(!panel.includes(':checkered_flag:'), 'Should never display unrendered raw slack emoji shortcode');
 });

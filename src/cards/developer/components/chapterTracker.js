@@ -1,4 +1,4 @@
-import { anim, pulse, tr } from '../utils/timeline.js';
+import { anim, pulse } from '../utils/timeline.js';
 
 /**
  * Renders the unified 3-act Chapter Tracker HUD at the top of the scene (24s timeline).
@@ -24,19 +24,17 @@ export function renderChapterTracker(profile, theme = {}) {
   return `<!-- ============================= UNIFIED CHAPTER TRACKER HUD ============================= -->
   <g transform="translate(20, 16)">
     <!-- HUD Background Glass Capsule -->
-    <rect x="0" y="0" width="370" height="28" rx="8" fill="#090e17" fill-opacity="0.92" stroke="#253347" stroke-width="1.2"/>
-    <line x1="2" y1="1" x2="368" y2="1" stroke="#fff" stroke-opacity="0.2"/>
+    <rect x="0" y="0" width="484" height="28" rx="8" fill="#090e17" fill-opacity="0.92" stroke="#253347" stroke-width="1.2"/>
+    <line x1="2" y1="1" x2="482" y2="1" stroke="#fff" stroke-opacity="0.2"/>
 
     <!-- Progress Track & Pips -->
     <g transform="translate(14, 14)">
       <!-- Track Background Line -->
       <line x1="0" y1="0" x2="48" y2="0" stroke="#1d283a" stroke-width="3" stroke-linecap="round"/>
-      <!-- Active Progress Bar Scrubber -->
-      <rect x="0" y="-1.5" width="48" height="3" rx="1.5" fill="none"/>
-      <g>
-        ${tr([[0, 0, 0], [12, 24, 0], [18, 40, 0], [24, 48, 0]])}
-        <circle cx="0" cy="0" r="2.8" fill="${accent}"/>
-      </g>
+      <!-- Active Progress Bar Fill -->
+      <line x1="0" y1="0" x2="48" y2="0" stroke="${accent}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="48" stroke-dashoffset="48">
+        ${anim('stroke-dashoffset', [[0, 48], [11.9, 48], [12.1, 24], [17.9, 24], [18.1, 0], [24, 0]])}
+      </line>
 
       <!-- Pip 1: Act 1 (0s-12s) -->
       <circle cx="0" cy="0" r="3.5" fill="#182333" stroke="${accent}" stroke-width="1.2"/>

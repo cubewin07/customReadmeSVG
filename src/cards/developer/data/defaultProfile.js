@@ -7,7 +7,9 @@ export const DEFAULT_DEVELOPER_PROFILE = {
   login: 'cubewin07',
   handle: '@cubewin07',
   role: 'Full-Stack Engineer & Creative Coder',
-  status: 'Building cool things 🚀',
+  createdAt: '2024-11-21T13:12:05Z',
+  joinedYear: 2024,
+  status: 'MEMBER SINCE 2024',
   focus: [
     'Crafting interactive web apps & reactive UI systems',
     'with dynamic, game-inspired SVG animation engines.',

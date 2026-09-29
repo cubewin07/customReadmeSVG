@@ -18,9 +18,13 @@ test('statsCard renders grade and score clearly in SVG across layouts', () => {
   
   // Ring layout
   const ringSvg = statsCard.renderSvg(data, themes.dark, { layout: 'ring' });
-  assert.ok(ringSvg.includes('Rank'));
+  assert.ok(ringSvg.includes('Overall Rank'));
   assert.ok(!ringSvg.includes('Top 49.2%')); // Contradictory inverted label removed
   assert.ok(ringSvg.includes('Score'));
+  // Top bar badge replaced duplicate rank with interesting activity metric
+  assert.ok(ringSvg.includes('⚡ 500 Commits'), 'Top bar badge should show dynamic commits metric');
+  assert.ok(!ringSvg.includes('🏆 Rank'), 'Duplicate Rank in top bar badge should be removed');
+  assert.ok(ringSvg.includes('height="195"'), 'Layout height should be tightened from 215 to 195');
 
   // Bars layout
   const barsSvg = statsCard.renderSvg(data, themes.dark, { layout: 'bars' });

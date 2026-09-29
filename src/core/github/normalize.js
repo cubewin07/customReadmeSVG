@@ -250,12 +250,16 @@ export function normalizeDeveloperData(rawData) {
     }
   }
 
+  const createdAtYear = user.createdAt ? new Date(user.createdAt).getFullYear() : 2024;
+
   return {
     name: user.name || user.login,
     login: user.login,
     handle: `@${user.login}`,
+    createdAt: user.createdAt || null,
+    joinedYear: createdAtYear,
     role: user.bio ? user.bio.split('.')[0] : 'Full-Stack Engineer & Creative Coder',
-    status: user.status?.message ? `${user.status.emoji || '🟢'} ${user.status.message}` : 'Building cool things 🚀',
+    status: user.status?.message ? user.status.message.replace(/^:[a-z0-9_+-]+:\s*/, '') : `MEMBER SINCE ${createdAtYear}`,
     focus: [
       user.bio || 'Crafting interactive web apps & reactive UI systems',
       'with dynamic, game-inspired SVG animation engines.',

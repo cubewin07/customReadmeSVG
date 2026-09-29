@@ -21,7 +21,10 @@ export function renderInfoPanel(data, theme) {
   const name = escapeXml(data.name || 'Le Tan Thang');
   const handle = escapeXml(data.handle || '@cubewin07');
   const role = escapeXml(data.role || 'Full-Stack Engineer & Creative Coder');
-  const status = escapeXml(data.status || 'Building cool things 🚀');
+  const joinedYear = data.joinedYear || (data.createdAt ? new Date(data.createdAt).getFullYear() : 2024);
+  const customStatus = data.customStatus
+    ? escapeXml(data.customStatus.replace(/^:[a-z0-9_+-]+:\s*/, ''))
+    : null;
 
   // Focus lines (split or fallback)
   let focus1 = 'Crafting interactive web apps & reactive UI systems';
@@ -134,7 +137,7 @@ export function renderInfoPanel(data, theme) {
 
   <!-- Status & Rank Row (y=100) -->
   <g>
-    <!-- Pulsating Radar Status Pill -->
+    <!-- Personalized Member Status Pill -->
     <rect x="32" y="100" width="248" height="28" rx="14" fill="${isLight ? '#ebf3ff' : '#0f1f38'}" stroke="${isLight ? '#b8d5ff' : '#1f3b66'}"/>
     <!-- Radar Waves -->
     <circle cx="48" cy="114" r="4.5" fill="#3fb950"/>
@@ -146,7 +149,9 @@ export function renderInfoPanel(data, theme) {
       <animate attributeName="r" values="4.5;18" dur="2s" begin="0.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.4;0" dur="2s" begin="0.6s" repeatCount="indefinite"/>
     </circle>
-    <text class="t" x="62" y="119" font-size="12" font-weight="700" fill="${isLight ? '#0969da' : '#dbe6f5'}">${status}</text>
+    <text class="t" x="62" y="119" font-size="11.5" font-weight="800" letter-spacing="0.8" fill="${isLight ? '#0969da' : '#dbe6f5'}">
+      ${customStatus ? customStatus : `<tspan fill="${subtext}" font-weight="700">MEMBER SINCE </tspan><tspan fill="${accent}" font-weight="800">${joinedYear}</tspan>`}
+    </text>
 
     <!-- Developer Rank & Tier Badge -->
     <g transform="translate(290, 100)">

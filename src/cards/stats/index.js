@@ -73,7 +73,11 @@ function renderV1RingSvg(data, theme, options = {}) {
   ];
 
   const width = 495;
-  const height = 215;
+  const height = 195;
+
+  const topBadgeText = totalCommits > 0
+    ? `⚡ ${totalCommits.toLocaleString()} Commits`
+    : (totalStars > 0 ? `⭐ ${totalStars.toLocaleString()} Stars` : `📦 ${totalRepos} Repos`);
 
   // Ring gauge calculation
   const circleR = 40;
@@ -90,10 +94,10 @@ function renderV1RingSvg(data, theme, options = {}) {
   <style>
     .header { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 17px; fill: ${theme.title}; }
     .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; fill: ${theme.secondaryText}; }
-    .stat-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 13px; fill: ${theme.text}; }
-    .rank-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 11px; fill: ${theme.secondaryText}; text-transform: uppercase; letter-spacing: 0.5px; }
-    .rank-grade { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 26px; fill: ${theme.title}; }
-    .rank-sub { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 10px; fill: ${theme.accent || theme.title}; }
+    .stat-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 13.5px; fill: ${theme.title}; }
+    .rank-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 11px; fill: ${theme.secondaryText}; text-transform: uppercase; letter-spacing: 0.6px; }
+    .rank-grade { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 900; font-size: 28px; fill: ${theme.title}; }
+    .rank-sub { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 11px; fill: ${theme.accent || theme.title}; }
   </style>
 
   <!-- Background -->
@@ -101,7 +105,7 @@ function renderV1RingSvg(data, theme, options = {}) {
   
   ${renderCardHeader({
     title: `${name}'s GitHub Stats`,
-    badgeText: `🏆 Rank ${rank.level}`,
+    badgeText: topBadgeText,
     width,
     theme,
   })}
@@ -110,31 +114,34 @@ function renderV1RingSvg(data, theme, options = {}) {
     <line x1="0" y1="14" x2="${width - 50}" y2="14" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
 
     <!-- Left Column: Metrics -->
-    <g transform="translate(0, 32)">
+    <g transform="translate(0, 30)">
       ${statsList.map((stat, idx) => `
-        <g transform="translate(0, ${idx * 26})">
+        <g transform="translate(0, ${idx * 25})">
           <g transform="translate(0, -10)">${stat.icon}</g>
           <text x="24" y="0" class="stat-lbl">${stat.label}:</text>
-          <text x="260" y="0" text-anchor="end" class="stat-val">${stat.value}</text>
+          <text x="200" y="0" text-anchor="end" class="stat-val">${stat.value}</text>
         </g>
       `).join('')}
     </g>
 
+    <!-- Subtle Column Divider -->
+    <line x1="222" y1="24" x2="222" y2="136" stroke="${theme.subtleBorder || theme.border}" stroke-dasharray="3 4" opacity="0.45"/>
+
     <!-- Right Column: Rank Circle Gauge -->
-    <g transform="translate(370, 85)">
+    <g transform="translate(336, 75)">
       <!-- Outer background circle -->
       <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${theme.barBg}" stroke-width="6"/>
       <!-- Progress ring circle -->
-      <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${theme.title}" stroke-width="6"
+      <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${theme.accent || theme.title}" stroke-width="6"
               stroke-dasharray="${circleC.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}"
               stroke-linecap="round" transform="rotate(-90)" />
       
       <!-- Rank Grade Text inside Circle -->
-      <text x="0" y="8" text-anchor="middle" class="rank-grade">${rank.level}</text>
+      <text x="0" y="9" text-anchor="middle" class="rank-grade">${rank.level}</text>
       
       <!-- Rank Labels below Circle -->
-      <text x="0" y="58" text-anchor="middle" class="rank-title">Overall Rank</text>
-      <text x="0" y="72" text-anchor="middle" class="rank-sub">Score ${rank.score}/100</text>
+      <text x="0" y="56" text-anchor="middle" class="rank-title">Overall Rank</text>
+      <text x="0" y="70" text-anchor="middle" class="rank-sub">Score ${rank.score}/100</text>
     </g>
   </g>
 </svg>`;
@@ -376,7 +383,7 @@ function renderV1CompactSvg(data, theme, options = {}) {
   const rank = calculateRank({ totalCommits, totalStars, totalForks, totalRepos, followers });
 
   const width = 495;
-  const height = 125;
+  const height = 116;
 
   const items = [
     { icon: icons.star(theme.iconColor), value: totalStars.toLocaleString() },
@@ -396,7 +403,7 @@ function renderV1CompactSvg(data, theme, options = {}) {
   <style>
     .header { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 16px; fill: ${theme.title}; }
     .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 11px; fill: ${theme.title}; }
-    .chip-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 12px; fill: ${theme.title}; }
+    .chip-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 13px; fill: ${theme.title}; }
   </style>
 
   <!-- Background -->
@@ -409,16 +416,16 @@ function renderV1CompactSvg(data, theme, options = {}) {
     theme,
   })}
 
-  <!-- Inline Metric Chips Row -->
-  <g transform="translate(24, 58)">
+  <!-- Inline Metric Chips Row (Symmetrically Distributed) -->
+  <g transform="translate(24, 56)">
     ${items.map((it, idx) => {
-      const x = idx * 90;
+      const x = idx * 91;
       return `
       <g transform="translate(${x}, 0)">
-        <rect x="0" y="0" width="82" height="34" rx="6" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-        <g transform="translate(10, 12)">
-          <g transform="translate(0, -9)">${it.icon}</g>
-          <text x="18" y="0" class="chip-val">${it.value}</text>
+        <rect x="0" y="0" width="83" height="36" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
+        <g transform="translate(12, 14)">
+          <g transform="translate(0, -8)">${it.icon}</g>
+          <text x="22" y="5" class="chip-val">${it.value}</text>
         </g>
       </g>`;
     }).join('')}

@@ -61,7 +61,8 @@ export const developerCard = {
       name: options.name || data?.name || (options.username && options.username !== DEFAULT_DEVELOPER_PROFILE.login ? options.username : DEFAULT_DEVELOPER_PROFILE.name),
       handle: data?.handle || (options.username ? `@${options.username}` : DEFAULT_DEVELOPER_PROFILE.handle),
       role: options.role || data?.role || DEFAULT_DEVELOPER_PROFILE.role,
-      status: options.status || data?.status || DEFAULT_DEVELOPER_PROFILE.status,
+      joinedYear: data?.joinedYear || (data?.createdAt ? new Date(data.createdAt).getFullYear() : DEFAULT_DEVELOPER_PROFILE.joinedYear),
+      customStatus: options.status || null,
       focus: options.bio ? [options.bio] : (data?.focus || DEFAULT_DEVELOPER_PROFILE.focus),
     };
 

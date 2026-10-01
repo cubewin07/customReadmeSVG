@@ -417,7 +417,6 @@ function renderV1BarsSvg(data, theme, options = {}) {
           <text x="447" y="0" text-anchor="end" class="stat-val">${m.value}</text>
         </g>`;
       }).join('')}
-    </g>
   </g>
 </svg>`;
 }

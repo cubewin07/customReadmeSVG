@@ -162,27 +162,45 @@ export function normalizeProfile(rawData) {
  * @returns {object}
  */
 export function normalizeLanguages(rawData) {
-  if (!rawData || !rawData.user) return { languages: [], totalSize: 0 };
+  if (!rawData || !rawData.user) return { languages: [], totalSize: 0, totalRepos: 0, totalLanguages: 0 };
   const repos = rawData.user.repositories?.nodes || [];
 
   const langMap = new Map();
   let totalSize = 0;
+  let totalRecentSize = 0;
+  const now = Date.now();
+  const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
   for (const repo of repos) {
+    const pushedTime = repo.pushedAt ? new Date(repo.pushedAt).getTime() : 0;
+    const monthsAgo = pushedTime ? Math.max(0, Math.floor((now - pushedTime) / (30 * 24 * 60 * 60 * 1000))) : 12;
+    const isRecent = pushedTime && (now - pushedTime <= ONE_YEAR_MS);
+
     const edges = repo.languages?.edges || [];
     for (const { size, node } of edges) {
       if (!node || !node.name) continue;
       const { name, color } = node;
       totalSize += size;
+      if (isRecent) totalRecentSize += size;
 
       if (langMap.has(name)) {
         const existing = langMap.get(name);
         existing.size += size;
+        existing.repoCount += 1;
+        if (monthsAgo < existing.lastUsedMonthsAgo) {
+          existing.lastUsedMonthsAgo = monthsAgo;
+        }
+        if (isRecent) {
+          existing.recentSize += size;
+        }
       } else {
         langMap.set(name, {
           name,
           color: color || '#858585',
           size,
+          recentSize: isRecent ? size : 0,
+          repoCount: 1,
+          lastUsedMonthsAgo: monthsAgo,
         });
       }
     }
@@ -192,12 +210,16 @@ export function normalizeLanguages(rawData) {
     .map(lang => ({
       ...lang,
       percentage: totalSize > 0 ? parseFloat(((lang.size / totalSize) * 100).toFixed(2)) : 0,
+      recentShare: totalRecentSize > 0
+        ? parseFloat(((lang.recentSize / totalRecentSize) * 100).toFixed(2))
+        : (totalSize > 0 ? parseFloat(((lang.size / totalSize) * 100).toFixed(2)) : 0),
     }))
     .sort((a, b) => b.size - a.size);
 
   return {
     languages,
     totalSize,
+    totalRepos: repos.length,
     totalLanguages: languages.length,
   };
 }

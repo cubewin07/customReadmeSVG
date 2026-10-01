@@ -116,6 +116,7 @@ export const LANGUAGES_QUERY = `
         }
         nodes {
           name
+          pushedAt
           languages(first: 20, orderBy: { field: SIZE, direction: DESC }) {
             edges {
               size

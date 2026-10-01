@@ -1,4 +1,4 @@
-import { anim, pulse } from '../utils/timeline.js';
+import { anim, pulse, sl, sla } from '../utils/timeline.js';
 
 /**
  * Renders the unified 3-act Chapter Tracker HUD at the top of the scene (24s timeline).
@@ -78,6 +78,27 @@ export function renderChapterTracker(profile, theme = {}) {
       <text class="m" x="78" y="18" font-size="10.5" font-weight="800" letter-spacing="0.6" fill="#e6edf3">
         <tspan fill="#a78bfa">ACT 03 // BUILD</tspan> • 7-WEEK VOXEL CITY (${totalCommits} COMMITS)
       </text>
+    </g>
+
+    <!-- HUD Streak Flame Badge (Right Side, Inside HUD) -->
+    <g transform="translate(470, 14)">
+      <g transform="translate(0, 0)">
+        ${sl('scale', ['1 1', '1.07 .93', '.95 1.06', '1 1'], 0.9)}
+        <!-- Outer Flame -->
+        <path d="M0 -9 C2.2 -5.5 6.5 -2.8 5.8 2.1 C5.1 6.3 1.5 8.4 0 8.4 C-2.1 8.4 -5.6 6.3 -5.6 2.1 C-5.6 -1.4 -2.8 -2.8 -2.1 -6.3 C-0.7 -4.9 0 -7 0 -9Z" fill="#ff8a3d"/>
+        <!-- Inner Flame Core -->
+        <path d="M0 -2.1 C1.4 0 3.5 1.4 2.8 4.2 C2.1 6.3 0.7 7 0 7 C-1.4 7 -2.8 6.3 -2.8 4.2 C-2.8 2.1 -0.7 1.4 0 -2.1Z" fill="#ffd76a"/>
+      </g>
+      <!-- Floating Embers -->
+      <circle cx="0" cy="-10" r="0.8" fill="#ffd76a">
+        ${sl('translate', ['0 0', '1.5 -7'], 1.6)}
+        ${sla('opacity', ['1', '0'], 1.6)}
+      </circle>
+      <circle cx="-2" cy="-9" r="0.6" fill="#ff8a3d">
+        ${sl('translate', ['0 0', '-2 -6'], 1.4, 0.4)}
+        ${sla('opacity', ['1', '0'], 1.4, 0.4)}
+      </circle>
+      <text class="t" x="-10" y="3.5" font-size="10.5" font-weight="700" fill="#ffb86b" text-anchor="end">${streak}-day streak</text>
     </g>
   </g>`;
 }

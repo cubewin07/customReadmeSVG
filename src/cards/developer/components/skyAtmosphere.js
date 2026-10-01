@@ -137,26 +137,5 @@ export function renderSkyAtmosphere(streak = 14) {
       ${sl('translate', ['0 0', '-12 -16', '0 0'], 4.1, 1.2)}
       ${sla('opacity', ['0.2', '0.8', '0.2'], 4.1, 1.2)}
     </circle>
-  </g>
-
-  <!-- HUD: Streak Flame Badge with Rising Ember Particles -->
-  <g transform="translate(486,26)">
-    <g>
-      ${sl('scale', ['1 1', '1.07 .93', '.95 1.06', '1 1'], 0.9)}
-      <!-- Outer Flame -->
-      <path d="M0 -13 C3 -8 9 -4 8 3 C7 9 2 12 0 12 C-3 12 -8 9 -8 3 C-8 -2 -4 -4 -3 -9 C-1 -7 0 -10 0 -13Z" fill="#ff8a3d"/>
-      <!-- Inner Flame Core -->
-      <path d="M0 -3 C2 0 5 2 4 6 C3 9 1 10 0 10 C-2 10 -4 9 -4 6 C-4 3 -1 2 0 -3Z" fill="#ffd76a"/>
-    </g>
-    <!-- Floating Embers -->
-    <circle cx="0" cy="-14" r="0.9" fill="#ffd76a">
-      ${sl('translate', ['0 0', '2 -10'], 1.6)}
-      ${sla('opacity', ['1', '0'], 1.6)}
-    </circle>
-    <circle cx="-3" cy="-12" r="0.7" fill="#ff8a3d">
-      ${sl('translate', ['0 0', '-3 -8'], 1.4, 0.4)}
-      ${sla('opacity', ['1', '0'], 1.4, 0.4)}
-    </circle>
-    <text class="t" x="14" y="4" font-size="12" font-weight="700" fill="#ffb86b">${streak}-day streak</text>
   </g>`;
 }

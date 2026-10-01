@@ -25,8 +25,8 @@ export const BRAND_COLORS = {
 /**
  * Renders SVG <defs> containing clip paths, gradients, 3D voxel cubes, and mini hero sprite.
  */
-export function renderSharedDefs(theme) {
-  const accent = theme.accent || '#58a6ff';
+export function renderSharedDefs(theme, sceneAccent = null) {
+  const accent = sceneAccent || theme.accent || '#58a6ff';
   const titleColor = theme.title || '#6ea8fe';
   const successColor = theme.success || '#3fb950';
 
@@ -59,6 +59,10 @@ export function renderSharedDefs(theme) {
     <style>
       .t { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
       .m { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+      @media (max-width: 700px) {
+        .dev-card-root { width: 100%; height: auto; }
+        .dev-hide-sm { display: none; }
+      }
     </style>
 
     <!-- Card & Scene Clipping -->

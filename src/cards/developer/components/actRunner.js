@@ -27,15 +27,14 @@ function lvl(count) {
 export function renderActRunner(counts = []) {
   const SPEED = 120;
   const X0 = 150;
-  const N = 58;
+  const N = 38;
 
   // Use provided counts or fallback
   const cData = counts && counts.length >= N
     ? counts
     : [
         2, 4, 3, 5, 0, 4, 6, 8, 5, 3, 0, 4, 6, 5, 9, 3, 2, 6, 4, 0,
-        5, 7, 6, 8, 4, 0, 5, 7, 6, 9, 4, 3, 7, 5, 0, 6, 8, 7, 4, 5,
-        3, 6, 0, 5, 7, 8, 6, 4, 0, 5, 6, 8, 7, 9, 5, 4, 6, 8,
+        5, 7, 6, 8, 4, 0, 5, 7, 6, 9, 4, 3, 7, 5, 0, 6, 8, 7,
       ];
 
   function getTop(c) {
@@ -48,38 +47,29 @@ export function renderActRunner(counts = []) {
 
   // Layer 1: Far Parallax Cyber Skyline with Window Lights & Antenna Blinkers
   const farSkyline = [
-    { x: 0, w: 28, h: 65, antenna: true }, { x: 36, w: 34, h: 95, antenna: false },
-    { x: 80, w: 24, h: 70, antenna: true }, { x: 114, w: 38, h: 115, antenna: false },
-    { x: 162, w: 26, h: 60, antenna: false }, { x: 198, w: 32, h: 88, antenna: true },
-    { x: 240, w: 25, h: 120, antenna: true }, { x: 275, w: 35, h: 72, antenna: false },
-    { x: 320, w: 28, h: 100, antenna: true }, { x: 358, w: 26, h: 80, antenna: false },
-    { x: 394, w: 36, h: 110, antenna: false }, { x: 440, w: 24, h: 65, antenna: true },
-    { x: 474, w: 32, h: 98, antenna: false }, { x: 516, w: 28, h: 75, antenna: true },
-    { x: 554, w: 34, h: 125, antenna: true }, { x: 598, w: 25, h: 70, antenna: false },
-    { x: 633, w: 35, h: 90, antenna: false }, { x: 678, w: 28, h: 85, antenna: true },
-    { x: 716, w: 32, h: 105, antenna: false }, { x: 758, w: 26, h: 75, antenna: false },
-    { x: 794, w: 36, h: 115, antenna: true }, { x: 840, w: 25, h: 80, antenna: false },
-    { x: 875, w: 35, h: 95, antenna: true }, { x: 920, w: 30, h: 120, antenna: false },
-    { x: 960, w: 26, h: 70, antenna: true },
+    { x: 0, w: 70, h: 85, antenna: true },
+    { x: 90, w: 85, h: 120, antenna: false },
+    { x: 195, w: 75, h: 95, antenna: true },
+    { x: 290, w: 90, h: 130, antenna: false },
+    { x: 400, w: 80, h: 90, antenna: true },
+    { x: 500, w: 90, h: 125, antenna: false },
+    { x: 610, w: 95, h: 100, antenna: true },
   ];
 
   let farSkylineSvg = '';
+  let antennaLightsSvg = '';
   for (const b of farSkyline) {
     const yTop = 300 - b.h;
     farSkylineSvg += `
       <rect x="${b.x}" y="${yTop}" width="${b.w}" height="${b.h + 70}" fill="#080e1a" opacity="0.85"/>
-      <!-- Window Matrix Grid -->
       <line x1="${b.x + 6}" y1="${yTop + 14}" x2="${b.x + b.w - 6}" y2="${yTop + 14}" stroke="#58a6ff" stroke-opacity="0.3" stroke-dasharray="3 4"/>
       <line x1="${b.x + 6}" y1="${yTop + 24}" x2="${b.x + b.w - 6}" y2="${yTop + 24}" stroke="#ffd76a" stroke-opacity="0.25" stroke-dasharray="3 4"/>
-      <line x1="${b.x + 6}" y1="${yTop + 34}" x2="${b.x + b.w - 6}" y2="${yTop + 34}" stroke="#58a6ff" stroke-opacity="0.2" stroke-dasharray="3 4"/>
-      ${b.antenna ? `
-        <!-- Radio Tower Antenna & Blinking Red Beacon -->
-        <line x1="${b.x + b.w / 2}" y1="${yTop}" x2="${b.x + b.w / 2}" y2="${yTop - 12}" stroke="#2a3547" stroke-width="1.2"/>
-        <circle cx="${b.x + b.w / 2}" cy="${yTop - 12}" r="1.5" fill="#ff5f56">
-          <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite"/>
-        </circle>
-      ` : ''}`;
+      ${b.antenna ? `<line x1="${b.x + b.w / 2}" y1="${yTop}" x2="${b.x + b.w / 2}" y2="${yTop - 12}" stroke="#2a3547" stroke-width="1.2"/>` : ''}`;
+    if (b.antenna) {
+      antennaLightsSvg += `<circle cx="${b.x + b.w / 2}" cy="${yTop - 12}" r="1.5" fill="#ff5f56"/>`;
+    }
   }
+  farSkylineSvg += `<g><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite"/>${antennaLightsSvg}</g>`;
 
   // Layer 2: Midground Skybridge with Speeding Data Packet
   let skybridgeSvg = `
@@ -95,7 +85,7 @@ export function renderActRunner(counts = []) {
 
   // Layer 3: Beveled Contribution Terrain Pillars
   let terrainSvg = '';
-  const candidateStarIndices = [9, 13, 17, 21, 25, 29, 33];
+  const candidateStarIndices = [9, 17, 25, 33];
   const starsAt = candidateStarIndices.filter(c => c < N && lvl(cData[c]) > 0);
 
   for (let c = 0; c < N; c++) {
@@ -103,16 +93,10 @@ export function renderActRunner(counts = []) {
     if (lv === 0) continue; // Gap/pit!
     const y = getTop(c);
     const col = CUBE_COLORS[lv];
-    terrainSvg += `
-      <!-- Pillar Base & Bevel -->
-      <rect x="${c * 24}" y="${y}" width="23" height="${SH - y}" fill="${shade(col, 0.45)}"/>
-      <!-- Vertical Activity Seam Lines -->
-      <line x1="${c * 24 + 11.5}" y1="${y + 5}" x2="${c * 24 + 11.5}" y2="${SH}" stroke="#000" stroke-opacity="0.25"/>
-      <!-- Side Shadow Edge -->
-      <rect x="${c * 24 + 20}" y="${y}" width="3" height="${SH - y}" fill="#000" opacity="0.2"/>
-      <!-- Top Glowing Cap -->
-      <rect x="${c * 24}" y="${y}" width="23" height="5" fill="${col}"/>
-      <line x1="${c * 24}" y1="${y}" x2="${c * 24 + 23}" y2="${y}" stroke="#fff" stroke-width="1" stroke-opacity="0.6"/>`;
+    terrainSvg += `<rect x="${c * 24}" y="${y}" width="23" height="${SH - y}" fill="${shade(col, 0.45)}"/>`
+      + `<line x1="${c * 24 + 11.5}" y1="${y + 5}" x2="${c * 24 + 11.5}" y2="${SH}" stroke="#000" stroke-opacity="0.25"/>`
+      + `<rect x="${c * 24}" y="${y}" width="23" height="5" fill="${col}"/>`
+      + `<line x1="${c * 24}" y1="${y}" x2="${c * 24 + 23}" y2="${y}" stroke="#fff" stroke-width="1" stroke-opacity="0.6"/>`;
   }
 
   // Spinning Stars with Glowing Halos
@@ -123,9 +107,7 @@ export function renderActRunner(counts = []) {
     terrainSvg += `
       <g transform="translate(${c * 24 + 12},${starY})">
         ${anim('opacity', [[0, 1], [tc - 0.06, 1], [tc, 0]])}
-        <!-- Halo Glow -->
         <circle r="14" fill="#ffd76a" opacity="0.2"/>
-        <!-- Spinning Star -->
         <g>
           ${sl('rotate', ['0', '360'], 2.4)}
           <polygon points="${starPts}" fill="#ffd76a"/>
@@ -138,20 +120,12 @@ export function renderActRunner(counts = []) {
   for (const c of starsAt) {
     const t = getTc(c);
     const y = getTop(c) - 80;
-    starPopsSvg += `
-      <g>
-        <text class="t" x="${X0 - 12}" y="${y}" font-size="12.5" font-weight="800" fill="#ffd76a" opacity="0">
-          ${anim('opacity', [[t - 0.02, 0], [t, 1], [t + 0.55, 0]])}
-          ${tr([[t, 0, 0], [t + 0.55, 0, -20]])}★+1
-        </text>
-        <!-- Sparkle Cross Burst -->
-        <g opacity="0">
-          ${anim('opacity', [[t - 0.02, 0], [t, 1], [t + 0.35, 0]])}
-          ${sc([[t, 0.4, 0.4], [t + 0.35, 1.4, 1.4]])}
-          <line x1="${X0}" y1="${y + 14}" x2="${X0}" y2="${y - 2}" stroke="#ffe885" stroke-width="1.5"/>
-          <line x1="${X0 - 8}" y1="${y + 6}" x2="${X0 + 8}" y2="${y + 6}" stroke="#ffe885" stroke-width="1.5"/>
-        </g>
-      </g>`;
+    starPopsSvg += `<g><text class="t" x="${X0 - 12}" y="${y}" font-size="12.5" font-weight="800" fill="#ffd76a" opacity="0">`
+      + `${anim('opacity', [[t - 0.02, 0], [t, 1], [t + 0.55, 0]])}`
+      + `${tr([[t, 0, 0], [t + 0.55, 0, -20]])}★+1</text>`
+      + `<g opacity="0">${anim('opacity', [[t - 0.02, 0], [t, 1], [t + 0.35, 0]])}${sc([[t, 0.4, 0.4], [t + 0.35, 1.4, 1.4]])}`
+      + `<line x1="${X0}" y1="${y + 14}" x2="${X0}" y2="${y - 2}" stroke="#ffe885" stroke-width="1.5"/>`
+      + `<line x1="${X0 - 8}" y1="${y + 6}" x2="${X0 + 8}" y2="${y + 6}" stroke="#ffe885" stroke-width="1.5"/></g></g>`;
   }
 
   // Runner vertical animation points (jumping across pits)
@@ -179,14 +153,11 @@ export function renderActRunner(counts = []) {
   }
   jetpackOpacity.push([18.0, 0]);
 
-
   // Foreground Speed Pylons / Mile Markers
   let mileMarkersSvg = '';
-  for (let m = 0; m < 16; m++) {
-    const mx = m * 105;
-    mileMarkersSvg += `
-      <rect x="${mx}" y="341" width="3" height="8" rx="1.5" fill="#38bdf8" opacity="0.8"/>
-      <circle cx="${mx + 1.5}" cy="339" r="1.6" fill="#ffe885"/>`;
+  for (let m = 0; m < 5; m++) {
+    const mx = m * 210;
+    mileMarkersSvg += `<rect x="${mx}" y="341" width="3" height="8" rx="1.5" fill="#38bdf8" opacity="0.8"/><circle cx="${mx + 1.5}" cy="339" r="1.6" fill="#ffe885"/>`;
   }
 
   return `<!-- ============================= ACT 2: RUNNER (12s - 18s) ============================= -->

@@ -57,12 +57,7 @@ export function renderActDesk(data, theme = {}) {
   // Confetti particles deterministic positions and colors
   const confettiColors = ['#ff6b6b', '#ffd76a', '#58a6ff', '#3fb950', '#bc8cff', '#ff9ed2'];
   const confettiOffsets = [
-    [-110, 65, 0.45], [95, 78, 0.6], [-60, 48, 0.5], [115, 92, 0.7],
-    [-85, 110, 0.55], [45, 55, 0.4], [-30, 85, 0.65], [70, 105, 0.5],
-    [-120, 95, 0.8], [105, 60, 0.45], [-45, 115, 0.6], [85, 45, 0.55],
-    [-75, 70, 0.7], [30, 90, 0.5], [-95, 50, 0.65], [60, 120, 0.75],
-    [-15, 60, 0.4], [120, 110, 0.6], [-105, 82, 0.7], [50, 75, 0.5],
-    [-40, 100, 0.6], [90, 88, 0.65], [-70, 125, 0.75], [15, 110, 0.55],
+    [-100, 65, 0.45], [95, 78, 0.6], [-50, 95, 0.5], [115, 92, 0.7], [35, 60, 0.4],
   ];
 
   let confettiSvg = '';
@@ -86,8 +81,8 @@ export function renderActDesk(data, theme = {}) {
 
   // Electric arc zap particles
   let zapParticlesSvg = '';
-  for (let k = 0; k < 6; k++) {
-    const a = (k * Math.PI) / 3 + 0.3;
+  for (let k = 0; k < 3; k++) {
+    const a = (k * Math.PI) / 1.5 + 0.3;
     const destX = Math.round(128 + 20 * Math.cos(a));
     const destY = Math.round(59 + 16 * Math.sin(a));
     zapParticlesSvg += `
@@ -105,8 +100,6 @@ export function renderActDesk(data, theme = {}) {
     repoSlidesSvg = `
       <g opacity="0">
         ${anim('opacity', pulse(7.7, 11.9, 0.25))}
-        <!-- Corner Tech Brackets -->
-        <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
         <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">SYSTEM STATUS</text>
         <text class="m" x="-68" y="-15" font-size="12" font-weight="700" fill="#eaf6ff">NO PUBLIC REPOS</text>
         <text class="t" x="-68" y="4" font-size="9.5" fill="#9fc3d9">Awaiting repository sync</text>
@@ -135,19 +128,15 @@ export function renderActDesk(data, theme = {}) {
             [b - 0.2, 0, 0],
             [b + 0.05, -14, 0],
           ])}
-          <!-- Corner Tech Brackets -->
-          <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
           <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
           <text class="m" x="-68" y="-15" font-size="${nameFontSize}" font-weight="700" fill="#eaf6ff">${escapeXml(truncatedName)}</text>
           <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(descText)}</text>
           <circle cx="-64" cy="14" r="4" fill="${r.color || '#58a6ff'}"/>
           <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language || 'Code')}</text>
           <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars || 0}</text>
-          <!-- Sparkline Area Glow & Polyline -->
           <polygon points="${areaPts}" fill="url(#holoAreaGrad)"/>
           <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
         </g>
-        <!-- Pagination Dot Indicator -->
         <circle cx="${(k - 1) * 12}" cy="66" r="2.6" fill="#4fd1ff" opacity="0.3">
           ${anim('opacity', [[0, 0.3], [a, 0.3], [a + 0.1, 1], [b - 0.1, 1], [b, 0.3]])}
         </circle>`;
@@ -155,20 +144,20 @@ export function renderActDesk(data, theme = {}) {
   }
 
   // Keyboard keycaps matrix with RGB Chroma underglow
-  let keycapsSvg = '';
+  let staticKeys = '';
+  let activeKeys = '';
   for (let row = 0; row < 3; row++) {
     for (let kx = 0; kx < 8; kx++) {
       const x = HX - 52 + kx * 13 + row * 1.5;
       const y = 306 + row * 9;
       if ((kx + row) % 2 === 0) {
-        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25">
-          ${sla('opacity', ['.25', '1', '.25'], 0.5, ((kx * 0.1) % 0.5))}
-        </rect>`;
+        activeKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}"/>`;
       } else {
-        keycapsSvg += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25"/>`;
+        staticKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25"/>`;
       }
     }
   }
+  const keycapsSvg = `${staticKeys}<g opacity="0.4">${sla('opacity', ['.25', '1', '.25'], 0.6)}${activeKeys}</g>`;
 
   // Right arm gesture schedule
   const grest = [
@@ -355,25 +344,17 @@ export function renderActDesk(data, theme = {}) {
       <rect width="42" height="50" rx="4" fill="#0c111a" stroke="#2a3547" stroke-width="1.2"/>
       <rect x="3" y="3" width="36" height="44" rx="2" fill="#06090e"/>
       <text class="m" x="21" y="10" text-anchor="middle" font-size="5" fill="#6e7681">TELEMETRY</text>
-      <rect x="6" y="28" width="4" height="14" rx="1" fill="#38bdf8">
-        ${sla('height', ['6', '16', '4', '12', '6'], 0.42)}
-        ${sla('y', ['36', '26', '38', '30', '36'], 0.42)}
+      <rect x="7" y="26" width="6" height="16" rx="1" fill="#38bdf8">
+        ${sla('height', ['8', '18', '5', '14', '8'], 0.42)}
+        ${sla('y', ['34', '24', '37', '28', '34'], 0.42)}
       </rect>
-      <rect x="13" y="24" width="4" height="18" rx="1" fill="#34d399">
+      <rect x="18" y="24" width="6" height="18" rx="1" fill="#34d399">
         ${sla('height', ['10', '20', '8', '16', '10'], 0.38)}
         ${sla('y', ['32', '22', '34', '26', '32'], 0.38)}
       </rect>
-      <rect x="20" y="26" width="4" height="16" rx="1" fill="#a78bfa">
-        ${sla('height', ['8', '18', '5', '14', '8'], 0.46)}
-        ${sla('y', ['34', '24', '37', '28', '34'], 0.46)}
-      </rect>
-      <rect x="27" y="30" width="4" height="12" rx="1" fill="#ffd76a">
-        ${sla('height', ['5', '14', '7', '11', '5'], 0.52)}
-        ${sla('y', ['37', '28', '35', '31', '37'], 0.52)}
-      </rect>
-      <rect x="34" y="28" width="4" height="14" rx="1" fill="#38bdf8">
-        ${sla('height', ['7', '15', '4', '13', '7'], 0.36)}
-        ${sla('y', ['35', '27', '38', '29', '35'], 0.36)}
+      <rect x="29" y="28" width="6" height="14" rx="1" fill="#a78bfa">
+        ${sla('height', ['6', '16', '4', '12', '6'], 0.48)}
+        ${sla('y', ['36', '26', '38', '30', '36'], 0.48)}
       </rect>
     </g>
 
@@ -461,25 +442,11 @@ export function renderActDesk(data, theme = {}) {
         </circle>
       </g>
       <!-- Rising Steaming Ribbons -->
-      <g>
-        ${anim('opacity', [[0, 0.35], [6.9, 0.35], [7.4, 1], [12, 1]])}
-        <g transform="translate(7,-4)">
-          <path d="M0 0 c-4 -6 4 -10 0 -16" stroke="#a9b7c6" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0">
-            ${sla('opacity', ['0', '.6', '0'], 2.4, 0)}
-            ${sl('translate', ['0 0', '0 -9'], 2.4, 0)}
-          </path>
-        </g>
-        <g transform="translate(13,-4)">
-          <path d="M0 0 c-4 -6 4 -10 0 -16" stroke="#a9b7c6" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0">
-            ${sla('opacity', ['0', '.6', '0'], 2.4, 0.7)}
-            ${sl('translate', ['0 0', '0 -9'], 2.4, 0.7)}
-          </path>
-        </g>
-        <g transform="translate(19,-4)">
-          <path d="M0 0 c-4 -6 4 -10 0 -16" stroke="#a9b7c6" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0">
-            ${sla('opacity', ['0', '.6', '0'], 2.4, 1.4)}
-            ${sl('translate', ['0 0', '0 -9'], 2.4, 1.4)}
-          </path>
+      <g opacity="0.6">
+        ${anim('opacity', [[0, 0.35], [6.9, 0.35], [7.4, 0.8], [12, 0.8]])}
+        <g>
+          ${sl('translate', ['0 0', '0 -8', '0 0'], 2.4)}
+          <path d="M7 -4 c-3 -5 3 -9 0 -14 M13 -4 c-3 -5 3 -9 0 -14 M19 -4 c-3 -5 3 -9 0 -14" stroke="#a9b7c6" stroke-width="1.6" fill="none" stroke-linecap="round"/>
         </g>
       </g>
     </g>
@@ -503,9 +470,6 @@ export function renderActDesk(data, theme = {}) {
         ${anim('opacity', [[0.35, 0], [0.5, 1]])}
         <rect x="16" y="34" width="46" height="5" rx="2.5" fill="#58a6ff"/>
         <rect x="67" y="34" width="30" height="5" rx="2.5" fill="#bc8cff" opacity="0.7"/>
-      </g>
-      <g opacity="0">
-        ${anim('opacity', [[0.65, 0], [0.8, 1]])}
         <rect x="16" y="45" width="26" height="5" rx="2.5" fill="#3fb950"/>
         <rect x="47" y="45" width="62" height="5" rx="2.5" fill="#3fb950" opacity="0.7"/>
       </g>
@@ -513,9 +477,6 @@ export function renderActDesk(data, theme = {}) {
         ${anim('opacity', [[0.95, 0], [1.1, 1]])}
         <rect x="28" y="56" width="58" height="5" rx="2.5" fill="#f0883e"/>
         <rect x="91" y="56" width="24" height="5" rx="2.5" fill="#8b949e" opacity="0.7"/>
-      </g>
-      <g opacity="0">
-        ${anim('opacity', [[1.25, 0], [1.4, 1]])}
         <rect x="16" y="67" width="40" height="5" rx="2.5" fill="#58a6ff"/>
         <rect x="61" y="67" width="34" height="5" rx="2.5" fill="#e6edf3" opacity="0.7"/>
       </g>
@@ -606,6 +567,7 @@ export function renderActDesk(data, theme = {}) {
           ${sl('translate', ['0 0', '0 -3', '0 0'], 3.2)}
           <!-- Hologram Glass Card Frame -->
           <rect x="-76" y="-52" width="152" height="104" rx="8" fill="#0c2233" fill-opacity="0.68" stroke="#4fd1ff" stroke-width="1.5"/>
+          <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
           <!-- Moving Laser Scanline -->
           <rect x="-76" y="-52" width="152" height="3" fill="#4fd1ff" opacity="0.35">
             ${sla('y', ['-50', '48'], 1.8)}

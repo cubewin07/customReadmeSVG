@@ -12,6 +12,27 @@ import { renderActRunner } from './components/actRunner.js';
 import { renderActCity } from './components/actCity.js';
 import { renderChapterTracker } from './components/chapterTracker.js';
 
+import { BRAND_COLORS } from './components/sharedDefs.js';
+
+export function getPrimaryLanguageColor(profile, theme) {
+  if (Array.isArray(profile.repos) && profile.repos.length > 0) {
+    for (const r of profile.repos) {
+      if (r?.primaryLanguage?.color) return r.primaryLanguage.color;
+      if (r?.color) return r.color;
+    }
+  }
+  if (Array.isArray(profile.topLanguages) && profile.topLanguages.length > 0) {
+    if (profile.topLanguages[0]?.color) return profile.topLanguages[0].color;
+  }
+  if (Array.isArray(profile.tech) && profile.tech.length > 0) {
+    for (const t of profile.tech) {
+      const lower = String(t).toLowerCase();
+      if (BRAND_COLORS[lower]) return BRAND_COLORS[lower];
+    }
+  }
+  return theme?.accent || '#58a6ff';
+}
+
 export const developerCard = {
   id: 'developer',
   title: 'Developer Showcase',
@@ -88,34 +109,43 @@ export const developerCard = {
       streak: data?.streak ?? (isFallback ? 0 : DEFAULT_DEVELOPER_PROFILE.streak),
     };
 
+    const sceneAccent = getPrimaryLanguageColor(profile, theme);
+    const isStack = (options.layout || '').toLowerCase() === 'stack';
+    const cardW = isStack ? 584 : W;
+    const cardH = isStack ? 740 : H;
+    const sceneX = isStack ? 0 : SX;
+    const sceneY = isStack ? 370 : SY;
+
     const cardBg = theme.bg || '#12161d';
     const borderColor = theme.border || '#2a313c';
     const name = escapeXml(profile.name || 'Le Tan Thang');
     const role = escapeXml(profile.role || 'Full-Stack Engineer & Creative Coder');
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="ttl dsc">
+    const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cardW}" height="${cardH}" viewBox="0 0 ${cardW} ${cardH}" role="img" aria-labelledby="ttl dsc">
   <title id="ttl">${name} - developer card</title>
   <desc id="dsc">${name}, ${role}. Animated scene: shipping code, pinned repos, a runner on the contribution graph and a voxel city built from commits.</desc>
 
-  ${renderSharedDefs(theme)}
+  ${renderSharedDefs(theme, sceneAccent)}
 
   <g clip-path="url(#card)">
     <!-- Main Card Body Background -->
-    <rect width="${W}" height="${H}" fill="${cardBg}"/>
+    <rect width="${cardW}" height="${cardH}" fill="${cardBg}"/>
 
     <!-- Top Glow Accent Bar -->
-    <rect width="${W}" height="4" fill="url(#barGrad)"/>
+    <rect width="${cardW}" height="4" fill="url(#barGrad)"/>
 
     <!-- Light Shimmer Beam Across Top Bar -->
     <rect y="0" width="200" height="4" fill="url(#shimGrad)">
-      ${tr([[0, -200, 0], [0.4, -200, 0], [2.6, 1150, 0]])}
+      ${tr([[0, -200, 0], [0.4, -200, 0], [2.6, cardW, 0]])}
     </rect>
 
     <!-- Left Column: Identity, Status, Focus, Arsenal, and Mechanical Rolling Stats -->
-    ${renderInfoPanel(profile, theme)}
+    <g class="dev-panel" transform="translate(0,0)">
+      ${renderInfoPanel(profile, theme, sceneAccent)}
+    </g>
 
-    <!-- Right Column: 24s Master Timeline Cyber World -->
-    <g transform="translate(${SX},${SY})" clip-path="url(#scene)">
+    <!-- Right/Bottom Column: 24s Master Timeline Cyber World -->
+    <g class="dev-scene" transform="translate(${sceneX},${sceneY})" clip-path="url(#scene)">
       <!-- Always-on Day/Night Sky & Celestial Paths -->
       ${renderSkyAtmosphere(profile.streak)}
 
@@ -134,8 +164,14 @@ export const developerCard = {
   </g>
 
   <!-- Outer Card Bezel Stroke -->
-  <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="17.5" fill="none" stroke="${borderColor}"/>
+  <rect x="0.5" y="0.5" width="${cardW - 1}" height="${cardH - 1}" rx="17.5" fill="none" stroke="${borderColor}"/>
 </svg>`;
+
+    // Strip HTML comments and condense runs of empty whitespace for clean sub-100KB footprint
+    return rawSvg
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/>\s+</g, '><')
+      .trim();
   },
 };
 

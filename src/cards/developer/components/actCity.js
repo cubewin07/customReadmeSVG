@@ -1,4 +1,4 @@
-import { anim, tr, sl, sla } from '../utils/timeline.js';
+import { anim, tr, sl, sla, T, kt, norm } from '../utils/timeline.js';
 
 /**
  * Calculates building stack height (0..4 cubes) from commit count.
@@ -42,64 +42,63 @@ export function renderActCity(counts = []) {
     gridLinesSvg += `<line x1="${negX1}" y1="${negY1}" x2="${negX2}" y2="${negY2}"/>`;
   }
 
-  // 3D Voxel Cubes ordered by depth
-  const cubes = [];
+  // 3D Voxel Building Columns ordered by isometric depth
+  const columns = [];
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 7; j++) {
       const idx = i * 7 + j;
       const hh = cubeHeight(cData[idx]);
-      for (let k = 0; k < hh; k++) {
-        cubes.push({
-          depth: i + j,
-          k,
-          i,
-          j,
-          hh,
-        });
+      if (hh > 0) {
+        columns.push({ depth: i + j, i, j, hh });
       }
     }
   }
 
-  // Sort by isometric draw order: depth first, then height k
-  cubes.sort((a, b) => (a.depth - b.depth) || (a.k - b.k));
+  // Sort by isometric draw order: depth first
+  columns.sort((a, b) => a.depth - b.depth);
+
+  // Group columns by isometric depth
+  const depthGroups = new Map();
+  for (const col of columns) {
+    if (!depthGroups.has(col.depth)) {
+      depthGroups.set(col.depth, []);
+    }
+    depthGroups.get(col.depth).push(col);
+  }
 
   let cubesSvg = '';
-  for (const c of cubes) {
-    const px = (c.i - c.j) * 13;
-    const py = (c.i + c.j) * 7.5 - (c.k + 1) * 12;
-    const ts = parseFloat((18.6 + (c.i + c.j) * 0.17 + c.k * 0.1).toFixed(2));
-    const isRoof = c.k === c.hh - 1;
-    const isSkyscraper = c.hh >= 3;
-
-    cubesSvg += `<use href="#c${c.hh}" x="${px}" y="${py}" opacity="0">
-      ${anim('opacity', [[ts, 0], [ts + 0.06, 1]])}
-      ${anim('y', [
-        [ts, parseFloat((py - 110).toFixed(1))],
-        [ts + 0.28, parseFloat((py + 3).toFixed(1))],
-        [ts + 0.38, parseFloat(py.toFixed(1))],
-      ])}
-    </use>`;
-
-    if (isRoof && isSkyscraper) {
-      cubesSvg += `
-        <!-- Rooftop Satellite Relay Antenna & Warning Beacon -->
-        <g opacity="0">
-          ${anim('opacity', [[ts + 0.38, 0], [ts + 0.44, 1]])}
-          <line x1="${px}" y1="${py}" x2="${px}" y2="${py - 9}" stroke="#ffffff" stroke-width="0.9"/>
-          <circle cx="${px}" cy="${py - 9}" r="1.6" fill="#ff5f56">
-            <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
-          </circle>
-        </g>`;
+  for (const [depth, cols] of depthGroups.entries()) {
+    const ts = parseFloat((18.6 + depth * 0.17).toFixed(2));
+    let groupContent = '';
+    for (const col of cols) {
+      const px = (col.i - col.j) * 13;
+      const baseY = (col.i + col.j) * 7.5;
+      const isSkyscraper = col.hh >= 3;
+      let colCubes = '';
+      for (let k = 0; k < col.hh; k++) {
+        colCubes += `<use href="#c${col.hh}" y="${-(k + 1) * 12}"/>`;
+      }
+      if (isSkyscraper) {
+        const roofY = -col.hh * 12;
+        colCubes += `<line y1="${roofY}" y2="${roofY - 9}" stroke="#ffffff" stroke-width="0.9"/><circle cy="${roofY - 9}" r="1.6" fill="#ff5f56"/>`;
+      }
+      groupContent += `<g transform="translate(${px},${baseY})">${colCubes}</g>`;
     }
+
+    cubesSvg += `<g opacity="0">
+      ${anim('opacity', [[ts, 0], [ts + 0.06, 1]])}
+      <animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite"
+        keyTimes="${kt(norm([[ts, 0, -110], [ts + 0.28, 0, 3], [ts + 0.38, 0, 0]]))}"
+        values="0 -110;0 3;0 0"/>
+      ${groupContent}
+    </g>`;
   }
 
   // Floating Anti-Gravity Data Shards / Crystals around Island
   const crystalCoords = [
-    [-110, 70, 2.8, 0],
-    [-80, 126, 3.4, 0.8],
+    [-95, 78, 2.8, 0],
     [92, 76, 3.1, 0.4],
-    [114, 120, 2.6, 1.2],
-    [0, 138, 3.8, 1.6],
+    [0, 138, 3.6, 1.2],
   ];
   let crystalsSvg = '';
   for (const [cx, cy, cDur, cDel] of crystalCoords) {

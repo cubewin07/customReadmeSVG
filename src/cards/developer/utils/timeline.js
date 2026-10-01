@@ -54,7 +54,10 @@ export function fmt(v) {
  * Formats keyTimes string normalized to [0, 1].
  */
 export function kt(ps) {
-  return ps.map(p => (p[0] / T).toFixed(4)).join(';');
+  return ps.map(p => {
+    const s = (p[0] / T).toFixed(3).replace(/\.?0+$/, '');
+    return s === '' ? '0' : s;
+  }).join(';');
 }
 
 /**

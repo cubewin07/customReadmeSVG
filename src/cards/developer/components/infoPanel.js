@@ -1,14 +1,15 @@
 import { escapeXml } from '../../../svg/escape.js';
-import { rollCounter, star } from '../utils/timeline.js';
+import { rollCounter, star, anim, pulse } from '../utils/timeline.js';
 import { BRAND_COLORS } from './sharedDefs.js';
 
 /**
  * Renders the left-hand identity and information panel (0 <= x <= 562).
  * Features glassmorphic bevel lines, branded tech badges, multi-ring radar status,
- * and tactile inset stat wells with mechanical rolling odometer counters.
+ * tactile inset stat wells with mechanical rolling odometer counters,
+ * and live Act Telemetry synchronized with the 24s master timeline.
  */
-export function renderInfoPanel(data, theme) {
-  const accent = theme.accent || '#58a6ff';
+export function renderInfoPanel(data, theme, sceneAccent = null) {
+  const accent = sceneAccent || theme.accent || '#58a6ff';
   const subtext = theme.subtext || '#8b949e';
   const cardBg = theme.cardBg || '#161b22';
   const border = theme.border || '#232a35';
@@ -178,27 +179,49 @@ export function renderInfoPanel(data, theme) {
     <line x1="33" y1="137" x2="539" y2="137" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
     <!-- Left Accent Pill -->
     <rect x="32" y="136" width="5" height="68" rx="2.5" fill="${accent}"/>
-    <text class="t" x="52" y="156" font-size="11" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
+    <text class="t" x="52" y="156" font-size="13" font-weight="700" letter-spacing="1.4" fill="${accent}">CORE FOCUS</text>
     
-    <!-- Git Branch & SHA Badge (Top-Right) -->
-    <g transform="translate(398, 142)">
-      <rect x="0" y="0" width="132" height="20" rx="10" fill="${isLight ? '#eaeef2' : '#141c28'}" stroke="${border}" stroke-width="0.8"/>
-      <!-- Git Branch Icon -->
-      <circle cx="12" cy="10" r="2.2" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <circle cx="20" cy="6.5" r="2.2" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <path d="M12 10 v-4 M12 8 a2 2 0 0 1 2 -2 h4" fill="none" stroke="${accent}" stroke-width="1.2"/>
-      <text class="m" x="28" y="14" font-size="10.5" font-weight="600" fill="${subtext}">main@<tspan fill="${accent}">${commitSha}</tspan></text>
+    <!-- Synchronized Act Telemetry HUD Pill (Top-Right) -->
+    <g class="left-act-telemetry" transform="translate(294, 142)">
+      <rect x="0" y="0" width="236" height="20" rx="10" fill="${isLight ? '#eaeef2' : '#141c28'}" stroke="${border}" stroke-width="0.8"/>
+      
+      <!-- Act 1 Telemetry (0s - 12s) -->
+      <g opacity="1">
+        ${anim('opacity', [[0, 1], [11.8, 1], [12.2, 0], [24, 0]])}
+        <circle cx="10" cy="10" r="2.5" fill="${accent}"/>
+        <text class="m" x="18" y="14" font-size="10.5" font-weight="600" fill="${subtext}">
+          <tspan fill="${accent}" font-weight="700">STATUS // SHIPPING</tspan> • main@<tspan fill="${accent}">${commitSha}</tspan>
+        </text>
+      </g>
+
+      <!-- Act 2 Telemetry (12s - 18s) -->
+      <g opacity="0">
+        ${anim('opacity', pulse(12.0, 17.8, 0.2))}
+        <circle cx="10" cy="10" r="2.5" fill="#3fb950"/>
+        <text class="m" x="18" y="14" font-size="10.5" font-weight="600" fill="${subtext}">
+          <tspan fill="#3fb950" font-weight="700">STATUS // RUNNING</tspan> • <tspan fill="${title}">${data.streak || 0}D STREAK</tspan>
+        </text>
+      </g>
+
+      <!-- Act 3 Telemetry (18s - 24s) -->
+      <g opacity="0">
+        ${anim('opacity', [[0, 0], [17.8, 0], [18.2, 1], [23.8, 1], [24, 0]])}
+        <circle cx="10" cy="10" r="2.5" fill="#a78bfa"/>
+        <text class="m" x="18" y="14" font-size="10.5" font-weight="600" fill="${subtext}">
+          <tspan fill="#a78bfa" font-weight="700">STATUS // BUILDING</tspan> • <tspan fill="${title}">${annualCommitsVal} COMMITS</tspan>
+        </text>
+      </g>
     </g>
 
-    <text class="t" x="52" y="176" font-size="13.5" fill="${text}">${escapeXml(focus1)}</text>
-    ${focus2 ? `<text class="t" x="52" y="194" font-size="13.5" fill="${text}">${escapeXml(focus2)}</text>` : ''}
+    <text class="t" x="52" y="176" font-size="14.5" fill="${text}">${escapeXml(focus1)}</text>
+    ${focus2 ? `<text class="t" x="52" y="196" font-size="14.5" fill="${text}">${escapeXml(focus2)}</text>` : ''}
   </g>
 
   <!-- Tech Arsenal Card with Glassmorphic Specular Line -->
   <g>
     <rect x="32" y="214" width="508" height="72" rx="10" fill="${cardBg}" stroke="${border}"/>
     <line x1="33" y1="215" x2="539" y2="215" stroke="#fff" stroke-opacity="0.12" stroke-linecap="round"/>
-    <text class="t" x="48" y="232" font-size="11" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
+    <text class="t" x="48" y="233" font-size="13" font-weight="700" letter-spacing="1.4" fill="${subtext}">TECH ARSENAL</text>
     ${techPills}
   </g>
 

@@ -201,3 +201,90 @@
 - [x] **Step 4: Run test to verify it passes**
 - [x] **Step 5: Commit `feat(developer): tag data source and display data unavailable on failed fetch`**
 
+---
+
+## Phase 2 Tasks: Shared Component Kit
+
+### Task 2.1: Per-Character Text Fitting & Multi-Line Wrapping
+**Files:**
+- Create: `src/svg/text.js`
+- Test: `tests/svg-text.test.js`
+
+**Interfaces:**
+- `measureText(text, fontPx)` => number
+- `fitText(text, fontPx, maxWidth, ellipsis)` => string
+- `wrapText(text, fontPx, maxWidth, maxLines)` => string[]
+
+- [x] **Step 1: Implement calibrated per-character font metrics and binary-search fitting in `src/svg/text.js`**
+- [x] **Step 2: Write tests in `tests/svg-text.test.js` validating truncation and wrapping**
+- [x] **Step 3: Verify all tests pass**
+
+---
+
+### Task 2.2: Canonical Widths and Layout Breakpoints
+**Files:**
+- Create: `src/svg/layout.js`
+- Test: `tests/phase2-component-kit.test.js`
+
+**Interfaces:**
+- `CANONICAL_WIDTHS`: `{ full: 830, half: 405, legacy: 495 }`
+- `resolveCardWidth(widthParam, defaultWidth)` => number (clamped 300-1200)
+- `getSizeClass(width)` => 'full' | 'half' | 'legacy'
+- `getCardBounds(width)` => `{ paddingX, paddingY, contentWidth }`
+
+- [x] **Step 1: Implement canonical width resolver and size classification in `src/svg/layout.js`**
+- [x] **Step 2: Test resolution across keyword aliases ('full', 'half', 'legacy') and numeric values**
+- [x] **Step 3: Verify all tests pass**
+
+---
+
+### Task 2.3: Semantic Theme Tokens & Option Resolver
+**Files:**
+- Modify: `src/svg/theme.js`
+- Test: `tests/phase2-component-kit.test.js`
+
+**Interfaces:**
+- Semantic tokens: `positive`, `negative`, `neutral`, `ringBg`, `heatmapLevels` across all 9 built-in themes
+- `resolveTheme(themeInput, options)` with `accent` and `bg=transparent` support
+
+- [x] **Step 1: Add semantic sentiment tokens and 5-level heatmap scales to all theme palettes**
+- [x] **Step 2: Implement `resolveTheme` handling custom accent hex overrides and transparent background styling**
+- [x] **Step 3: Verify all tests pass**
+
+---
+
+### Task 2.4: Standardized Labelled Metric Tile Component
+**Files:**
+- Create: `src/svg/tile.js`
+- Test: `tests/phase2-component-kit.test.js`
+
+**Interfaces:**
+- `renderMetricTile({ x, y, width, height, label, value, icon, delta, deltaType, subtext, accentColor, theme })`
+
+- [x] **Step 1: Implement `renderMetricTile` ensuring visible uppercase label, prominent hero number, and delta badge**
+- [x] **Step 2: Guarantee text fitting on long values/labels without card overflow**
+- [x] **Step 3: Validate strict XML well-formedness via `xmllint`**
+
+---
+
+### Task 2.5: Shared Static-First Visual Primitives
+**Files:**
+- Modify: `src/svg/primitives.js`
+- Test: `tests/phase2-component-kit.test.js`
+
+**Interfaces:**
+- `renderProgressRing({ score, level, x, y, radius, strokeWidth, maxScore, label, theme })`
+- `renderStackedBar({ segments, width, height, x, y, rx, theme })`
+- `renderCommitSparkline(bins, width, height, strokeColor, fillColor)`
+- `renderHeatmapMatrix({ weeks, x, y, cellWidth, cellGap, cols, theme })`
+- `renderDeltaChip({ delta, label, x, y, theme })`
+- `renderTopicChips(topics, maxCount, maxWidth, theme)`
+- `renderReleaseTag(tagName, theme)`
+- `renderLanguageBar(languages, width, height, theme)`
+
+- [x] **Step 1: Implement static-first SVG progress ring with track background, circular dashoffset, and centered grade**
+- [x] **Step 2: Implement stacked proportion bar with rounded clip-path mask**
+- [x] **Step 3: Implement 26-week / 53-week mini heatmap grid with theme-aware intensity levels**
+- [x] **Step 4: Implement delta chip with positive (+), negative (-), and neutral symbols**
+- [x] **Step 5: Validate 100% test pass rate across all primitives with strict XML parsing**
+

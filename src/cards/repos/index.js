@@ -66,21 +66,11 @@ function formatCount(num) {
   return num.toString();
 }
 
-function applyThemeOptions(theme, options) {
-  let res = { ...theme };
-  if (options.accent) {
-    res.title = options.accent;
-    res.iconColor = options.accent;
-  }
-  if (options.bg === 'transparent') {
-    res.bg = 'transparent';
-    res.cardBg = 'rgba(255, 255, 255, 0.04)';
-  }
-  return res;
-}
+import { resolveTheme } from '../../svg/theme.js';
+import { resolveCardWidth, getCardBounds } from '../../svg/layout.js';
 
 function renderV1Svg(data, rawTheme, options = {}) {
-  const theme = applyThemeOptions(rawTheme, options);
+  const theme = resolveTheme(rawTheme, options);
   const layout = (options.layout || 'grid').toLowerCase();
 
   if (layout === 'featured' || layout === 'hero') {
@@ -105,7 +95,7 @@ function renderV1Svg(data, rawTheme, options = {}) {
  */
 function renderV1GridSvg(data, theme, options = {}) {
   const username = escapeXml(options.username || 'User');
-  const width = Math.max(320, Number(options.width) || 495);
+  const width = resolveCardWidth(options.width);
   const reposList = (data.repos || []).slice(0, 6);
 
   const isSingleCol = width < 450;
@@ -222,7 +212,7 @@ function renderV1GridSvg(data, theme, options = {}) {
  */
 function renderV1FeaturedSvg(data, theme, options = {}) {
   const username = escapeXml(options.username || 'User');
-  const width = Math.max(320, Number(options.width) || 495);
+  const width = resolveCardWidth(options.width);
   const reposList = (data.repos || []).slice(0, 3);
   const heroRepo = reposList[0];
   const subRepos = reposList.slice(1, 3); // exactly 2 secondary tiles
@@ -368,7 +358,7 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
  */
 function renderV1SpotlightSvg(data, theme, options = {}) {
   const username = escapeXml(options.username || 'User');
-  const width = Math.max(320, Number(options.width) || 495);
+  const width = resolveCardWidth(options.width);
   const reposList = (data.repos || []).slice(0, 4);
   const heroRepo = reposList[0];
   const sideRepos = reposList.slice(1, 4);
@@ -524,7 +514,7 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
  */
 function renderV1TimelineSvg(data, theme, options = {}) {
   const username = escapeXml(options.username || 'User');
-  const width = Math.max(320, Number(options.width) || 495);
+  const width = resolveCardWidth(options.width);
 
   // Genuinely distinct: SORT BY pushedAt DESCENDING
   const rawRepos = [...(data.repos || [])];
@@ -640,7 +630,7 @@ function renderV1TimelineSvg(data, theme, options = {}) {
  */
 function renderV1LeaderboardSvg(data, theme, options = {}) {
   const username = escapeXml(options.username || 'User');
-  const width = Math.max(320, Number(options.width) || 495);
+  const width = resolveCardWidth(options.width);
   const reposList = [...(data.repos || [])]
     .sort((a, b) => (b.stargazerCount || 0) - (a.stargazerCount || 0))
     .slice(0, 5);

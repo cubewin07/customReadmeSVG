@@ -100,7 +100,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
   const strokeOffset = circleC - (circleC * (rank.percentile / 100));
 
   const prSub = reviews > 0 ? `+${reviews} Reviews` : (issues > 0 ? `${issues} Issues` : 'Merged & Active');
-  const streakSub = maxStreak > streak ? `Peak: ${maxStreak}d` : `${totalRepos} Repositories`;
+  const streakSub = streak > 0 ? (maxStreak > streak ? `Peak: ${maxStreak}d` : `${totalRepos} Repositories`) : (maxStreak > 0 ? `Peak: ${maxStreak}d` : '0 Streak');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
@@ -215,7 +215,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
     <line x1="1" y1="1" x2="125" y2="1" stroke="#fff" stroke-opacity="0.12"/>
     <rect x="0" y="0" width="3.5" height="62" rx="1.5" fill="#f59e0b"/>
     <text class="hud-mono" x="12" y="16" font-size="8.5" font-weight="700" letter-spacing="0.8" fill="${subtext}">ACTIVE STREAK</text>
-    <text class="hud-val" x="12" y="38">${streak} <tspan font-size="12" font-weight="600" fill="${subtext}">DAYS</tspan></text>
+    <text class="hud-val" x="12" y="38">${streak > 0 ? `${streak} <tspan font-size="12" font-weight="600" fill="${subtext}">DAYS</tspan>` : '–'}</text>
     <text class="hud-mono" x="12" y="52" font-size="9" font-weight="600" fill="#f59e0b">🔥 ${streakSub}</text>
   </g>
 
@@ -367,7 +367,7 @@ function renderV1BarsSvg(data, theme, options = {}) {
     { icon: icons.zap('#00f2fe'), label: 'Contributions', value: totalContributions.toLocaleString(), perc: Math.min(100, Math.round(100 * (1 - Math.exp(-totalContributions / 1200)))) },
     { icon: icons.commits(theme.iconColor), label: 'Commits', value: totalCommits.toLocaleString(), perc: Math.min(100, Math.round(100 * (1 - Math.exp(-totalCommits / 1000)))) },
     { icon: icons.pullRequest('#a855f7'), label: 'Pull Requests', value: pullRequests.toLocaleString(), perc: Math.min(100, Math.round(100 * (1 - Math.exp(-pullRequests / 25)))) },
-    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: `${streak} Days`, perc: Math.min(100, Math.round(100 * (1 - Math.exp(-streak / 20)))) },
+    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: streak > 0 ? `${streak} Days` : '–', perc: streak > 0 ? Math.min(100, Math.round(100 * (1 - Math.exp(-streak / 20)))) : 0 },
     { icon: icons.repo(theme.iconColor), label: 'Repositories', value: totalRepos.toLocaleString(), perc: Math.min(100, Math.round(100 * (1 - Math.exp(-totalRepos / 30)))) },
   ];
 
@@ -441,7 +441,7 @@ function renderV1HeroSvg(data, theme, options = {}) {
     { icon: icons.zap('#00f2fe'), label: 'Total Contributions', value: totalContributions.toLocaleString() },
     { icon: icons.commits(theme.iconColor), label: 'Commits Pushed', value: totalCommits.toLocaleString() },
     { icon: icons.pullRequest('#a855f7'), label: 'Pull Requests', value: pullRequests.toLocaleString() },
-    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: `${streak} Days` },
+    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: streak > 0 ? `${streak} Days` : '–' },
   ];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
@@ -526,7 +526,7 @@ function renderV1DashboardSvg(data, theme, options = {}) {
     { icon: icons.zap('#00f2fe'), label: 'Contributions', value: totalContributions.toLocaleString() },
     { icon: icons.commits(theme.iconColor), label: 'Commits', value: totalCommits.toLocaleString() },
     { icon: icons.pullRequest('#a855f7'), label: 'Pull Requests', value: pullRequests.toLocaleString() },
-    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: `${streak}d` },
+    { icon: icons.flame('#f59e0b'), label: 'Active Streak', value: streak > 0 ? `${streak}d` : '–' },
     { icon: icons.repo(theme.iconColor), label: 'Repositories', value: totalRepos.toLocaleString() },
     { isRankTile: true, label: 'Overall Rank', value: `${rank.level} (Score ${rank.score})` },
   ];
@@ -602,7 +602,7 @@ function renderV1CompactSvg(data, theme, options = {}) {
     { icon: icons.zap('#00f2fe'), value: totalContributions.toLocaleString() },
     { icon: icons.commits(theme.iconColor), value: totalCommits.toLocaleString() },
     { icon: icons.pullRequest('#a855f7'), value: pullRequests.toLocaleString() },
-    { icon: icons.flame('#f59e0b'), value: `${streak}d` },
+    { icon: icons.flame('#f59e0b'), value: streak > 0 ? `${streak}d` : '–' },
     { icon: icons.repo(theme.iconColor), value: totalRepos.toLocaleString() },
   ];
 

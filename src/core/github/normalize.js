@@ -162,9 +162,9 @@ export function normalizeStats(rawData) {
     issues,
     reviews,
     totalContributions: totalContributions > 0 ? totalContributions : totalCommits,
-    currentStreak: currentStreak > 0 ? currentStreak : 3,
-    maxStreak: maxStreak > 0 ? maxStreak : 14,
-    memberYear: user.createdAt ? new Date(user.createdAt).getFullYear() : 2024,
+    currentStreak,
+    maxStreak,
+    memberYear: user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear(),
     restrictedContributions: contribs.restrictedContributionsCount || 0,
   };
 }

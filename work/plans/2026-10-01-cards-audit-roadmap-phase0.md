@@ -122,3 +122,82 @@
 - [x] **Step 3: Regenerate all 120 snapshots via `npm run snapshot`**
 - [x] **Step 4: Run `xmllint --noout work/snapshots/*.svg` and `npm test` to verify 100% pass rate**
 - [x] **Step 5: Commit `feat(audit): enforce strict XML validation across all 120 card snapshots`**
+
+---
+
+## Phase 1 Tasks: Data Integrity & Fallbacks
+
+### Task 1.1: Remove Fabricated Streak Fallbacks in `normalize.js`
+
+**Files:**
+- Modify: `src/core/github/normalize.js`
+- Modify: `src/cards/stats/index.js`
+- Test: `tests/stats-streak-zero-fallback.test.js`
+
+**Interfaces:**
+- Consumes: `normalizeStats(rawData)`
+- Produces: `currentStreak: 0` and `maxStreak: 0` when contribution counts are 0, rendered as `–` or `0 Days`
+
+- [x] **Step 1: Write failing test verifying 0-streak accounts return 0 (not 3/14) and stats card shows clean 0/–**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: In `normalizeStats`, remove fallback to 3 and 14; update stats card to handle 0 cleanly**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(normalize): remove fabricated 3 and 14 day streak fallbacks in stats`**
+
+---
+
+### Task 1.2: Bucket Real Commit Dates into 8 Weekly Bins for Repo Sparklines
+
+**Files:**
+- Modify: `src/core/github/normalize.js`
+- Test: `tests/developer-real-sparklines.test.js`
+
+**Interfaces:**
+- Consumes: `history.nodes[i].committedDate` in `normalizeDeveloperData`
+- Produces: 8-element sparkline array based on weekly commit density instead of `message.charCodeAt(0) % 7`
+
+- [ ] **Step 1: Write failing test verifying sparkline bins are determined by commit dates**
+- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 3: Implement weekly date binning from `committedDate`**
+- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 5: Commit `feat(developer): compute repo sparklines from real weekly commit bins`**
+
+---
+
+### Task 1.3: Remove Fake Defaults in the Developer Card
+
+**Files:**
+- Modify: `src/core/github/normalize.js`
+- Modify: `src/cards/developer/components/infoPanel.js`
+- Modify: `src/cards/developer/components/chapterTracker.js`
+- Test: `tests/developer-fake-defaults.test.js`
+
+**Interfaces:**
+- Consumes: `profile` in developer card components
+- Produces: Developer card rendering actual commit count (including 0), empty or actual commitSha, without hardcoded `'ea77b7c'`, `142`, or `14`
+
+- [ ] **Step 1: Write failing test asserting zero-commit accounts don't receive fake 142 commits, streak 14, or sha ea77b7c**
+- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 3: Remove hardcoded fallbacks across components**
+- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 5: Commit `fix(developer): remove hardcoded fake defaults and fallbacks`**
+
+---
+
+### Task 1.4: Add `data.source = 'live' | 'fallback'` and Render Explicit Data Unavailable State
+
+**Files:**
+- Modify: `src/cards/developer/index.js`
+- Modify: `src/cards/developer/components/infoPanel.js`
+- Test: `tests/developer-source-fallback.test.js`
+
+**Interfaces:**
+- Consumes: `developerCard.fetchData(username)` and `developerCard.renderSvg(data, theme, options)`
+- Produces: `data.source = 'live' | 'fallback'`, rendering "DATA UNAVAILABLE" state rather than another user's stats on fetch error
+
+- [ ] **Step 1: Write failing test verifying failed fetch tags `source: 'fallback'` and does not show 28 repos / 64 stars / 42 followers**
+- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 3: Implement source tagging and data unavailable UI state in developerCard**
+- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 5: Commit `feat(developer): tag data source and display data unavailable on failed fetch`**
+

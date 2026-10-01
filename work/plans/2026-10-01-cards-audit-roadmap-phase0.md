@@ -195,9 +195,9 @@
 - Consumes: `developerCard.fetchData(username)` and `developerCard.renderSvg(data, theme, options)`
 - Produces: `data.source = 'live' | 'fallback'`, rendering "DATA UNAVAILABLE" state rather than another user's stats on fetch error
 
-- [ ] **Step 1: Write failing test verifying failed fetch tags `source: 'fallback'` and does not show 28 repos / 64 stars / 42 followers**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement source tagging and data unavailable UI state in developerCard**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `feat(developer): tag data source and display data unavailable on failed fetch`**
+- [x] **Step 1: Write failing test verifying failed fetch tags `source: 'fallback'` and does not show 28 repos / 64 stars / 42 followers**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement source tagging and data unavailable UI state in developerCard**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `feat(developer): tag data source and display data unavailable on failed fetch`**
 

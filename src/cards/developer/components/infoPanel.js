@@ -39,9 +39,12 @@ export function renderInfoPanel(data, theme) {
   }
 
   // Developer Activity Badge (honest metric)
+  const isFallback = data.source === 'fallback';
   const annualCommitsVal = data.annualCommits || (data.counts ? data.counts.reduce((a, b) => a + (b || 0), 0) : 0);
   const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 0;
-  const devBadgeText = annualCommitsVal > 0 ? `${annualCommitsVal.toLocaleString()} COMMITS / YR` : `${totalStarsVal} TOTAL STARS`;
+  const devBadgeText = isFallback
+    ? 'OFFLINE / FALLBACK'
+    : (annualCommitsVal > 0 ? `${annualCommitsVal.toLocaleString()} COMMITS / YR` : `${totalStarsVal} TOTAL STARS`);
 
   // Deterministic commit SHA
   const commitSha = data.commitSha || '–';
@@ -49,7 +52,7 @@ export function renderInfoPanel(data, theme) {
   // Tech tags with branded glowing indicator dots
   const techList = Array.isArray(data.tech) && data.tech.length > 0
     ? data.tech
-    : ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'];
+    : (isFallback ? ['Offline'] : ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js']);
 
   let techPills = '';
   const isMultiRow = techList.length > 4;
@@ -140,17 +143,17 @@ export function renderInfoPanel(data, theme) {
     <!-- Personalized Member Status Pill -->
     <rect x="32" y="100" width="248" height="28" rx="14" fill="${isLight ? '#ebf3ff' : '#0f1f38'}" stroke="${isLight ? '#b8d5ff' : '#1f3b66'}"/>
     <!-- Radar Waves -->
-    <circle cx="48" cy="114" r="4.5" fill="#3fb950"/>
-    <circle cx="48" cy="114" r="4.5" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.6">
+    <circle cx="48" cy="114" r="4.5" fill="${isFallback ? '#f85149' : '#3fb950'}"/>
+    <circle cx="48" cy="114" r="4.5" fill="none" stroke="${isFallback ? '#f85149' : '#3fb950'}" stroke-width="1.5" opacity="0.6">
       <animate attributeName="r" values="4.5;13" dur="2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.6;0" dur="2s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="48" cy="114" r="4.5" fill="none" stroke="#3fb950" stroke-width="1" opacity="0.4">
+    <circle cx="48" cy="114" r="4.5" fill="none" stroke="${isFallback ? '#f85149' : '#3fb950'}" stroke-width="1" opacity="0.4">
       <animate attributeName="r" values="4.5;18" dur="2s" begin="0.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.4;0" dur="2s" begin="0.6s" repeatCount="indefinite"/>
     </circle>
-    <text class="t" x="62" y="119" font-size="11.5" font-weight="800" letter-spacing="0.8" fill="${isLight ? '#0969da' : '#dbe6f5'}">
-      ${customStatus ? customStatus : `<tspan fill="${subtext}" font-weight="700">MEMBER SINCE </tspan><tspan fill="${accent}" font-weight="800">${joinedYear}</tspan>`}
+    <text class="t" x="62" y="119" font-size="11.5" font-weight="800" letter-spacing="0.8" fill="${isLight ? (isFallback ? '#cf222e' : '#0969da') : (isFallback ? '#ff7b72' : '#dbe6f5')}">
+      ${customStatus ? customStatus : (isFallback ? 'DATA UNAVAILABLE' : `<tspan fill="${subtext}" font-weight="700">MEMBER SINCE </tspan><tspan fill="${accent}" font-weight="800">${joinedYear}</tspan>`)}
     </text>
 
     <!-- Developer Rank & Tier Badge -->

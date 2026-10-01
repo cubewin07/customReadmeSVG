@@ -29,41 +29,63 @@ export const developerCard = {
       const normalized = normalizeDeveloperData(data);
       if (normalized) {
         return {
+          source: 'live',
           ...DEFAULT_DEVELOPER_PROFILE,
           ...normalized,
           name: options.name || normalized.name || DEFAULT_DEVELOPER_PROFILE.name,
           role: options.role || normalized.role || DEFAULT_DEVELOPER_PROFILE.role,
           status: options.status || normalized.status || DEFAULT_DEVELOPER_PROFILE.status,
           focus: options.bio ? [options.bio] : normalized.focus,
-          streak: normalized.streak || DEFAULT_DEVELOPER_PROFILE.streak,
-          counts: normalized.counts && normalized.counts.length >= 49 ? normalized.counts : DEFAULT_DEVELOPER_PROFILE.counts,
+          streak: normalized.streak,
+          counts: normalized.counts,
         };
       }
     } catch {
-      // Graceful fallback to default developer profile on unauthenticated/offline environments
+      // Graceful fallback to explicit data unavailable state on unauthenticated/offline environments
     }
 
     return {
-      ...DEFAULT_DEVELOPER_PROFILE,
-      name: options.name || (username && username !== DEFAULT_DEVELOPER_PROFILE.login ? username : DEFAULT_DEVELOPER_PROFILE.name),
-      login: username || DEFAULT_DEVELOPER_PROFILE.login,
-      handle: username ? `@${username}` : DEFAULT_DEVELOPER_PROFILE.handle,
-      role: options.role || DEFAULT_DEVELOPER_PROFILE.role,
-      status: options.status || DEFAULT_DEVELOPER_PROFILE.status,
-      focus: options.bio ? [options.bio] : DEFAULT_DEVELOPER_PROFILE.focus,
+      source: 'fallback',
+      name: options.name || username || 'Developer',
+      login: username || 'developer',
+      handle: username ? `@${username}` : '@developer',
+      role: options.role || 'Software Engineer',
+      status: options.status || 'DATA UNAVAILABLE',
+      focus: options.bio ? [options.bio] : ['GitHub live data currently unavailable', 'Check network or token configuration.'],
+      tech: [],
+      stats: [
+        { label: 'REPOSITORIES', value: 0 },
+        { label: 'TOTAL STARS', value: 0 },
+        { label: 'FOLLOWERS', value: 0 },
+      ],
+      commit: 'No commit telemetry',
+      commitSha: '',
+      annualCommits: 0,
+      streak: 0,
+      repos: [],
+      counts: new Array(60).fill(0),
     };
   },
 
   renderSvg(data, theme, options = {}) {
+    const isFallback = data?.source === 'fallback';
     const profile = {
-      ...DEFAULT_DEVELOPER_PROFILE,
+      ...(isFallback ? {} : DEFAULT_DEVELOPER_PROFILE),
       ...data,
       name: options.name || data?.name || (options.username && options.username !== DEFAULT_DEVELOPER_PROFILE.login ? options.username : DEFAULT_DEVELOPER_PROFILE.name),
       handle: data?.handle || (options.username ? `@${options.username}` : DEFAULT_DEVELOPER_PROFILE.handle),
       role: options.role || data?.role || DEFAULT_DEVELOPER_PROFILE.role,
-      joinedYear: data?.joinedYear || (data?.createdAt ? new Date(data.createdAt).getFullYear() : DEFAULT_DEVELOPER_PROFILE.joinedYear),
-      customStatus: options.status || null,
-      focus: options.bio ? [options.bio] : (data?.focus || DEFAULT_DEVELOPER_PROFILE.focus),
+      joinedYear: data?.joinedYear || (data?.createdAt ? new Date(data.createdAt).getFullYear() : (isFallback ? '–' : DEFAULT_DEVELOPER_PROFILE.joinedYear)),
+      customStatus: options.status || (isFallback ? 'DATA UNAVAILABLE' : null),
+      focus: options.bio ? [options.bio] : (data?.focus || (isFallback ? ['GitHub live data currently unavailable', 'Check network or token configuration.'] : DEFAULT_DEVELOPER_PROFILE.focus)),
+      stats: data?.stats || (isFallback ? [
+        { label: 'REPOSITORIES', value: 0 },
+        { label: 'TOTAL STARS', value: 0 },
+        { label: 'FOLLOWERS', value: 0 },
+      ] : DEFAULT_DEVELOPER_PROFILE.stats),
+      repos: data?.repos !== undefined ? data.repos : (isFallback ? [] : DEFAULT_DEVELOPER_PROFILE.repos),
+      counts: data?.counts || (isFallback ? new Array(60).fill(0) : DEFAULT_DEVELOPER_PROFILE.counts),
+      streak: data?.streak ?? (isFallback ? 0 : DEFAULT_DEVELOPER_PROFILE.streak),
     };
 
     const cardBg = theme.bg || '#12161d';

@@ -25,9 +25,9 @@ export function renderActDesk(data, theme = {}) {
   const commitMsg = escapeXml(data.commit || 'feat: add SVG animation engine');
 
   // Pinned repos fallback
-  const repos = data.repos && data.repos.length >= 3
+  const repos = Array.isArray(data.repos)
     ? data.repos
-    : [
+    : (data.source === 'fallback' ? [] : [
         {
           name: 'customReadmeSVG',
           language: 'JavaScript',
@@ -52,7 +52,7 @@ export function renderActDesk(data, theme = {}) {
           description: 'Algorithmic artwork & visual tools',
           sparkline: [3, 3, 4, 2, 5, 4, 6, 9],
         },
-      ];
+      ]);
 
   // Confetti particles deterministic positions and colors
   const confettiColors = ['#ff6b6b', '#ffd76a', '#58a6ff', '#3fb950', '#bc8cff', '#ff9ed2'];
@@ -101,43 +101,57 @@ export function renderActDesk(data, theme = {}) {
   const starts = [7.7, 9.0, 10.4];
   const ends = [9.0, 10.4, 11.9];
   let repoSlidesSvg = '';
-  for (let k = 0; k < 3; k++) {
-    const r = repos[k];
-    const a = starts[k];
-    const b = ends[k];
-    const repoName = r.name || '';
-    const nameFontSize = repoName.length > 15 ? '11.5' : '13.5';
-    const truncatedName = repoName.length > 21 ? repoName.slice(0, 18) + '...' : repoName;
-    const descText = r.description ? (r.description.length > 32 ? r.description.slice(0, 29) + '...' : r.description) : '';
-    const pts = r.sparkline.map((v, i) => `${(-68 + i * 19.4).toFixed(1)},${(44 - v * 2.2).toFixed(1)}`).join(' ');
-    const areaPts = `-68,44 ${pts} ${( -68 + (r.sparkline.length - 1) * 19.4).toFixed(1)},44`;
-
-    repoSlidesSvg += `
+  if (repos.length === 0) {
+    repoSlidesSvg = `
       <g opacity="0">
-        ${anim('opacity', pulse(a, b - 0.2, 0.25))}
-        ${tr([
-          [a - 0.01, 14, 0],
-          [a, 14, 0],
-          [a + 0.3, 0, 0],
-          [b - 0.2, 0, 0],
-          [b + 0.05, -14, 0],
-        ])}
+        ${anim('opacity', pulse(7.7, 11.9, 0.25))}
         <!-- Corner Tech Brackets -->
         <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
-        <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
-        <text class="m" x="-68" y="-15" font-size="${nameFontSize}" font-weight="700" fill="#eaf6ff">${escapeXml(truncatedName)}</text>
-        <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(descText)}</text>
-        <circle cx="-64" cy="14" r="4" fill="${r.color}"/>
-        <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language)}</text>
-        <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars}</text>
-        <!-- Sparkline Area Glow & Polyline -->
-        <polygon points="${areaPts}" fill="url(#holoAreaGrad)"/>
-        <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      </g>
-      <!-- Pagination Dot Indicator -->
-      <circle cx="${(k - 1) * 12}" cy="66" r="2.6" fill="#4fd1ff" opacity="0.3">
-        ${anim('opacity', [[0, 0.3], [a, 0.3], [a + 0.1, 1], [b - 0.1, 1], [b, 0.3]])}
-      </circle>`;
+        <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">SYSTEM STATUS</text>
+        <text class="m" x="-68" y="-15" font-size="12" font-weight="700" fill="#eaf6ff">NO PUBLIC REPOS</text>
+        <text class="t" x="-68" y="4" font-size="9.5" fill="#9fc3d9">Awaiting repository sync</text>
+      </g>`;
+  } else {
+    const repoCount = Math.min(repos.length, 3);
+    for (let k = 0; k < repoCount; k++) {
+      const r = repos[k];
+      const a = starts[k];
+      const b = ends[k];
+      const repoName = r.name || '';
+      const nameFontSize = repoName.length > 15 ? '11.5' : '13.5';
+      const truncatedName = repoName.length > 21 ? repoName.slice(0, 18) + '...' : repoName;
+      const descText = r.description ? (r.description.length > 32 ? r.description.slice(0, 29) + '...' : r.description) : '';
+      const sparklineArr = Array.isArray(r.sparkline) && r.sparkline.length > 0 ? r.sparkline : [1, 1, 1, 1, 1, 1, 1, 1];
+      const pts = sparklineArr.map((v, i) => `${(-68 + i * 19.4).toFixed(1)},${(44 - v * 2.2).toFixed(1)}`).join(' ');
+      const areaPts = `-68,44 ${pts} ${( -68 + (sparklineArr.length - 1) * 19.4).toFixed(1)},44`;
+
+      repoSlidesSvg += `
+        <g opacity="0">
+          ${anim('opacity', pulse(a, b - 0.2, 0.25))}
+          ${tr([
+            [a - 0.01, 14, 0],
+            [a, 14, 0],
+            [a + 0.3, 0, 0],
+            [b - 0.2, 0, 0],
+            [b + 0.05, -14, 0],
+          ])}
+          <!-- Corner Tech Brackets -->
+          <path d="M-72 -48 h6 M-72 -48 v6 M72 -48 h-6 M72 -48 v6 M-72 48 h6 M-72 48 v-6 M72 48 h-6 M72 48 v-6" stroke="#4fd1ff" stroke-width="1.2" fill="none"/>
+          <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
+          <text class="m" x="-68" y="-15" font-size="${nameFontSize}" font-weight="700" fill="#eaf6ff">${escapeXml(truncatedName)}</text>
+          <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(descText)}</text>
+          <circle cx="-64" cy="14" r="4" fill="${r.color || '#58a6ff'}"/>
+          <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language || 'Code')}</text>
+          <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars || 0}</text>
+          <!-- Sparkline Area Glow & Polyline -->
+          <polygon points="${areaPts}" fill="url(#holoAreaGrad)"/>
+          <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        </g>
+        <!-- Pagination Dot Indicator -->
+        <circle cx="${(k - 1) * 12}" cy="66" r="2.6" fill="#4fd1ff" opacity="0.3">
+          ${anim('opacity', [[0, 0.3], [a, 0.3], [a + 0.1, 1], [b - 0.1, 1], [b, 0.3]])}
+        </circle>`;
+    }
   }
 
   // Keyboard keycaps matrix with RGB Chroma underglow

@@ -156,11 +156,11 @@
 - Consumes: `history.nodes[i].committedDate` in `normalizeDeveloperData`
 - Produces: 8-element sparkline array based on weekly commit density instead of `message.charCodeAt(0) % 7`
 
-- [ ] **Step 1: Write failing test verifying sparkline bins are determined by commit dates**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement weekly date binning from `committedDate`**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `feat(developer): compute repo sparklines from real weekly commit bins`**
+- [x] **Step 1: Write failing test verifying sparkline bins are determined by commit dates**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement weekly date binning from `committedDate`**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `feat(developer): compute repo sparklines from real weekly commit bins`**
 
 ---
 

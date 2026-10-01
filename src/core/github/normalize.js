@@ -176,7 +176,7 @@ export function normalizeStats(rawData) {
  * @param {object} rawData - GraphQL response payload
  * @returns {object|null}
  */
-export function normalizeDeveloperData(rawData) {
+export function normalizeDeveloperData(rawData, options = {}) {
   if (!rawData || !rawData.user) return null;
   const user = rawData.user;
 
@@ -190,18 +190,36 @@ export function normalizeDeveloperData(rawData) {
   const topNodes = (user.topRepos?.nodes || []).filter(Boolean);
   const rawRepos = (pinnedNodes.length > 0 ? pinnedNodes : topNodes).slice(0, 3);
 
+  const now = options.now || Date.now();
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
   const normalizedRepos = rawRepos.map(r => {
-    // Generate an 8-point sparkline from commit history or sensible defaults
+    // Generate an 8-point sparkline by bucketing real commit dates into weekly bins
     const historyNodes = r.defaultBranchRef?.target?.history?.nodes || [];
-    let sparkline = [2, 4, 3, 5, 4, 7, 6, 8];
-    if (historyNodes.length >= 4) {
-      sparkline = historyNodes.slice(0, 8).map((node) => {
-        const charCode = node.message ? node.message.charCodeAt(0) : 5;
-        return Math.max(1, Math.min(9, Math.round(2 + (charCode % 7))));
-      });
-      while (sparkline.length < 8) {
-        sparkline.push(5);
+    const weeklyCounts = [0, 0, 0, 0, 0, 0, 0, 0];
+
+    for (const node of historyNodes) {
+      if (node.committedDate) {
+        const time = new Date(node.committedDate).getTime();
+        const diffMs = now - time;
+        if (diffMs >= 0) {
+          const weekIdx = Math.floor(diffMs / WEEK_MS);
+          if (weekIdx >= 0 && weekIdx < 8) {
+            weeklyCounts[7 - weekIdx]++;
+          }
+        }
       }
+    }
+
+    const maxCount = Math.max(...weeklyCounts);
+    let sparkline;
+    if (maxCount === 0) {
+      sparkline = [1, 1, 1, 1, 1, 1, 1, 1];
+    } else {
+      sparkline = weeklyCounts.map(count => {
+        if (count === 0) return 1;
+        return Math.max(1, Math.min(9, Math.round(1 + (count / maxCount) * 8)));
+      });
     }
 
     return {

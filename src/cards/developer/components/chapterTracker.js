@@ -13,13 +13,12 @@ import { anim, pulse, sl, sla } from '../utils/timeline.js';
  */
 export function renderChapterTracker(profile, theme = {}) {
   const accent = theme.accent || '#58a6ff';
-  const streak = profile.streak || 14;
+  const streak = profile.streak ?? 0;
   const counts = profile.counts || [];
   let totalCommits = 0;
   for (let i = 0; i < 49 && i < counts.length; i++) {
     totalCommits += (counts[i] || 0);
   }
-  if (totalCommits === 0) totalCommits = 142;
 
   return `<!-- ============================= UNIFIED CHAPTER TRACKER HUD ============================= -->
   <g transform="translate(20, 16)">

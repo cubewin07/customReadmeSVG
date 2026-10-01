@@ -176,11 +176,11 @@
 - Consumes: `profile` in developer card components
 - Produces: Developer card rendering actual commit count (including 0), empty or actual commitSha, without hardcoded `'ea77b7c'`, `142`, or `14`
 
-- [ ] **Step 1: Write failing test asserting zero-commit accounts don't receive fake 142 commits, streak 14, or sha ea77b7c**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Remove hardcoded fallbacks across components**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `fix(developer): remove hardcoded fake defaults and fallbacks`**
+- [x] **Step 1: Write failing test asserting zero-commit accounts don't receive fake 142 commits, streak 14, or sha ea77b7c**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Remove hardcoded fallbacks across components**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(developer): remove hardcoded fake defaults and fallbacks`**
 
 ---
 

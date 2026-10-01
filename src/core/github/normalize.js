@@ -233,8 +233,8 @@ export function normalizeDeveloperData(rawData, options = {}) {
   });
 
   // 2. Latest Commit Message & Real Commit SHA
-  let latestCommit = 'feat: update developer card engine';
-  let commitSha = 'ea77b7c';
+  let latestCommit = '';
+  let commitSha = '';
   for (const r of [...rawRepos, ...topNodes]) {
     const history = r.defaultBranchRef?.target?.history?.nodes || [];
     if (history.length > 0) {
@@ -304,10 +304,8 @@ export function normalizeDeveloperData(rawData, options = {}) {
   // Extract last 60 days of counts
   let counts = allDays.slice(-60).map(d => d.count);
   if (counts.length < 60) {
-    // Fill with default realistic counts if history is short
-    const seed = [3, 4, 0, 5, 6, 2, 8, 4, 0, 3, 5, 2, 7, 0, 4, 3, 6, 5, 9, 2, 0, 4, 5, 7, 3, 6, 0, 4, 2, 5];
     while (counts.length < 60) {
-      counts.unshift(seed[counts.length % seed.length]);
+      counts.unshift(0);
     }
   }
 
@@ -331,10 +329,10 @@ export function normalizeDeveloperData(rawData, options = {}) {
       { label: 'TOTAL STARS', value: totalStars },
       { label: 'FOLLOWERS', value: followers },
     ],
-    commit: latestCommit,
+    commit: latestCommit || 'No recent public commits',
     commitSha,
     annualCommits,
-    streak: streak > 0 ? streak : 12,
+    streak,
     repos: normalizedRepos.length > 0 ? normalizedRepos : undefined,
     counts,
   };

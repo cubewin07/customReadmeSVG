@@ -40,11 +40,11 @@ export function renderInfoPanel(data, theme) {
 
   // Developer Activity Badge (honest metric)
   const annualCommitsVal = data.annualCommits || (data.counts ? data.counts.reduce((a, b) => a + (b || 0), 0) : 0);
-  const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 64;
+  const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 0;
   const devBadgeText = annualCommitsVal > 0 ? `${annualCommitsVal.toLocaleString()} COMMITS / YR` : `${totalStarsVal} TOTAL STARS`;
 
   // Deterministic commit SHA
-  const commitSha = data.commitSha || 'ea77b7c';
+  const commitSha = data.commitSha || '–';
 
   // Tech tags with branded glowing indicator dots
   const techList = Array.isArray(data.tech) && data.tech.length > 0
@@ -87,9 +87,9 @@ export function renderInfoPanel(data, theme) {
   const statsList = Array.isArray(data.stats) && data.stats.length === 3
     ? data.stats
     : [
-        { label: 'REPOSITORIES', value: data.stats?.repos ?? 28 },
-        { label: 'TOTAL STARS', value: data.stats?.stars ?? 64 },
-        { label: 'FOLLOWERS', value: data.stats?.followers ?? 42 },
+        { label: 'REPOSITORIES', value: data.stats?.repos ?? 0 },
+        { label: 'TOTAL STARS', value: data.stats?.stars ?? 0 },
+        { label: 'FOLLOWERS', value: data.stats?.followers ?? 0 },
       ];
 
   const cells = [52, 222, 392];

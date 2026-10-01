@@ -74,7 +74,7 @@ function extractProfileFields(data, options = {}) {
   const rawBio = data?.bio || 'No bio provided.';
   const hideBio = options.hide_bio === 'true' || options.show_bio === 'false';
   const hideMeta = options.hide_meta === 'true' || options.show_meta === 'false';
-  const bio = hideBio ? null : escapeXml(rawBio.length > 95 ? rawBio.slice(0, 92) + '...' : rawBio);
+  const bio = hideBio ? null : (rawBio.length > 95 ? rawBio.slice(0, 92) + '...' : rawBio);
 
   const avatarDataUri = data?.avatarBase64 && data.avatarBase64.startsWith('data:') ? escapeXml(data.avatarBase64) : null;
   const followers = data?.followers ?? 0;
@@ -181,7 +181,7 @@ function renderV1ClassicSvg(data, theme, options = {}) {
         <text x="335" y="13" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
       ` : ''}
 
-      ${p.bio ? `<text x="0" y="55" class="bio">${p.bio}</text>` : ''}
+      ${p.bio ? `<text x="0" y="55" class="bio">${escapeXml(p.bio)}</text>` : ''}
     </g>
 
     <!-- Meta Info Row -->
@@ -288,7 +288,7 @@ function renderV1HeroSvg(data, theme, options = {}) {
       </g>
     ` : ''}
 
-    ${p.bio ? `<text x="0" y="${p.createdAtYear ? 58 : 38}" text-anchor="middle" class="hero-bio">${p.bio}</text>` : ''}
+    ${p.bio ? `<text x="0" y="${p.createdAtYear ? 58 : 38}" text-anchor="middle" class="hero-bio">${escapeXml(p.bio)}</text>` : ''}
   </g>
 
   <!-- Bottom Stats Row (4 tiles) -->
@@ -573,7 +573,7 @@ function renderV1DashboardSvg(data, theme, options = {}) {
         <text x="407" y="17" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
       ` : ''}
 
-      ${p.bio ? `<text x="0" y="62" class="bio-text">${p.bio}</text>` : ''}
+      ${p.bio ? `<text x="0" y="62" class="bio-text">${escapeXml(p.bio)}</text>` : ''}
     </g>
 
     <!-- 2x2 Dashboard Tile Cards -->

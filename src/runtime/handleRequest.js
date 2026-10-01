@@ -4,7 +4,7 @@ import { getTheme } from '../svg/theme.js';
 import { createCache } from '../core/cache/index.js';
 import { escapeXml } from '../svg/escape.js';
 
-const sharedCache = createCache({ kind: 'memory', ttlMs: 3600000 });
+export const sharedCache = createCache({ kind: 'memory', ttlMs: 3600000 });
 
 /**
  * Handle incoming SVG request for /:user or /:user/:card
@@ -36,30 +36,41 @@ export async function handleRequest(pathname, options = {}) {
 
   const headers = {
     'Content-Type': 'image/svg+xml; charset=utf-8',
+    'Cache-Control': 'public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400',
+  };
+
+  const errorHeaders = {
+    'Content-Type': 'image/svg+xml; charset=utf-8',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
   };
 
   if (!card) {
     const errorBody = renderErrorSvg(theme, '404 Card Not Found', `No card plugin registered for "${cardId}".`);
-    return { status: 404, headers, body: errorBody };
+    return { status: 404, headers: errorHeaders, body: errorBody };
   }
 
-  try {
-    const cacheObj = (query.cache === '0' || query.cache === 'false') ? null : sharedCache;
-    const cacheKey = `gh:${card.id}:${username}:${version}`;
+  const cacheObj = (query.cache === '0' || query.cache === 'false') ? null : sharedCache;
+  const cacheKey = `gh:${card.id}:${username}:${version}`;
 
+  try {
     const data = await card.fetchData(username, {
       cache: cacheObj,
       cacheKey,
       ttlMs: card.cacheTtlMs,
-      token: query.token,
     });
 
     const body = card.renderSvg(data, theme, { username, version, ...query });
     return { status: 200, headers, body };
   } catch (err) {
+    // Serve last good copy on API errors (stale-while-revalidate)
+    const staleData = cacheObj?.getStale ? cacheObj.getStale(cacheKey) : null;
+    if (staleData) {
+      const body = card.renderSvg(staleData, theme, { username, version, ...query });
+      return { status: 200, headers, body };
+    }
+
     const errorBody = renderErrorSvg(theme, '500 Server Error', err.message);
-    return { status: 500, headers, body: errorBody };
+    return { status: 500, headers: errorHeaders, body: errorBody };
   }
 }
 

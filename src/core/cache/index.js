@@ -11,7 +11,6 @@ export class MemoryCache {
     const item = this.store.get(key);
     if (!item) return null;
     if (item.expiresAt && Date.now() > item.expiresAt) {
-      this.store.delete(key);
       return null;
     }
     return item.value;
@@ -24,6 +23,11 @@ export class MemoryCache {
 
   has(key) {
     return this.get(key) !== null;
+  }
+
+  getStale(key) {
+    const item = this.store.get(key);
+    return item ? item.value : null;
   }
 
   clear() {
@@ -46,7 +50,6 @@ export class LocalStorageCache {
       if (!raw) return null;
       const { value, expiresAt } = JSON.parse(raw);
       if (expiresAt && Date.now() > expiresAt) {
-        localStorage.removeItem(key);
         return null;
       }
       return value;
@@ -67,6 +70,18 @@ export class LocalStorageCache {
 
   has(key) {
     return this.get(key) !== null;
+  }
+
+  getStale(key) {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const { value } = JSON.parse(raw);
+      return value;
+    } catch {
+      return null;
+    }
   }
 
   clear() {

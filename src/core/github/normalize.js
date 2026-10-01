@@ -77,25 +77,103 @@ export function normalizeLanguages(rawData) {
   };
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 /**
- * Normalizes top repositories list.
+ * Computes an 8-bucket weekly commit sparkline from commit history nodes.
+ * @param {Array} historyNodes
+ * @param {number} [now=Date.now()]
+ * @returns {number[]} 8-element array of counts
+ */
+function computeWeeklyCommitBins(historyNodes = [], now = Date.now()) {
+  const weeklyCounts = [0, 0, 0, 0, 0, 0, 0, 0];
+  for (const node of historyNodes) {
+    if (node && node.committedDate) {
+      const time = new Date(node.committedDate).getTime();
+      const diffMs = now - time;
+      if (diffMs >= 0) {
+        const weekIdx = Math.floor(diffMs / WEEK_MS);
+        if (weekIdx >= 0 && weekIdx < 8) {
+          weeklyCounts[7 - weekIdx]++;
+        }
+      }
+    }
+  }
+  return weeklyCounts;
+}
+
+/**
+ * Normalizes top repositories list with rich metadata for card variants.
  * @param {object} rawData - Data payload returned by REPOS_QUERY
+ * @param {object} [options={}]
  * @returns {object}
  */
-export function normalizeRepos(rawData) {
+export function normalizeRepos(rawData, options = {}) {
   if (!rawData || !rawData.user) return { repos: [] };
   const repos = rawData.user.repositories?.nodes || [];
+  const now = options.now || Date.now();
 
   return {
-    repos: repos.map(r => ({
-      name: r.name,
-      description: r.description || '',
-      url: r.url,
-      stargazerCount: r.stargazerCount || 0,
-      forkCount: r.forkCount || 0,
-      primaryLanguage: r.primaryLanguage ? { name: r.primaryLanguage.name, color: r.primaryLanguage.color } : null,
-      updatedAt: r.updatedAt,
-    })),
+    repos: repos.map(r => {
+      const topics = (r.repositoryTopics?.nodes || [])
+        .map(t => t?.topic?.name)
+        .filter(Boolean);
+
+      const rawLangs = r.languages?.edges || [];
+      let totalLangSize = 0;
+      const languages = rawLangs.map(edge => {
+        const size = edge.size || 0;
+        totalLangSize += size;
+        return {
+          name: edge.node?.name || 'Code',
+          color: edge.node?.color || '#858585',
+          size,
+        };
+      });
+
+      const normalizedLangs = languages.map(l => ({
+        ...l,
+        percentage: totalLangSize > 0 ? parseFloat(((l.size / totalLangSize) * 100).toFixed(1)) : 0,
+      }));
+
+      if (!normalizedLangs.length && r.primaryLanguage) {
+        normalizedLangs.push({
+          name: r.primaryLanguage.name,
+          color: r.primaryLanguage.color || '#858585',
+          size: 1,
+          percentage: 100,
+        });
+      }
+
+      const historyNodes = r.defaultBranchRef?.target?.history?.nodes || [];
+      const firstCommit = historyNodes[0] || null;
+      const lastCommit = firstCommit ? {
+        message: firstCommit.message ? firstCommit.message.split('\n')[0].trim() : '',
+        sha: firstCommit.abbreviatedOid || '',
+        date: firstCommit.committedDate || null,
+      } : (r.lastCommit || null);
+
+      const sparkline = r.sparkline && Array.isArray(r.sparkline)
+        ? r.sparkline
+        : computeWeeklyCommitBins(historyNodes, now);
+
+      return {
+        name: r.name,
+        description: r.description || '',
+        url: r.url,
+        stargazerCount: r.stargazerCount || 0,
+        forkCount: r.forkCount || 0,
+        watchers: r.watchers?.totalCount !== undefined ? r.watchers.totalCount : (r.watchers || 0),
+        primaryLanguage: r.primaryLanguage ? { name: r.primaryLanguage.name, color: r.primaryLanguage.color } : null,
+        topics: topics.length ? topics : (r.topics || []),
+        latestRelease: r.latestRelease?.tagName || (typeof r.latestRelease === 'string' ? r.latestRelease : null),
+        pushedAt: r.pushedAt || r.updatedAt || null,
+        updatedAt: r.updatedAt,
+        languages: normalizedLangs,
+        lastCommit,
+        sparkline,
+      };
+    }),
   };
 }
 

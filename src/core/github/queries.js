@@ -89,10 +89,11 @@ export const LANGUAGES_QUERY = `
 
 /**
  * REPOS_QUERY
- * Fetches top 6 public, non-fork repositories owned by the user, ordered by stargazers count descending.
+ * Fetches top public, non-fork repositories owned by the user with topics, releases,
+ * watchers, languages, and commit history for rich variant displays.
  */
 export const REPOS_QUERY = `
-  query GetUserTopRepos($login: String!, $first: Int = 6) {
+  query GetUserTopRepos($login: String!, $first: Int = 10) {
     user(login: $login) {
       repositories(
         ownerAffiliations: [OWNER]
@@ -107,11 +108,50 @@ export const REPOS_QUERY = `
           url
           stargazerCount
           forkCount
+          pushedAt
+          updatedAt
           primaryLanguage {
             name
             color
           }
-          updatedAt
+          repositoryTopics(first: 3) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          licenseInfo {
+            spdxId
+          }
+          latestRelease {
+            tagName
+          }
+          watchers {
+            totalCount
+          }
+          languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 8) {
+                  nodes {
+                    message
+                    committedDate
+                    abbreviatedOid
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

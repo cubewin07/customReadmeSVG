@@ -228,6 +228,48 @@ export function normalizeStats(rawData) {
     }
   }
 
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const monthlyContributions = new Array(12).fill(0);
+  const monthLabels = new Array(12).fill('');
+
+  for (let m = 0; m < 12; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - (11 - m), 1);
+    monthLabels[m] = MONTH_NAMES[d.getMonth()];
+  }
+
+  for (const d of allDays) {
+    if (d.date && d.contributionCount > 0) {
+      const dayDate = new Date(d.date);
+      const diffMonths = (now.getFullYear() - dayDate.getFullYear()) * 12 + (now.getMonth() - dayDate.getMonth());
+      if (diffMonths >= 0 && diffMonths < 12) {
+        monthlyContributions[11 - diffMonths] += d.contributionCount;
+      }
+    }
+  }
+
+  let peakMonthIdx = 0;
+  let peakMonthVal = 0;
+  for (let i = 0; i < 12; i++) {
+    if (monthlyContributions[i] > peakMonthVal) {
+      peakMonthVal = monthlyContributions[i];
+      peakMonthIdx = i;
+    }
+  }
+
+  const bestMonth = {
+    name: monthLabels[peakMonthIdx] || 'Peak',
+    count: peakMonthVal,
+  };
+
+  const actionTotal = totalCommits + pullRequests + issues + reviews;
+  const effortShares = {
+    commitsPct: actionTotal > 0 ? parseFloat(((totalCommits / actionTotal) * 100).toFixed(1)) : 0,
+    prsPct: actionTotal > 0 ? parseFloat(((pullRequests / actionTotal) * 100).toFixed(1)) : 0,
+    reviewsPct: actionTotal > 0 ? parseFloat(((reviews / actionTotal) * 100).toFixed(1)) : 0,
+    issuesPct: actionTotal > 0 ? parseFloat(((issues / actionTotal) * 100).toFixed(1)) : 0,
+  };
+
   return {
     login: user.login,
     name: user.name || user.login,
@@ -244,6 +286,11 @@ export function normalizeStats(rawData) {
     maxStreak,
     memberYear: user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear(),
     restrictedContributions: contribs.restrictedContributionsCount || 0,
+    weeks: calendarWeeks,
+    monthlyContributions,
+    monthLabels,
+    bestMonth,
+    effortShares,
   };
 }
 

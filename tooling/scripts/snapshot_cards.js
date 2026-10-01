@@ -1,12 +1,74 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { profileCard } from '../../src/cards/profile/index.js';
 import { languagesCard } from '../../src/cards/languages/index.js';
 import { reposCard } from '../../src/cards/repos/index.js';
 import { statsCard } from '../../src/cards/stats/index.js';
 import { developerCard } from '../../src/cards/developer/index.js';
 import { themes } from '../../src/svg/theme.js';
+
+let _hasXmllint = null;
+function hasXmllint() {
+  if (_hasXmllint !== null) return _hasXmllint;
+  try {
+    execFileSync('xmllint', ['--version'], { stdio: 'ignore' });
+    _hasXmllint = true;
+  } catch {
+    _hasXmllint = false;
+  }
+  return _hasXmllint;
+}
+
+/**
+ * Validates that an SVG string is strictly well-formed XML using xmllint
+ * or a structural XML tag stack verification fallback.
+ * @param {string} svg
+ */
+export function validateXml(svg) {
+  if (hasXmllint()) {
+    try {
+      execFileSync('xmllint', ['--noout', '-'], {
+        input: svg,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      return;
+    } catch (err) {
+      const msg = err.stderr ? err.stderr.toString().trim() : err.message;
+      throw new Error(`XML Validation Error: ${msg}`);
+    }
+  }
+
+  // Fallback well-formedness checker when xmllint binary is unavailable
+  const tagRegex = /<(\/)?([a-zA-Z0-9:-]+)([^>]*?)(\/)?>/g;
+  const stack = [];
+  let match;
+  while ((match = tagRegex.exec(svg)) !== null) {
+    const isClosing = Boolean(match[1]);
+    const tagName = match[2];
+    const isSelfClosing = Boolean(match[4]) || match[3].trim().endsWith('/');
+
+    if (tagName.startsWith('?') || tagName.startsWith('!')) continue;
+    if (isSelfClosing) continue;
+
+    if (isClosing) {
+      if (stack.length === 0) {
+        throw new Error(`Unexpected closing tag </${tagName}> with empty stack`);
+      }
+      const top = stack.pop();
+      if (top !== tagName) {
+        throw new Error(`Tag mismatch: expected </${top}>, found </${tagName}>`);
+      }
+    } else {
+      stack.push(tagName);
+    }
+  }
+  if (stack.length > 0) {
+    throw new Error(`Unclosed XML tags: ${stack.join(', ')}`);
+  }
+}
 
 const MOCK_DATA = {
   standard: {
@@ -294,6 +356,9 @@ export async function runSnapshotAudit(options = {}) {
             if (svg.includes('[object Object]')) {
               throw new Error(`Contains unrendered [object Object] in output`);
             }
+
+            // Strict XML well-formedness validation
+            validateXml(svg);
 
             passed++;
 

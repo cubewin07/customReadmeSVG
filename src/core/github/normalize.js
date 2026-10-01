@@ -13,6 +13,115 @@ export function normalizeProfile(rawData) {
   const repos = user.repositories?.nodes || [];
   const totalStars = repos.reduce((acc, r) => acc + (r.stargazerCount || 0), 0);
 
+  const createdAtYear = user.createdAt ? new Date(user.createdAt).getFullYear() : null;
+  const currentYear = new Date().getFullYear();
+  const accountAgeYears = createdAtYear ? Math.max(1, currentYear - createdAtYear) : null;
+  const tenureText = createdAtYear ? `Joined ${createdAtYear} · ${accountAgeYears}y active` : null;
+
+  // Top Repo
+  const topRepoNode = user.topRepo?.nodes?.[0];
+  const topRepo = topRepoNode ? {
+    name: topRepoNode.name,
+    stars: topRepoNode.stargazerCount || 0,
+    language: topRepoNode.primaryLanguage?.name || 'Code',
+    languageColor: topRepoNode.primaryLanguage?.color || '#58a6ff',
+  } : null;
+
+  // Top Languages
+  const langMap = new Map();
+  const topLangRepos = user.topLanguages?.nodes || repos;
+  for (const r of topLangRepos) {
+    if (r.primaryLanguage?.name) {
+      const name = r.primaryLanguage.name;
+      const color = r.primaryLanguage.color || '#58a6ff';
+      const prev = langMap.get(name) || { name, color, count: 0 };
+      prev.count += 1;
+      langMap.set(name, prev);
+    }
+  }
+  const topLangList = Array.from(langMap.values()).sort((a, b) => b.count - a.count).slice(0, 3);
+  const totalLangCount = topLangList.reduce((acc, l) => acc + l.count, 0) || 1;
+  const topLanguages = topLangList.map(l => ({
+    ...l,
+    percentage: Math.round((l.count / totalLangCount) * 100),
+  }));
+
+  // Organizations
+  const organizations = (user.organizations?.nodes || []).map(org => ({
+    name: org.name || org.login,
+    login: org.login,
+    avatarUrl: org.avatarUrl,
+  })).slice(0, 4);
+
+  // Contributions Calendar
+  const contribCollection = user.contributionsCollection || {};
+  const calendar = contribCollection.contributionCalendar || {};
+  const weeks = calendar.weeks || [];
+  const totalContributions = calendar.totalContributions || 0;
+
+  const allDays = [];
+  const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
+  for (const w of weeks) {
+    for (const d of (w.contributionDays || [])) {
+      const count = d.contributionCount || 0;
+      allDays.push({ date: d.date, count, weekday: d.weekday });
+      if (typeof d.weekday === 'number' && d.weekday >= 0 && d.weekday <= 6) {
+        weekdayTotals[d.weekday] += count;
+      }
+    }
+  }
+
+  // Streaks
+  let currentStreak = 0;
+  if (allDays.length > 0) {
+    let i = allDays.length - 1;
+    if (allDays[i].count === 0 && i > 0 && allDays[i - 1].count > 0) {
+      i--;
+    }
+    while (i >= 0 && allDays[i].count > 0) {
+      currentStreak++;
+      i--;
+    }
+  }
+
+  let longestStreak = 0;
+  let tempStreak = 0;
+  for (const day of allDays) {
+    if (day.count > 0) {
+      tempStreak++;
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  let maxWeekdayCount = -1;
+  let busiestWeekdayIndex = 2; // Default Tuesday if equal or empty
+  weekdayTotals.forEach((total, idx) => {
+    if (total > maxWeekdayCount && total > 0) {
+      maxWeekdayCount = total;
+      busiestWeekdayIndex = idx;
+    }
+  });
+  const busiestWeekday = weekdayNames[busiestWeekdayIndex];
+  const last30DaysCount = allDays.slice(-30).reduce((sum, d) => sum + d.count, 0);
+
+  // 12 monthly contributions
+  const monthlyContributions = Array(12).fill(0);
+  if (allDays.length > 0) {
+    const now = new Date();
+    for (const d of allDays) {
+      if (!d.date) continue;
+      const dayDate = new Date(d.date);
+      const diffMonths = (now.getFullYear() - dayDate.getFullYear()) * 12 + (now.getMonth() - dayDate.getMonth());
+      if (diffMonths >= 0 && diffMonths < 12) {
+        const binIndex = 11 - diffMonths;
+        monthlyContributions[binIndex] += d.count;
+      }
+    }
+  }
+
   return {
     login: user.login || '',
     name: user.name || user.login || '',
@@ -24,10 +133,26 @@ export function normalizeProfile(rawData) {
     repositories: user.repositories?.totalCount || 0,
     totalStars,
     createdAt: user.createdAt || '',
+    createdAtYear,
+    accountAgeYears,
+    tenureText,
     location: user.location || null,
     websiteUrl: user.websiteUrl || null,
     company: user.company || null,
+    isHireable: Boolean(user.isHireable),
     status: user.status ? { emoji: user.status.emoji, message: user.status.message } : null,
+    organizations,
+    topRepo,
+    topLanguages,
+    monthlyContributions,
+    calendar: {
+      totalContributions,
+      currentStreak,
+      longestStreak,
+      busiestWeekday,
+      last30DaysCount,
+      weeks,
+    },
   };
 }
 

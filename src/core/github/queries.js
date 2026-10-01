@@ -31,9 +31,59 @@ export const PROFILE_QUERY = `
       location
       websiteUrl
       company
+      isHireable
       status {
         emoji
         message
+      }
+      organizations(first: 4) {
+        nodes {
+          name
+          avatarUrl
+          login
+        }
+      }
+      topRepo: repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 1
+      ) {
+        nodes {
+          name
+          stargazerCount
+          primaryLanguage {
+            name
+            color
+          }
+        }
+      }
+      topLanguages: repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 10
+      ) {
+        nodes {
+          primaryLanguage {
+            name
+            color
+          }
+        }
+      }
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+              weekday
+            }
+          }
+        }
       }
     }
     rateLimit {

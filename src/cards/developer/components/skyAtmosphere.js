@@ -49,7 +49,7 @@ const STAR_DATA = [
  * - Volumetric dust motes in desk lamp beam
  * - Streak Flame HUD badge with rising ember sparks
  */
-export function renderSkyAtmosphere(streak = 14) {
+export function renderSkyAtmosphere() {
   let starsSvg = '';
   for (const s of STAR_DATA) {
     starsSvg += `<circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="#dfe7f5">

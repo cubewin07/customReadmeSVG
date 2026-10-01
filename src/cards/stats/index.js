@@ -6,8 +6,7 @@ import { icons } from '../../svg/icons.js';
 import { calculateRank } from '../../core/stats/rank.js';
 import { renderCardHeader } from '../../svg/header.js';
 import { resolveTheme } from '../../svg/theme.js';
-import { resolveCardWidth, getCardBounds } from '../../svg/layout.js';
-import { fitText } from '../../svg/text.js';
+import { resolveCardWidth } from '../../svg/layout.js';
 import { renderMetricTile } from '../../svg/tile.js';
 import {
   renderProgressRing,
@@ -46,16 +45,6 @@ export const statsCard = {
   },
 };
 
-function formatCount(num) {
-  if (num === null || num === undefined) return '0';
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  }
-  return num.toString();
-}
 
 function renderV1Svg(data, rawTheme, options = {}) {
   const theme = resolveTheme(rawTheme, options);
@@ -505,7 +494,6 @@ export const renderV1DashboardSvg = renderV1YearSvg;
  * Shows: 4 labelled metrics with icons and a rank grade chip in a single row (~72px tall).
  */
 export function renderV1TickerSvg(data, theme, options = {}) {
-  const username = escapeXml(data?.name || data?.login || options.username || 'User');
   const width = resolveCardWidth(options.width);
   const height = 72;
   const contentWidth = width - 48;
@@ -684,7 +672,6 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
   const totalContributions = data?.totalContributions ?? totalCommits;
   const pullRequests = data?.pullRequests ?? 0;
   const reviews = data?.reviews ?? 0;
-  const issues = data?.issues ?? 0;
   const streak = data?.currentStreak ?? (data?.streak ?? 0);
   const maxStreak = data?.maxStreak ?? streak;
   const totalRepos = data?.totalRepos ?? 0;

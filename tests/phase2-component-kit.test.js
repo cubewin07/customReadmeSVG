@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { resolveCardWidth, getSizeClass, CANONICAL_WIDTHS, getCardBounds } from '../src/svg/layout.js';
-import { resolveTheme, themes, getTheme } from '../src/svg/theme.js';
+import { resolveTheme, themes } from '../src/svg/theme.js';
 import { renderMetricTile } from '../src/svg/tile.js';
 import {
   renderProgressRing,
@@ -13,7 +13,6 @@ import {
   renderTopicChips,
   renderReleaseTag,
 } from '../src/svg/primitives.js';
-import { fitText, wrapText, measureText } from '../src/svg/text.js';
 
 function assertValidXml(svg) {
   try {
@@ -36,6 +35,11 @@ test('layout: resolveCardWidth resolves canonical widths and numbers correctly',
   // Clamping
   assert.equal(resolveCardWidth('100'), 300);
   assert.equal(resolveCardWidth(1500), 1200);
+
+  // CANONICAL_WIDTHS map
+  assert.equal(CANONICAL_WIDTHS.full, 830);
+  assert.equal(CANONICAL_WIDTHS.half, 405);
+  assert.equal(CANONICAL_WIDTHS.legacy, 495);
 });
 
 test('layout: getSizeClass returns full, half, or legacy', () => {
@@ -174,4 +178,17 @@ test('primitives: renderDeltaChip renders positive and negative indicators', () 
   const negativeChip = renderDeltaChip({ delta: -6, theme: themes.dark });
   assertValidXml(negativeChip);
   assert.ok(negativeChip.includes('▼ -6%'));
+});
+
+test('primitives: renderTopicChips renders pill chips with valid XML', () => {
+  const chipsSvg = renderTopicChips(['react', 'svg', 'github'], 200, themes.dark);
+  assertValidXml(chipsSvg);
+  assert.ok(chipsSvg.includes('react'));
+  assert.ok(chipsSvg.includes('svg'));
+});
+
+test('primitives: renderReleaseTag renders release badge with valid XML', () => {
+  const tagSvg = renderReleaseTag('v2.1.0', themes.dark);
+  assertValidXml(tagSvg);
+  assert.ok(tagSvg.includes('v2.1.0'));
 });

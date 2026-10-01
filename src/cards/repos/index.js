@@ -67,7 +67,7 @@ function formatCount(num) {
 }
 
 import { resolveTheme } from '../../svg/theme.js';
-import { resolveCardWidth, getCardBounds } from '../../svg/layout.js';
+import { resolveCardWidth } from '../../svg/layout.js';
 
 function renderV1Svg(data, rawTheme, options = {}) {
   const theme = resolveTheme(rawTheme, options);
@@ -680,8 +680,6 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
       ` : reposList.map((repo, idx) => {
         const y = idx * rowGap;
         const langColor = repo.primaryLanguage?.color || '#858585';
-        const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-        const displayLang = langName ? escapeXml(fitText(langName, 9.5, 50)) : '';
         const rawName = repo.name || 'Unnamed';
 
         const formattedStars = formatCount(repo.stargazerCount);

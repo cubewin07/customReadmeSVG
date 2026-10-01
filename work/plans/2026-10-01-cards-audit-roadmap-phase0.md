@@ -43,11 +43,11 @@
 - Consumes: `renderV1BarsSvg(data, theme, options)`
 - Produces: Valid XML SVG string with balanced `<g>` tags
 
-- [ ] **Step 1: Write failing test verifying XML validity of stats bars layout**
-- [ ] **Step 2: Run test to verify it fails with XML parser error**
-- [ ] **Step 3: Remove duplicate `</g>` tag in `renderV1BarsSvg` in `src/cards/stats/index.js`**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `fix(stats): remove duplicate closing g tag in bars layout`**
+- [x] **Step 1: Write failing test verifying XML validity of stats bars layout**
+- [x] **Step 2: Run test to verify it fails with XML parser error**
+- [x] **Step 3: Remove duplicate `</g>` tag in `renderV1BarsSvg` in `src/cards/stats/index.js`**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(stats): remove duplicate closing g tag in bars layout`**
 
 ---
 
@@ -61,11 +61,11 @@
 - Consumes: `profileCard.renderSvg(data, theme, { layout: 'split' })`
 - Produces: Output containing `&amp;` instead of `&amp;amp;` for bios with ampersands
 
-- [ ] **Step 1: Write failing test asserting bio containing `&` renders as `&amp;` and not `&amp;amp;` in split and all layouts**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Modify `extractProfileFields` and layout renderers to escape at output point only**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `fix(profile): escape bio once at output to prevent double-escaping`**
+- [x] **Step 1: Write failing test asserting bio containing `&` renders as `&amp;` and not `&amp;amp;` in split and all layouts**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Modify `extractProfileFields` and layout renderers to escape at output point only**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(profile): escape bio once at output to prevent double-escaping`**
 
 ---
 
@@ -80,15 +80,15 @@
 - Consumes: `renderChapterTracker(profile, theme)`, `renderSkyAtmosphere(streak)`
 - Produces: Streak badge rendered within HUD / safe bounds without clipping against `clip-path="url(#scene)"`
 
-- [ ] **Step 1: Write test verifying developer card SVG has no elements extending past scene width (584px) at the streak badge**
-- [ ] **Step 2: Run test to verify failure / boundary overflow**
-- [ ] **Step 3: Move streak flame badge inside the HUD capsule or anchor right-aligned with safe margin, eliminating the clipping**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `fix(developer): move streak badge inside HUD to prevent edge clipping`**
+- [x] **Step 1: Write test verifying developer card SVG has no elements extending past scene width (584px) at the streak badge**
+- [x] **Step 2: Run test to verify failure / boundary overflow**
+- [x] **Step 3: Move streak flame badge inside the HUD capsule or anchor right-aligned with safe margin, eliminating the clipping**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(developer): move streak badge inside HUD to prevent edge clipping`**
 
 ---
 
-### Task 6: Fix Cache-Control Headers and Remove Query `token`
+### Task 4: Fix Cache-Control Headers and Remove Query `token`
 
 **Files:**
 - Modify: `src/runtime/handleRequest.js`
@@ -98,11 +98,11 @@
 - Consumes: `handleRequest(pathname, options)`
 - Produces: Response headers containing `public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400`, ignoring query.token
 
-- [ ] **Step 1: Write tests checking `Cache-Control` header format and verifying `query.token` is rejected/ignored**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Update `handleRequest.js` headers and remove `query.token` propagation**
-- [ ] **Step 4: Run test to verify it passes**
-- [ ] **Step 5: Commit `fix(runtime): send stale-while-revalidate cache headers and drop query token`**
+- [x] **Step 1: Write tests checking `Cache-Control` header format and verifying `query.token` is rejected/ignored**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Update `handleRequest.js` headers and remove `query.token` propagation**
+- [x] **Step 4: Run test to verify it passes**
+- [x] **Step 5: Commit `fix(runtime): send stale-while-revalidate cache headers and drop query token`**
 
 ---
 
@@ -117,8 +117,8 @@
 - Consumes: `runSnapshotAudit()`
 - Produces: Complete audit that parses every generated SVG with strict XML validation (`xmllint`)
 
-- [ ] **Step 1: Write `tests/xml-validity.test.js` that audits all cards and validates each against `xmllint`**
-- [ ] **Step 2: Update `tooling/scripts/snapshot_cards.js` to include XML well-formedness validation in audit loop**
-- [ ] **Step 3: Regenerate all 120 snapshots via `npm run snapshot`**
-- [ ] **Step 4: Run `xmllint --noout work/snapshots/*.svg` and `npm test` to verify 100% pass rate**
-- [ ] **Step 5: Commit `feat(audit): enforce strict XML validation across all 120 card snapshots`**
+- [x] **Step 1: Write `tests/xml-validity.test.js` that audits all cards and validates each against `xmllint`**
+- [x] **Step 2: Update `tooling/scripts/snapshot_cards.js` to include XML well-formedness validation in audit loop**
+- [x] **Step 3: Regenerate all 120 snapshots via `npm run snapshot`**
+- [x] **Step 4: Run `xmllint --noout work/snapshots/*.svg` and `npm test` to verify 100% pass rate**
+- [x] **Step 5: Commit `feat(audit): enforce strict XML validation across all 120 card snapshots`**

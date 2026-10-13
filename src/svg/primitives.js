@@ -312,3 +312,97 @@ export function renderReleaseTag(tagName, theme = {}) {
       <text x="${tagWidth / 2}" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" fill="${textCol}">${escaped}</text>
     </g>`;
 }
+
+/**
+ * 9. Glassmorphic Bento Tile Primitive
+ */
+export function bentoTile({ x = 0, y = 0, width = 100, height = 50, rx = 10, theme = {}, children = '' }) {
+  const cardBg = theme.cardBg || 'rgba(13, 17, 28, 0.78)';
+  const border = theme.subtleBorder || theme.border || 'rgba(255, 255, 255, 0.12)';
+  return `
+    <g transform="translate(${x}, ${y})">
+      <rect width="${width}" height="${height}" rx="${rx}" fill="${cardBg}" stroke="${border}" stroke-width="1" />
+      <line x1="${rx}" y1="0.5" x2="${width - rx}" y2="0.5" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" />
+      ${children}
+    </g>
+  `;
+}
+
+/**
+ * 10. Glowing Skill / Tech Badge Primitive
+ */
+export function skillBadge({ x = 0, y = 0, label = '', accent = '#38bdf8', level = '' }) {
+  const textWidth = label.length * 6.8 + (level ? 28 : 14);
+  const width = Math.max(58, Math.round(textWidth + 16));
+  return {
+    width,
+    svg: `
+      <g transform="translate(${x}, ${y})">
+        <rect width="${width}" height="24" rx="6" fill="#090d16" fill-opacity="0.85" stroke="${accent}" stroke-opacity="0.35" stroke-width="1" />
+        <circle cx="10" cy="12" r="2.8" fill="${accent}" />
+        <text x="18" y="15.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="11" font-weight="500" fill="#f1f5f9">${escapeXml(label)}</text>
+        ${level ? `<text x="${width - 8}" y="15" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="${accent}">${escapeXml(level)}</text>` : ''}
+      </g>
+    `,
+  };
+}
+
+/**
+ * 11. Specular Shared Defs Helper
+ */
+export function renderSharedDefs(theme = {}) {
+  const c1 = theme.title || '#38bdf8';
+  const c2 = theme.accent || '#818cf8';
+  const bg = theme.bg || '#06080f';
+  const cardBg = theme.cardBg || '#0d111c';
+  return `
+    <defs>
+      <linearGradient id="card-border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
+        <stop offset="35%" stop-color="#ffffff" stop-opacity="0.06" />
+        <stop offset="100%" stop-color="${c1}" stop-opacity="0.18" />
+      </linearGradient>
+      <linearGradient id="tile-surface-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${cardBg}" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="${bg}" stop-opacity="0.95" />
+      </linearGradient>
+      <radialGradient id="glow-primary" cx="0%" cy="0%" r="70%">
+        <stop offset="0%" stop-color="${c1}" stop-opacity="0.16" />
+        <stop offset="100%" stop-color="${c1}" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="glow-secondary" cx="100%" cy="100%" r="70%">
+        <stop offset="0%" stop-color="${c2}" stop-opacity="0.14" />
+        <stop offset="100%" stop-color="${c2}" stop-opacity="0" />
+      </radialGradient>
+      <pattern id="dot-matrix" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="0.85" fill="#ffffff" fill-opacity="0.06" />
+      </pattern>
+    </defs>
+  `;
+}
+
+/**
+ * 12. Glassmorphic Bento Canvas Wrapper
+ */
+export function svgCanvas({ width = 495, height = 230, title = 'Card', children = '', customCss = '', theme = {} }) {
+  const bg = theme.bg || '#06080f';
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeXml(title)}">
+      <title>${escapeXml(title)}</title>
+      ${renderSharedDefs(theme)}
+      <style>
+        .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; }
+        .label-caps { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; fill: ${theme.secondaryText || '#94a3b8'}; }
+        ${customCss}
+      </style>
+      <rect width="${width}" height="${height}" rx="14" fill="${bg}" />
+      <rect width="${width}" height="${height}" rx="14" fill="url(#dot-matrix)" />
+      <rect width="${width}" height="${height}" rx="14" fill="url(#glow-primary)" />
+      <rect width="${width}" height="${height}" rx="14" fill="url(#glow-secondary)" />
+      ${children}
+      <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="13.5" stroke="url(#card-border-grad)" stroke-width="1" fill="none" />
+    </svg>
+  `.trim();
+}
+

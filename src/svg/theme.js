@@ -161,6 +161,24 @@ export const themes = {
     ringBg: '#372a4b',
     heatmapLevels: ['#241b30', '#372a4b', '#5a3d75', '#a44d93', '#ef65b0'],
   },
+  obsidian: {
+    bg: '#06080F',
+    border: '#232f42',
+    subtleBorder: '#162032',
+    title: '#38BDF8',
+    text: '#F8FAFC',
+    secondaryText: '#94A3B8',
+    accent: '#818CF8',
+    iconColor: '#38BDF8',
+    barBg: '#131929',
+    cardBg: '#0D111C',
+    badgeBg: 'rgba(56, 189, 248, 0.15)',
+    positive: '#34D399',
+    negative: '#EF4444',
+    neutral: '#94A3B8',
+    ringBg: '#131929',
+    heatmapLevels: ['#0D111C', '#0E3A5A', '#135882', '#2288B8', '#38BDF8'],
+  },
 };
 
 /**

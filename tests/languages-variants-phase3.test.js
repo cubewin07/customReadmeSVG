@@ -88,3 +88,32 @@ test('Languages card supports canonical widths (830 full, 405 half, 495 legacy) 
   assert.ok(defaultSvg.includes('width="495"'));
   assertValidXml(defaultSvg);
 });
+
+test('Languages redesign audit assertions: polyglot renders 6+ languages and enforces minimum cell bounds', () => {
+  const skewedData = {
+    totalSize: 10000000,
+    totalLanguages: 6,
+    totalRepos: 10,
+    languages: [
+      { name: 'TypeScript', color: '#3178c6', size: 9200000, percentage: 92.0, repoCount: 8 },
+      { name: 'JavaScript', color: '#f1e05a', size: 400000, percentage: 4.0, repoCount: 3 },
+      { name: 'Python', color: '#3572A5', size: 200000, percentage: 2.0, repoCount: 2 },
+      { name: 'Rust', color: '#dea584', size: 100000, percentage: 1.0, repoCount: 1 },
+      { name: 'HTML', color: '#e34c26', size: 50000, percentage: 0.5, repoCount: 2 },
+      { name: 'CSS', color: '#563d7c', size: 50000, percentage: 0.5, repoCount: 2 },
+    ],
+  };
+
+  const svg = languagesCard.renderSvg(skewedData, themes.dark, { layout: 'polyglot', langs_count: '6' });
+  assertValidXml(svg);
+  // Must render all 6 languages, including CSS
+  assert.ok(svg.includes('CSS'), 'Polyglot must render all requested languages including 6th item');
+
+  // Verify that treemap cells enforce minimum cell height (no cell rect with height < 38)
+  const cellRectMatches = Array.from(svg.matchAll(/class="treemap-cell"[\s\S]*?<rect[^>]*height="([0-9.]+)"/g));
+  assert.ok(cellRectMatches.length >= 3, 'Must match primary treemap cells');
+  for (const match of cellRectMatches) {
+    const h = parseFloat(match[1]);
+    assert.ok(h >= 38, `Treemap primary cell height must be >= 38 to prevent overflow, got ${h}`);
+  }
+});

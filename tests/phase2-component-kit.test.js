@@ -12,6 +12,11 @@ import {
   renderDeltaChip,
   renderTopicChips,
   renderReleaseTag,
+  renderCardDefs,
+  renderCardStyles,
+  renderCardFrame,
+  renderBentoTile,
+  renderRankBadge,
 } from '../src/svg/primitives.js';
 
 function assertValidXml(svg) {
@@ -191,4 +196,33 @@ test('primitives: renderReleaseTag renders release badge with valid XML', () => 
   const tagSvg = renderReleaseTag('v2.1.0', themes.dark);
   assertValidXml(tagSvg);
   assert.ok(tagSvg.includes('v2.1.0'));
+});
+
+test('Shared Glassmorphic Bento Kit renders valid XML in both dark and light themes', () => {
+  const defs = renderCardDefs('test-card', themes.light, '#0366d6', '#28a745');
+  const style = renderCardStyles(themes.light);
+  const frame = renderCardFrame(495, 220, 'test-card', themes.light);
+  const tile = renderBentoTile({
+    x: 24,
+    y: 50,
+    width: 200,
+    height: 60,
+    theme: themes.light,
+    idPrefix: 'test-card',
+    accentColor: '#0366d6',
+    children: '<text x="12" y="20">Content</text>',
+  });
+  const badge = renderRankBadge({ x: 0, y: 0, rank: 1, theme: themes.light });
+
+  const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="495" height="220"><defs>${defs}</defs><style>${style}</style>${frame}${tile}${badge}</svg>`;
+  try {
+    execFileSync('xmllint', ['--noout', '-'], {
+      input: fullSvg,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch (err) {
+    assert.fail(`Generated SVG is not valid XML: ${err.stderr?.toString() || err.message}\nSVG snippet: ${fullSvg.slice(0, 300)}`);
+  }
+  assert.ok(fullSvg.includes('test-card-bg'));
+  assert.ok(fullSvg.includes('#1'));
 });

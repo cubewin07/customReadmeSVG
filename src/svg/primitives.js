@@ -38,9 +38,13 @@ export function renderProgressRing({
 
   const ringBgColor = theme.ringBg || theme.barBg || '#21262d';
   const progressColor = theme.iconColor || theme.title || '#58a6ff';
+  const tickRadius = radius + strokeWidth / 2 + 3;
 
   return `
     <g class="progress-ring" transform="translate(${x}, ${y})">
+      <!-- Outer Tick Track Ring -->
+      <circle cx="0" cy="0" r="${tickRadius}" fill="none" stroke="${theme.secondaryText || '#8b949e'}" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="2 4" />
+
       <!-- Background Track Circle -->
       <circle cx="0" cy="0" r="${radius}" fill="none" stroke="${ringBgColor}" stroke-width="${strokeWidth}" />
       
@@ -59,8 +63,8 @@ export function renderProgressRing({
       />
       
       <!-- Center Content -->
-      <text x="0" y="3" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="${theme.title}">${escapeXml(level)}</text>
-      <text x="0" y="16" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="${theme.secondaryText}">${escapeXml(label)}</text>
+      <text x="0" y="3" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="${theme.title}">${escapeXml(level)}</text>
+      <text x="0" y="16" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, monospace" font-size="8.5" font-weight="700" fill="${theme.secondaryText}">${escapeXml(label)}</text>
     </g>`;
 }
 
@@ -109,6 +113,7 @@ export function renderStackedBar({
       <g clip-path="url(#${clipId})">
         ${rects}
       </g>
+      <line x1="0" y1="0.75" x2="${width}" y2="0.75" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
     </g>`;
 }
 
@@ -134,11 +139,15 @@ export function renderCommitSparkline(bins = [0,0,0,0,0,0,0,0], width = 80, heig
 
   const pathData = `M ${points.join(' L ')}`;
   const areaData = `${pathData} L ${width},${height} L 0,${height} Z`;
+  const lastPoint = points[points.length - 1].split(',');
+  const lastX = lastPoint[0];
+  const lastY = lastPoint[1];
 
   return `
     <g class="sparkline">
       ${fillColor && fillColor !== 'none' ? `<path d="${areaData}" fill="${fillColor}" opacity="0.25" />` : ''}
       <path d="${pathData}" fill="none" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="${strokeColor}" />
     </g>`;
 }
 
@@ -404,5 +413,143 @@ export function svgCanvas({ width = 495, height = 230, title = 'Card', children 
       <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="13.5" stroke="url(#card-border-grad)" stroke-width="1" fill="none" />
     </svg>
   `.trim();
+}
+
+/**
+ * 13. Theme-Aware Glassmorphic Card Defs
+ */
+export function renderCardDefs(idPrefix, theme = {}, primaryColor = null, secondaryColor = null) {
+  const c1 = primaryColor || theme.title || '#38bdf8';
+  const c2 = secondaryColor || theme.accent || '#818cf8';
+  const isLight = theme.bg === '#ffffff' || (theme.bg && String(theme.bg).toLowerCase().includes('fff'));
+  const rimHighlight = isLight ? theme.border || '#d0d7de' : '#ffffff';
+  const rimOpacity = isLight ? '0.85' : '0.22';
+  const dotOpacity = isLight ? '0.18' : '0.12';
+
+  return `
+    <linearGradient id="${idPrefix}-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${theme.bg}" />
+      <stop offset="100%" stop-color="${theme.cardBg}" />
+    </linearGradient>
+    <linearGradient id="${idPrefix}-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${rimHighlight}" stop-opacity="${rimOpacity}" />
+      <stop offset="45%" stop-color="${theme.border}" stop-opacity="0.65" />
+      <stop offset="100%" stop-color="${c1}" stop-opacity="0.35" />
+    </linearGradient>
+    <linearGradient id="${idPrefix}-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="${rimHighlight}" stop-opacity="${isLight ? '0.6' : '0.14'}" />
+      <stop offset="100%" stop-color="${theme.subtleBorder || theme.border}" stop-opacity="0.45" />
+    </linearGradient>
+    <linearGradient id="${idPrefix}-brand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="${c1}" />
+      <stop offset="100%" stop-color="${c2}" />
+    </linearGradient>
+    <radialGradient id="${idPrefix}-glow-tl" cx="0%" cy="0%" r="65%">
+      <stop offset="0%" stop-color="${c1}" stop-opacity="${isLight ? '0.07' : '0.14'}" />
+      <stop offset="100%" stop-color="${c1}" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="${idPrefix}-glow-br" cx="100%" cy="100%" r="65%">
+      <stop offset="0%" stop-color="${c2}" stop-opacity="${isLight ? '0.06' : '0.11'}" />
+      <stop offset="100%" stop-color="${c2}" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="${idPrefix}-dots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.8" fill="${theme.secondaryText}" fill-opacity="${dotOpacity}" />
+    </pattern>
+  `;
+}
+
+/**
+ * 14. Standardized Card Typography & Utility CSS
+ */
+export function renderCardStyles(theme = {}, extraCss = '') {
+  return `
+    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: ${theme.secondaryText}; letter-spacing: 0.08em; text-transform: uppercase; }
+    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 14px; fill: ${theme.title}; font-variant-numeric: tabular-nums; }
+    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 500; fill: ${theme.secondaryText}; }
+    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
+    ${extraCss}
+  `;
+}
+
+/**
+ * 15. Outer Glassmorphic Card Frame with Top Specular Accent Bar
+ */
+export function renderCardFrame(width, height, idPrefix, theme = {}, rx = 14) {
+  const isTransparent = theme.bg === 'transparent';
+  return `
+    ${!isTransparent ? `<rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-bg)" />` : ''}
+    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-dots)" />
+    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-glow-tl)" />
+    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-glow-br)" />
+    <path d="M ${rx + 4},0.5 L ${width - rx - 4},0.5" stroke="url(#${idPrefix}-brand)" stroke-width="2" stroke-linecap="round" opacity="0.85" />
+    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="none" stroke="url(#${idPrefix}-rim)" stroke-width="1" />
+  `;
+}
+
+/**
+ * 16. Glassmorphic Bento Tile Container
+ */
+export function renderBentoTile({
+  x = 0,
+  y = 0,
+  width = 120,
+  height = 54,
+  theme = {},
+  idPrefix = 'card',
+  rx = 8,
+  accentColor = null,
+  accentPosition = 'left',
+  className = '',
+  children = '',
+}) {
+  const isLight = theme.bg === '#ffffff' || (theme.bg && String(theme.bg).toLowerCase().includes('fff'));
+  const fillOpacity = isLight ? '0.92' : '0.78';
+  const specOpacity = isLight ? '0.5' : '0.15';
+  const clsAttr = className ? ` class="${className}"` : '';
+
+  let accentSvg = '';
+  if (accentColor) {
+    if (accentPosition === 'top') {
+      accentSvg = `<rect x="0" y="0" width="${width}" height="3.5" rx="1.75" fill="${accentColor}" />`;
+    } else {
+      accentSvg = `<rect x="0" y="0" width="3.5" height="${height}" rx="1.75" fill="${accentColor}" />`;
+    }
+  }
+
+  return `
+    <g${clsAttr} transform="translate(${x}, ${y})">
+      <rect x="0" y="0" width="${width}" height="${height}" rx="${rx}" fill="${theme.cardBg}" fill-opacity="${fillOpacity}" stroke="url(#${idPrefix}-tile-rim)" stroke-width="1" />
+      <line x1="${rx}" y1="0.5" x2="${width - rx}" y2="0.5" stroke="#ffffff" stroke-opacity="${specOpacity}" stroke-width="1" />
+      ${accentSvg}
+      ${children}
+    </g>
+  `;
+}
+
+/**
+ * 17. Metallic / Glass Rank Standing Badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Slate)
+ */
+export function renderRankBadge({ x = 0, y = 0, rank = 1, width = 38, height = 18, theme = {} }) {
+  const tierStyles = {
+    1: { bg: 'rgba(234, 179, 8, 0.18)', border: '#eab308', text: '#eab308', label: '#1 🥇' },
+    2: { bg: 'rgba(148, 163, 184, 0.18)', border: '#94a3b8', text: '#94a3b8', label: '#2 🥈' },
+    3: { bg: 'rgba(217, 119, 6, 0.18)', border: '#d97706', text: '#d97706', label: '#3 🥉' },
+  };
+  const st = tierStyles[rank] || {
+    bg: theme.badgeBg || 'rgba(139, 148, 158, 0.12)',
+    border: theme.subtleBorder || theme.border || '#30363d',
+    text: theme.secondaryText || '#8b949e',
+    label: `#${rank}`,
+  };
+
+  return `
+    <g class="rank-badge" transform="translate(${x}, ${y})">
+      <rect x="0" y="0" width="${width}" height="${height}" rx="${Math.round(height / 2)}" fill="${st.bg}" stroke="${st.border}" stroke-opacity="0.6" stroke-width="1" />
+      <text x="${width / 2}" y="${Math.round(height * 0.68)}" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', monospace" font-size="9.5" font-weight="800" fill="${st.text}">${escapeXml(st.label)}</text>
+    </g>
+  `;
 }
 

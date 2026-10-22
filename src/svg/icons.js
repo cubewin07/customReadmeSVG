@@ -78,4 +78,19 @@ export const icons = {
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="${color}" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M10.5 8a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM8 0a.75.75 0 01.75.75v1.815a5.503 5.503 0 013.935 3.935h1.815a.75.75 0 010 1.5h-1.815a5.503 5.503 0 01-3.935 3.935v1.815a.75.75 0 01-1.5 0v-1.815a5.503 5.503 0 01-3.935-3.935H1.515a.75.75 0 010-1.5h1.815A5.503 5.503 0 017.25 2.565V.75A.75.75 0 018 0z"></path>
     </svg>`,
+
+  trophy: (color = '#eab308') => `
+    <svg class="icon" viewBox="0 0 16 16" width="13" height="13" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path d="M4.5 1a.5.5 0 00-.5.5V2H1.75a.75.75 0 00-.75.75v1.5A3.75 3.75 0 004.22 7.97a4.01 4.01 0 003.03 2.48V13H4.75a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5H8.75v-2.55a4.01 4.01 0 003.03-2.48A3.75 3.75 0 0015 4.25v-1.5A.75.75 0 0014.25 2H12v-.5a.5.5 0 00-.5-.5h-7zM2.5 3.5H4v2.72A2.25 2.25 0 012.5 4.25v-.75zm9.5 2.72V3.5h1.5v.75a2.25 2.25 0 01-1.5 1.97z"></path>
+    </svg>`,
+
+  clock: (color = 'currentColor') => `
+    <svg class="icon" viewBox="0 0 16 16" width="12" height="12" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.75 7.742V4.75z"></path>
+    </svg>`,
+
+  layers: (color = 'currentColor') => `
+    <svg class="icon" viewBox="0 0 16 16" width="13" height="13" fill="${color}" style="display:inline-block;vertical-align:text-top;">
+      <path d="M8 .5L.5 4.25 8 8l7.5-3.75L8 .5zM.5 8L8 11.75 15.5 8M.5 11.75L8 15.5l7.5-3.75" stroke="${color}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>`,
 };

@@ -1,4 +1,5 @@
 import { escapeXml } from './escape.js';
+import { fitText, measureText } from './text.js';
 
 /**
  * Standardized SVG header component for cards.
@@ -9,18 +10,23 @@ import { escapeXml } from './escape.js';
  * @param {object} params.theme - Card theme palette
  * @returns {string} SVG <g> element containing header title and optional pill badge
  */
-export function renderCardHeader({ title, badgeText, width = 495, theme }) {
-  const titleText = escapeXml(title);
-  const badge = badgeText ? escapeXml(badgeText) : null;
-  const badgeW = badge ? Math.max(90, Math.ceil(badge.length * 6.5) + 24) : 0;
-  const badgeX = width - 48 - badgeW;
+export function renderCardHeader({ title, badgeText, width = 495, theme = {} }) {
+  const rawBadge = badgeText ? String(badgeText) : null;
+  const badge = rawBadge ? escapeXml(rawBadge) : null;
+  const badgeW = rawBadge ? Math.max(88, Math.ceil(measureText(rawBadge, 10) + 24)) : 0;
+  const innerWidth = width - 48;
+  const badgeX = innerWidth - badgeW;
+  const maxTitleWidth = rawBadge ? Math.max(140, badgeX - 14) : innerWidth;
+  const titleText = escapeXml(fitText(String(title || ''), 16.5, maxTitleWidth));
+  const accent = theme.accent || theme.title || '#58a6ff';
 
   return `
-    <g transform="translate(24, 22)">
-      <text x="0" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="17" fill="${theme.title}">${titleText}</text>
+    <g transform="translate(24, 24)">
+      <line x1="1.5" y1="-12" x2="1.5" y2="3" stroke="${accent}" stroke-width="3" stroke-linecap="round" />
+      <text x="10" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.02em" fill="${theme.title}">${titleText}</text>
       ${badge ? `
-        <rect x="${badgeX}" y="-14" width="${badgeW}" height="20" rx="10" fill="${theme.badgeBg}"/>
-        <text x="${badgeX + badgeW / 2}" y="0" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="600" font-size="10" fill="${theme.title}">${badge}</text>
+        <rect x="${badgeX}" y="-14" width="${badgeW}" height="20" rx="10" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
+        <text x="${badgeX + badgeW / 2}" y="-0.5" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" font-weight="700" font-size="9.5" fill="${theme.title}">${badge}</text>
       ` : ''}
     </g>`;
 }

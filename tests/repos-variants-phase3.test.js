@@ -223,3 +223,26 @@ test('Repos card supports width customization (830px full, 405px half, 495px def
   assertValidXml(svgHalf);
   assert.ok(svgHalf.includes('width="405"'));
 });
+
+test('Repos redesign audit assertions: responsive geometry across all 5 layouts', () => {
+  const layouts = ['grid', 'featured', 'spotlight', 'timeline', 'leaderboard'];
+  const widths = [405, 495, 830];
+
+  for (const l of layouts) {
+    for (const w of widths) {
+      const svg = reposCard.renderSvg(mockRepoData, themes.dark, { layout: l, width: w });
+      assertValidXml(svg);
+      assert.ok(svg.includes(`width="${w}"`), `Layout ${l} must render width="${w}"`);
+    }
+  }
+
+  // Timeline at 830px: metadata should scale past x=500
+  const timeline830 = reposCard.renderSvg(mockRepoData, themes.dark, { layout: 'timeline', width: 830 });
+  assert.ok(timeline830.includes('width="830"'));
+  assert.ok(/transform="translate\([5-7][0-9]{2}/.test(timeline830) || /x="[5-7][0-9]{2}"/.test(timeline830), 'Timeline metadata must right-align past x=500 on 830px width');
+
+  // Spotlight at 405px: right column should be >= 140px width
+  const spotlight405 = reposCard.renderSvg(mockRepoData, themes.dark, { layout: 'spotlight', width: 405 });
+  assert.ok(spotlight405.includes('width="405"'));
+  assert.ok(/width="1[4-9][0-9]"/.test(spotlight405) || /width="[2-9][0-9]{2}"/.test(spotlight405), 'Spotlight right column cards must have width >= 140 on 405px card');
+});

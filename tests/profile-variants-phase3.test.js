@@ -128,3 +128,21 @@ test('Profile card supports canonical widths (830 full, 405 half, 495 legacy)', 
   assert.ok(defaultSvg.includes('width="495"'));
   assertValidXml(defaultSvg);
 });
+
+test('Profile redesign audit assertions: split legend, activity scale, classic header & 405px bounds', () => {
+  // 1. split layout includes language legend percentages inside Bento tile
+  const splitSvg = profileCard.renderSvg(mockProfileData, themes.dark, { layout: 'split' });
+  assertValidXml(splitSvg);
+  assert.ok(splitSvg.includes('JavaScript') && splitSvg.includes('55%'), 'Split must include language percentages in legend');
+
+  // 2. activity layout includes Less / More heatmap intensity scale legend
+  const actSvg = profileCard.renderSvg(mockProfileData, themes.dark, { layout: 'activity' });
+  assertValidXml(actSvg);
+  assert.ok(actSvg.includes('Less') && actSvg.includes('More'), 'Activity must render Less/More intensity scale legend');
+
+  // 3. classic layout header does not duplicate name directly above name text and renders cleanly at 405px
+  const classicHalfSvg = profileCard.renderSvg(mockProfileData, themes.dark, { layout: 'classic', width: 'half' });
+  assertValidXml(classicHalfSvg);
+  assert.ok(classicHalfSvg.includes('// Overview') || classicHalfSvg.includes('// IDENTITY') || classicHalfSvg.includes('PROFILE'), 'Classic header should have standardized category title');
+  assert.ok(!classicHalfSvg.includes(`${mockProfileData.name} // Identity`), 'Classic header should not repeat name directly above name element');
+});

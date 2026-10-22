@@ -7,8 +7,12 @@ import { icons } from '../../svg/icons.js';
 import { renderCardHeader } from '../../svg/header.js';
 import { resolveTheme } from '../../svg/theme.js';
 import { resolveCardWidth } from '../../svg/layout.js';
-import { fitText, wrapText } from '../../svg/text.js';
+import { fitText, wrapText, measureText } from '../../svg/text.js';
 import {
+  renderCardDefs,
+  renderCardStyles,
+  renderCardFrame,
+  renderBentoTile,
   renderHeatmapMatrix,
   renderCommitSparkline,
   renderLanguageBar,
@@ -83,59 +87,48 @@ export const profileCard = {
   },
 };
 
-function extractProfileFields(data, options = {}) {
-  const name = escapeXml(data?.name || data?.login || options.username || 'User');
-  const login = escapeXml(data?.login || options.username || '');
-  const handle = escapeXml(`@${login}`);
-  const rawBio = data?.bio || 'Full-Stack Engineer crafting interactive web apps & reactive UI systems.';
-  const hideBio = options.hide_bio === 'true' || options.show_bio === 'false';
-  const hideMeta = options.hide_meta === 'true' || options.show_meta === 'false';
-  const bio = hideBio ? null : rawBio.length > 95 ? rawBio.slice(0, 92) + '...' : rawBio;
+function extractProfileFields(data = {}, options = {}) {
+  const login = data.login || 'developer';
+  const name = data.name || login;
+  const handle = `@${login}`;
+  const rawBio = (data.bio || '').trim();
+  const hideBio = options.hide_bio === 'true' || options.hide_bio === true || !rawBio;
+  const hideMeta = options.hide_meta === 'true' || options.hide_meta === true;
+  const bio = hideBio ? '' : rawBio;
+  const avatarDataUri = data.avatarBase64 || data.avatarUrl || null;
 
-  const avatarDataUri =
-    data?.avatarBase64 && data.avatarBase64.startsWith('data:')
-      ? escapeXml(data.avatarBase64)
-      : null;
-  const followers = data?.followers ?? 0;
-  const following = data?.following ?? 0;
-  const repos = data?.repositories ?? 0;
-  const stars = data?.totalStars ?? 0;
+  const followers = data.followers || 0;
+  const following = data.following || 0;
+  const repos = data.repositories || 0;
+  const stars = data.totalStars || 0;
 
-  const company = !hideMeta && data?.company ? escapeXml(data.company) : null;
-  const location = !hideMeta && data?.location ? escapeXml(data.location) : null;
-  const website =
-    !hideMeta && data?.websiteUrl
-      ? escapeXml(data.websiteUrl.replace(/^https?:\/\//, ''))
-      : null;
-  const createdAtYear = data?.createdAt
-    ? new Date(data.createdAt).getFullYear()
-    : data?.createdAtYear || null;
-  const currentYear = new Date().getFullYear();
-  const accountAgeYears = createdAtYear
-    ? Math.max(1, currentYear - createdAtYear)
-    : data?.accountAgeYears || null;
+  const company = hideMeta ? '' : (data.company || '').trim();
+  const location = hideMeta ? '' : (data.location || '').trim();
+  const website = hideMeta ? '' : (data.websiteUrl || '').trim();
+
+  let createdAtYear = null;
+  let accountAgeYears = null;
+  if (data.createdAt) {
+    const createdDate = new Date(data.createdAt);
+    if (!Number.isNaN(createdDate.getTime())) {
+      createdAtYear = createdDate.getFullYear();
+      const now = new Date();
+      accountAgeYears = Math.max(1, now.getFullYear() - createdAtYear);
+    }
+  }
   const tenureText = createdAtYear
     ? `Joined ${createdAtYear} · ${accountAgeYears}y active`
-    : data?.tenureText || null;
-  const isHireable = Boolean(data?.isHireable);
-  const status = data?.status
-    ? {
-        emoji: escapeXml(data.status.emoji || ''),
-        message: escapeXml(data.status.message || ''),
-      }
     : null;
 
-  const organizations = Array.isArray(data?.organizations)
-    ? data.organizations.slice(0, 4)
-    : [];
-  const topRepo = data?.topRepo || null;
-  const topLanguages = Array.isArray(data?.topLanguages)
-    ? data.topLanguages.slice(0, 4)
-    : [];
-  const monthlyContributions = Array.isArray(data?.monthlyContributions)
+  const isHireable = Boolean(data.isHireable);
+  const status = data.status || null;
+  const organizations = Array.isArray(data.organizations) ? data.organizations : [];
+  const topRepo = data.topRepo || null;
+  const topLanguages = Array.isArray(data.topLanguages) ? data.topLanguages : [];
+  const monthlyContributions = Array.isArray(data.monthlyContributions)
     ? data.monthlyContributions
-    : Array(12).fill(0);
-  const calendar = data?.calendar || {
+    : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const calendar = data.calendar || {
     totalContributions: 0,
     currentStreak: 0,
     longestStreak: 0,
@@ -171,80 +164,6 @@ function extractProfileFields(data, options = {}) {
     monthlyContributions,
     calendar,
   };
-}
-
-/**
- * Shared Glassmorphic Defs, Specular Bento Tile & Vector Micro-Icons
- */
-function renderPremiumDefs(idPrefix, theme, primaryColor, secondaryColor) {
-  const c1 = primaryColor || theme.title || '#38bdf8';
-  const c2 = secondaryColor || theme.accent || '#818cf8';
-  return `
-    <linearGradient id="${idPrefix}-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="${idPrefix}-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
-      <stop offset="40%" stop-color="${theme.border}" stop-opacity="0.6" />
-      <stop offset="100%" stop-color="${c1}" stop-opacity="0.35" />
-    </linearGradient>
-    <linearGradient id="${idPrefix}-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="${theme.subtleBorder || theme.border}" stop-opacity="0.35" />
-    </linearGradient>
-    <linearGradient id="${idPrefix}-brand" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${c1}" />
-      <stop offset="100%" stop-color="${c2}" />
-    </linearGradient>
-    <radialGradient id="${idPrefix}-glow-tl" cx="0%" cy="0%" r="65%">
-      <stop offset="0%" stop-color="${c1}" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="${c1}" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="${idPrefix}-glow-br" cx="100%" cy="100%" r="65%">
-      <stop offset="0%" stop-color="${c2}" stop-opacity="0.12" />
-      <stop offset="100%" stop-color="${c2}" stop-opacity="0" />
-    </radialGradient>
-    <pattern id="${idPrefix}-dots" width="18" height="18" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="0.8" fill="${theme.secondaryText}" fill-opacity="0.14" />
-    </pattern>
-  `;
-}
-
-function renderPremiumStyle(theme) {
-  return `
-    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace; font-variant-numeric: tabular-nums; }
-    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; fill: ${theme.title}; }
-    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 12px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
-    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11.5px; fill: ${theme.text}; opacity: 0.92; }
-    .bio-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11.5px; fill: ${theme.text}; opacity: 0.92; }
-    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-weight: 700; font-size: 13.5px; fill: ${theme.title}; font-variant-numeric: tabular-nums; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: ${theme.secondaryText}; letter-spacing: 0.09em; text-transform: uppercase; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11px; font-weight: 500; fill: ${theme.secondaryText}; }
-    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
-    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
-  `;
-}
-
-function renderGlassFrame(width, height, idPrefix, rx = 14) {
-  return `
-    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-bg)" />
-    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-dots)" />
-    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-glow-tl)" />
-    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="url(#${idPrefix}-glow-br)" />
-    <rect x="0.5" y="0.5" rx="${rx}" width="${width - 1}" height="${height - 1}" fill="none" stroke="url(#${idPrefix}-rim)" stroke-width="1" />
-  `;
-}
-
-function renderBentoBox(x, y, w, h, theme, idPrefix, rx = 9, innerSvg = '') {
-  return `
-    <g transform="translate(${x}, ${y})">
-      <rect x="0" y="0" width="${w}" height="${h}" rx="${rx}" fill="${theme.cardBg}" fill-opacity="0.78" stroke="url(#${idPrefix}-tile-rim)" stroke-width="1" />
-      <line x1="${rx}" y1="0.5" x2="${w - rx}" y2="0.5" stroke="#ffffff" stroke-opacity="0.16" stroke-width="1" />
-      ${innerSvg}
-    </g>
-  `;
 }
 
 function renderAvatarRing(cx, cy, r, clipId, avatarDataUri, initial, idPrefix) {
@@ -289,11 +208,11 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
   const width = resolveCardWidth(options.width, 495);
   const height = 220;
   const idPrefix = 'prof-classic';
+  const contentWidth = width - 48;
 
   const badgeText = p.isHireable
     ? '🟢 Available for hire'
     : p.tenureText || `JOINED ${p.createdAtYear || 2024}`;
-  const bioLines = p.hideBio ? [] : wrapText(p.rawBio, 11.5, width - 118, 2);
 
   const topLang = p.topLanguages[0] || {
     name: 'JavaScript',
@@ -301,10 +220,44 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
   };
   const topRepo = p.topRepo || { name: `${p.login}/repo`, stars: p.stars };
 
-  const footerWidth = width - 44;
-  const col0W = Math.floor(footerWidth * 0.22);
-  const col1W = Math.floor(footerWidth * 0.35);
-  const col2W = Math.floor(footerWidth * 0.19);
+  const fittedName = escapeXml(fitText(p.name, 17, contentWidth - 175));
+  const nameW = Math.round(measureText(fitText(p.name, 17, contentWidth - 175), 17));
+  const handleX = nameW + 10;
+  const bioLines = p.hideBio ? [] : wrapText(p.rawBio, 11.5, contentWidth - 76, 2);
+
+  // Dynamic Metadata Row (advancing currentX to strictly avoid collisions/overflow)
+  const metaItems = [];
+  if (p.company) metaItems.push({ icon: icons.company(theme.iconColor), text: p.company });
+  if (p.location) metaItems.push({ icon: icons.location(theme.iconColor), text: p.location });
+  if (p.website) {
+    const webLabel = p.website.length > 22 ? `${p.website.slice(0, 20)}...` : p.website;
+    metaItems.push({ icon: icons.link(theme.iconColor), text: webLabel });
+  }
+  if (metaItems.length === 0) {
+    metaItems.push({ statusDot: true, text: p.status?.message || 'Active Open-Source Builder & Systems Engineer' });
+  }
+
+  let metaX = 0;
+  const maxMetaX = contentWidth - 76;
+  const metaSvg = metaItems
+    .map((item) => {
+      const itemText = escapeXml(item.text);
+      const itemW = Math.round(measureText(item.text, 10.5)) + (item.statusDot ? 18 : 20);
+      if (metaX + itemW > maxMetaX && metaX > 0) return '';
+      const currentX = metaX;
+      metaX += itemW + 14;
+      if (item.statusDot) {
+        return `<g transform="translate(${currentX}, 0)"><circle cx="4" cy="6" r="3.5" fill="#10b981" class="pulse-dot"/><text x="14" y="10">${itemText}</text></g>`;
+      }
+      return `<g transform="translate(${currentX}, 0)">${item.icon}<text x="16" y="10">${itemText}</text></g>`;
+    })
+    .join('');
+
+  // 4-Cell Bento Telemetry Strip
+  const footerWidth = contentWidth;
+  const col0W = Math.floor(footerWidth * 0.24);
+  const col1W = Math.floor(footerWidth * 0.34);
+  const col2W = Math.floor(footerWidth * 0.20);
   const col3W = footerWidth - col0W - col1W - col2W - 18;
 
   const cells = [
@@ -335,19 +288,19 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
   let currentTileX = 0;
   const tilesSvg = cells
     .map((cell) => {
-      const tile = renderBentoBox(
-        currentTileX,
-        0,
-        cell.w,
-        52,
+      const tile = renderBentoTile({
+        x: currentTileX,
+        y: 0,
+        width: cell.w,
+        height: 52,
         theme,
         idPrefix,
-        8,
-        `<g transform="translate(11, 15)">
+        rx: 8,
+        children: `<g transform="translate(11, 15)">
           <text x="0" y="0" class="stat-lbl">${cell.label}</text>
           <g transform="translate(0, 6)">${cell.content}</g>
-        </g>`
-      );
+        </g>`,
+      });
       currentTileX += cell.w + 6;
       return tile;
     })
@@ -358,14 +311,19 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
     <clipPath id="avatar-clip-classic">
       <circle cx="54" cy="52" r="29" />
     </clipPath>
-    ${renderPremiumDefs(idPrefix, theme, topLang.color, theme.accent)}
+    ${renderCardDefs(idPrefix, theme, topLang.color, theme.accent)}
   </defs>
-  <style>${renderPremiumStyle(theme)}</style>
+  <style>
+    ${renderCardStyles(theme)}
+    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; fill: ${theme.title}; }
+    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 12px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
+    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11.5px; fill: ${theme.text}; opacity: 0.92; }
+  </style>
 
-  ${renderGlassFrame(width, height, idPrefix, 14)}
+  ${renderCardFrame(width, height, idPrefix, theme, 14)}
 
   ${renderCardHeader({
-    title: `${p.name} // Identity`,
+    title: `${p.name} // Overview`,
     badgeText,
     width,
     theme,
@@ -376,8 +334,8 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
 
     <!-- Identity & Bio -->
     <g transform="translate(98, 16)">
-      <text x="0" y="15" class="name">${p.name}</text>
-      <text x="${Math.min(width - 210, p.name.length * 10 + 10)}" y="15" class="handle">${p.handle}</text>
+      <text x="0" y="15" class="name">${fittedName}</text>
+      <text x="${handleX}" y="15" class="handle">${p.handle}</text>
       ${
         bioLines.length > 0
           ? `<text x="0" y="36" class="bio bio-text">
@@ -387,16 +345,13 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
       }
     </g>
 
-    <!-- Metadata Pills -->
+    <!-- Metadata Dynamic Row -->
     <g transform="translate(98, 78)" class="meta-text">
-      ${p.company ? `<g transform="translate(0,0)">${icons.company(theme.iconColor)} <text x="16" y="10">${p.company}</text></g>` : ''}
-      ${p.location ? `<g transform="translate(${p.company ? 135 : 0},0)">${icons.location(theme.iconColor)} <text x="16" y="10">${p.location}</text></g>` : ''}
-      ${p.website ? `<g transform="translate(${p.company && p.location ? 265 : (p.company || p.location ? 135 : 0)},0)">${icons.link(theme.iconColor)} <text x="16" y="10">${p.website.length > 22 ? p.website.slice(0, 20) + '...' : p.website}</text></g>` : ''}
-      ${!p.company && !p.location && !p.website ? `<g transform="translate(0,0)"><circle cx="5" cy="6" r="3.5" fill="#10b981" class="pulse-dot"/><text x="14" y="10">${p.status?.message || 'Active Open-Source Builder &amp; Systems Engineer'}</text></g>` : ''}
+      ${metaSvg}
     </g>
 
     <!-- 4-Cell Bento Telemetry Strip -->
-    <g transform="translate(22, 128)">
+    <g transform="translate(24, 136)">
       ${tilesSvg}
     </g>
   </g>
@@ -416,7 +371,7 @@ export function renderV1HeroSvg(data, theme, options = {}) {
   const lang2 = p.topLanguages?.[1]?.color || theme.accent || '#818cf8';
 
   const stats = [
-    { label: 'REPOSITORIES', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
+    { label: 'PUBLIC REPOS', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
     { label: 'TOTAL STARS', value: p.stars.toLocaleString(), icon: icons.star(theme.iconColor) },
     { label: 'FOLLOWERS', value: p.followers.toLocaleString(), icon: icons.followers(theme.iconColor) },
     { label: 'FOLLOWING', value: p.following.toLocaleString(), icon: icons.followers(theme.iconColor) },
@@ -429,20 +384,28 @@ export function renderV1HeroSvg(data, theme, options = {}) {
     <clipPath id="avatar-clip-hero">
       <circle cx="${width / 2}" cy="50" r="28" />
     </clipPath>
-    ${renderPremiumDefs(idPrefix, theme, lang1, lang2)}
+    <clipPath id="hero-banner-clip">
+      <rect x="1" y="1" width="${width - 2}" height="56" rx="13" />
+    </clipPath>
+    ${renderCardDefs(idPrefix, theme, lang1, lang2)}
     <linearGradient id="hero-banner-grad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="${lang1}" stop-opacity="0.32" />
       <stop offset="50%" stop-color="${lang2}" stop-opacity="0.48" />
       <stop offset="100%" stop-color="${lang1}" stop-opacity="0.32" />
     </linearGradient>
   </defs>
-  <style>${renderPremiumStyle(theme)}</style>
+  <style>
+    ${renderCardStyles(theme)}
+    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; fill: ${theme.title}; }
+    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 12px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
+    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11.5px; fill: ${theme.text}; opacity: 0.92; }
+  </style>
 
-  ${renderGlassFrame(width, height, idPrefix, 14)}
+  ${renderCardFrame(width, height, idPrefix, theme, 14)}
 
-  <!-- Top Aurora Header Banner -->
-  <rect x="1" y="1" width="${width - 2}" height="54" rx="13" fill="url(#hero-banner-grad)" />
-  <line x1="1" y1="55" x2="${width - 1}" y2="55" stroke="#ffffff" stroke-opacity="0.12" />
+  <!-- Top Aurora Header Banner (Clipped to Card Bounds) -->
+  <rect x="1" y="1" width="${width - 2}" height="68" clip-path="url(#hero-banner-clip)" fill="url(#hero-banner-grad)" />
+  <line x1="1" y1="56" x2="${width - 1}" y2="56" stroke="#ffffff" stroke-opacity="0.12" />
 
   ${renderAvatarRing(width / 2, 50, 28, 'avatar-clip-hero', p.avatarDataUri, p.name.charAt(0).toUpperCase(), idPrefix)}
 
@@ -466,7 +429,8 @@ export function renderV1HeroSvg(data, theme, options = {}) {
               return `
               <g transform="translate(${startX}, 0)">
                 <rect x="0" y="0" width="${pillW}" height="22" rx="11" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" stroke-opacity="0.7" />
-                <text x="10" y="14.5" class="font-ui" font-size="10" font-weight="600" fill="${theme.secondaryText}">🏢 ${escapeXml(fitText(org.name || org.login, 10, 92))}</text>
+                <g transform="translate(8, 4)">${icons.company(theme.iconColor)}</g>
+                <text x="24" y="14.5" class="font-ui" font-size="10" font-weight="600" fill="${theme.secondaryText}">${escapeXml(fitText(org.name || org.login, 10, 80))}</text>
               </g>`;
             })
             .join('')
@@ -492,20 +456,20 @@ export function renderV1HeroSvg(data, theme, options = {}) {
   <g transform="translate(22, 184)">
     ${stats
       .map((st, idx) =>
-        renderBentoBox(
-          idx * (colWidth + 8),
-          0,
-          colWidth,
-          50,
+        renderBentoTile({
+          x: idx * (colWidth + 8),
+          y: 0,
+          width: colWidth,
+          height: 50,
           theme,
           idPrefix,
-          8,
-          `<g transform="translate(11, 15)">
+          rx: 8,
+          children: `<g transform="translate(11, 15)">
             <g transform="translate(0, -8)">${st.icon}</g>
             <text x="17" y="0" class="stat-lbl">${st.label}</text>
             <text x="0" y="21" class="stat-val" font-size="15">${st.value}</text>
-          </g>`
-        )
+          </g>`,
+        })
       )
       .join('')}
   </g>
@@ -522,48 +486,60 @@ export function renderV1CompactSvg(data, theme, options = {}) {
   const idPrefix = 'prof-compact';
 
   const chips = [
-    { label: 'REPOS', value: p.repos.toLocaleString() },
-    { label: 'FOLLOWERS', value: p.followers.toLocaleString() },
-    { label: 'ACTIVE', value: `${p.accountAgeYears || 1}y` },
+    { label: 'REPOS', value: p.repos.toLocaleString(), accent: theme.title },
+    { label: 'FOLLOWERS', value: p.followers.toLocaleString(), accent: theme.accent || theme.title },
+    { label: 'ACTIVE', value: `${p.accountAgeYears || 1}y`, accent: '#10b981' },
   ];
 
   const chipWidth = 78;
   const chipGap = 8;
   const chipsTotalWidth = chips.length * chipWidth + (chips.length - 1) * chipGap;
   const chipsStartX = width - chipsTotalWidth - 16;
-  const textMaxWidth = Math.max(120, chipsStartX - 80);
+  const textMaxWidth = Math.max(100, chipsStartX - 78);
+
+  const handleStr = p.handle;
+  const handleW = Math.round(measureText(handleStr, 11.5));
+  const maxNameW = Math.max(70, textMaxWidth - handleW - 12);
+  const fittedName = escapeXml(fitText(p.name, 15, maxNameW));
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
     <clipPath id="avatar-clip-compact">
       <circle cx="36" cy="36" r="21" />
     </clipPath>
-    ${renderPremiumDefs(idPrefix, theme, theme.title, theme.accent)}
+    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
   </defs>
-  <style>${renderPremiumStyle(theme)}</style>
+  <style>
+    ${renderCardStyles(theme)}
+    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: -0.02em; fill: ${theme.title}; }
+    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 11.5px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
+    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: ${theme.text}; opacity: 0.92; }
+  </style>
 
-  ${renderGlassFrame(width, height, idPrefix, 12)}
+  ${renderCardFrame(width, height, idPrefix, theme, 12)}
   ${renderAvatarRing(36, 36, 21, 'avatar-clip-compact', p.avatarDataUri, p.name.charAt(0).toUpperCase(), idPrefix)}
 
   <g transform="translate(70, 17)">
-    <text x="0" y="13" class="name" font-size="15">${p.name} <tspan class="handle" dx="4">${p.handle}</tspan></text>
-    <text x="0" y="32" class="bio bio-text" font-size="11">${escapeXml(fitText(p.rawBio, 10.5, textMaxWidth))}</text>
+    <text x="0" y="13" class="name">${fittedName} <tspan class="handle" dx="4">${handleStr}</tspan></text>
+    <text x="0" y="32" class="bio bio-text">${escapeXml(fitText(p.rawBio, 10.5, textMaxWidth))}</text>
   </g>
 
   <g transform="translate(${chipsStartX}, 15)">
     ${chips
       .map((ch, idx) =>
-        renderBentoBox(
-          idx * (chipWidth + chipGap),
-          0,
-          chipWidth,
-          42,
+        renderBentoTile({
+          x: idx * (chipWidth + chipGap),
+          y: 0,
+          width: chipWidth,
+          height: 42,
           theme,
           idPrefix,
-          7,
-          `<text x="${chipWidth / 2}" y="15" text-anchor="middle" class="stat-lbl" font-size="8.5">${ch.label}</text>
-           <text x="${chipWidth / 2}" y="32" text-anchor="middle" class="stat-val" font-size="13">${ch.value}</text>`
-        )
+          rx: 7,
+          accentColor: ch.accent,
+          accentPosition: 'top',
+          children: `<text x="${chipWidth / 2}" y="17" text-anchor="middle" class="stat-lbl" font-size="8.5">${ch.label}</text>
+           <text x="${chipWidth / 2}" y="34" text-anchor="middle" class="stat-val" font-size="13">${ch.value}</text>`,
+        })
       )
       .join('')}
   </g>
@@ -583,91 +559,126 @@ export function renderV1SplitSvg(data, theme, options = {}) {
   const rightWidth = width - sidebarWidth - 34;
   const bioLines = wrapText(p.rawBio, 11, rightWidth - 24, 2);
 
+  // Top 3 Language Legend Pills
+  const topLangs = p.topLanguages.slice(0, 3);
+  const legendItemsSvg = topLangs
+    .map((l) => `<tspan fill="${l.color || theme.title}">● </tspan><tspan fill="${theme.title}">${escapeXml(l.name)} </tspan><tspan fill="${theme.secondaryText}" font-family="'JetBrains Mono', monospace">${l.percentage}%</tspan>`)
+    .join('  ');
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
     <clipPath id="avatar-clip-split">
-      <circle cx="${sidebarWidth / 2 + 10}" cy="48" r="27" />
+      <circle cx="${sidebarWidth / 2}" cy="44" r="26" />
     </clipPath>
-    ${renderPremiumDefs(idPrefix, theme, theme.title, theme.accent)}
+    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
   </defs>
-  <style>${renderPremiumStyle(theme)}</style>
+  <style>
+    ${renderCardStyles(theme)}
+    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 14.5px; fill: ${theme.title}; }
+    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 11px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
+    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11px; fill: ${theme.text}; opacity: 0.92; }
+  </style>
 
-  ${renderGlassFrame(width, height, idPrefix, 14)}
+  ${renderCardFrame(width, height, idPrefix, theme, 14)}
 
-  <!-- Left Sidebar Bento -->
-  ${renderBentoBox(
-    10,
-    10,
-    sidebarWidth,
-    height - 20,
+  <!-- Left Sidebar Bento Container -->
+  ${renderBentoTile({
+    x: 12,
+    y: 12,
+    width: sidebarWidth,
+    height: height - 24,
     theme,
     idPrefix,
-    10,
-    `<g transform="translate(-10, -10)">
-      ${renderAvatarRing(sidebarWidth / 2 + 10, 48, 27, 'avatar-clip-split', p.avatarDataUri, p.name.charAt(0).toUpperCase(), idPrefix)}
-      <g transform="translate(${sidebarWidth / 2 + 10}, 92)">
-        <text x="0" y="0" text-anchor="middle" class="name" font-size="14.5">${escapeXml(fitText(p.name, 14, sidebarWidth - 18))}</text>
-        <text x="0" y="16" text-anchor="middle" class="handle" font-size="11">${p.handle}</text>
-        <rect x="-42" y="25" width="84" height="18" rx="9" fill="${theme.badgeBg || theme.bg}" stroke="${theme.subtleBorder || theme.border}" />
-        <text x="0" y="37" text-anchor="middle" class="stat-lbl" font-size="8.5" fill="${theme.title}">SINCE ${p.createdAtYear || 2024}</text>
+    rx: 10,
+    children: `
+      ${renderAvatarRing(sidebarWidth / 2, 44, 26, 'avatar-clip-split', p.avatarDataUri, p.name.charAt(0).toUpperCase(), idPrefix)}
+      <g transform="translate(${sidebarWidth / 2}, 88)">
+        <text x="0" y="0" text-anchor="middle" class="name">${escapeXml(fitText(p.name, 14, sidebarWidth - 18))}</text>
+        <text x="0" y="16" text-anchor="middle" class="handle">${p.handle}</text>
+        <rect x="-42" y="24" width="84" height="18" rx="9" fill="${theme.badgeBg || theme.bg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
+        <text x="0" y="36" text-anchor="middle" class="stat-lbl" font-size="8.5" fill="${theme.title}">SINCE ${p.createdAtYear || 2024}</text>
       </g>
-      <g transform="translate(22, 154)" class="meta-text">
-        ${p.company ? `<g transform="translate(0, 0)">${icons.company(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.company, 10.5, sidebarWidth - 36))}</text></g>` : ''}
-        ${p.location ? `<g transform="translate(0, ${p.company ? 19 : 0})">${icons.location(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.location, 10.5, sidebarWidth - 36))}</text></g>` : ''}
-        ${p.website ? `<g transform="translate(0, ${p.company && p.location ? 38 : (p.company || p.location ? 19 : 0)})">${icons.link(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.website, 10.5, sidebarWidth - 36))}</text></g>` : ''}
+      <g transform="translate(16, 148)" class="meta-text">
+        ${p.company ? `<g transform="translate(0, 0)">${icons.company(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.company, 10.5, sidebarWidth - 34))}</text></g>` : ''}
+        ${p.location ? `<g transform="translate(0, ${p.company ? 19 : 0})">${icons.location(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.location, 10.5, sidebarWidth - 34))}</text></g>` : ''}
+        ${p.website ? `<g transform="translate(0, ${p.company && p.location ? 38 : (p.company || p.location ? 19 : 0)})">${icons.link(theme.iconColor)} <text x="16" y="9">${escapeXml(fitText(p.website, 10.5, sidebarWidth - 34))}</text></g>` : ''}
       </g>
-    </g>`
-  )}
+    `,
+  })}
 
   <!-- Right Main Content -->
-  <g transform="translate(${sidebarWidth + 22}, 14)">
-    ${renderBentoBox(
-      0,
-      0,
-      rightWidth,
-      54,
+  <g transform="translate(${sidebarWidth + 22}, 12)">
+    <!-- Tile 1: About / Bio -->
+    ${renderBentoTile({
+      x: 0,
+      y: 0,
+      width: rightWidth,
+      height: 52,
       theme,
       idPrefix,
-      8,
-      `<text x="12" y="15" class="stat-lbl">ENGINEERING PROFILE // ABOUT</text>
+      rx: 8,
+      children: `<text x="12" y="15" class="stat-lbl">ENGINEERING PROFILE // ABOUT</text>
        <text x="12" y="31" class="bio-text" font-size="11">
          ${bioLines.map((l, idx) => `<tspan x="12" dy="${idx === 0 ? 0 : 14}">${escapeXml(l)}</tspan>`).join('')}
-       </text>`
-    )}
+       </text>`,
+    })}
 
-    ${renderBentoBox(
-      0,
-      62,
-      rightWidth,
-      26,
+    <!-- Tile 2: Status Pill -->
+    ${renderBentoTile({
+      x: 0,
+      y: 56,
+      width: rightWidth,
+      height: 26,
       theme,
       idPrefix,
-      7,
-      `<circle cx="14" cy="13" r="3.5" fill="#10b981" class="pulse-dot" />
-       <text x="24" y="17" class="bio" font-size="11" font-weight="600" fill="${theme.title}">
-         ${p.status?.message || 'Crafting interactive web apps &amp; reactive UI systems'}
-       </text>`
-    )}
+      rx: 7,
+      children: `<circle cx="14" cy="13" r="3.5" fill="#10b981" class="pulse-dot" />
+       <text x="24" y="17" class="bio" font-size="10.5" font-weight="600" fill="${theme.title}">
+         ${escapeXml(p.status?.message || 'Crafting interactive web apps & reactive UI systems')}
+       </text>`,
+    })}
 
-    <g transform="translate(0, 98)">
-      <text x="2" y="10" class="stat-lbl">LANGUAGE DISTRIBUTION</text>
-      <g transform="translate(0, 16)">
-        ${renderLanguageBar(p.topLanguages, rightWidth, 8, theme)}
-      </g>
-    </g>
+    <!-- Tile 3: Language Distribution with Legend -->
+    ${renderBentoTile({
+      x: 0,
+      y: 86,
+      width: rightWidth,
+      height: 54,
+      theme,
+      idPrefix,
+      rx: 8,
+      children: `
+        <text x="12" y="14" class="stat-lbl">LANGUAGE DISTRIBUTION</text>
+        <text x="${rightWidth - 12}" y="14" text-anchor="end" class="font-ui" font-size="9.5" font-weight="600">${legendItemsSvg}</text>
+        <g transform="translate(12, 28)">
+          ${renderLanguageBar(p.topLanguages, rightWidth - 24, 7, theme)}
+        </g>
+      `,
+    })}
 
-    <g transform="translate(0, 140)">
-      <text x="2" y="10" class="stat-lbl">12-MONTH ACTIVITY // VELOCITY</text>
-      <g transform="translate(0, 16)">
-        ${renderCommitSparkline(
-          p.monthlyContributions.slice(-8),
-          rightWidth,
-          36,
-          theme.title,
-          theme.accent || theme.title
-        )}
-      </g>
-    </g>
+    <!-- Tile 4: 12-Month Velocity -->
+    ${renderBentoTile({
+      x: 0,
+      y: 144,
+      width: rightWidth,
+      height: 62,
+      theme,
+      idPrefix,
+      rx: 8,
+      children: `
+        <text x="12" y="14" class="stat-lbl">12-MONTH ACTIVITY // VELOCITY</text>
+        <text x="${rightWidth - 12}" y="14" text-anchor="end" class="font-mono" font-size="9.5" font-weight="700" fill="${theme.title}">${p.calendar.totalContributions.toLocaleString()} <tspan fill="${theme.secondaryText}">contribs</tspan></text>
+        <g transform="translate(12, 22)">
+          ${renderCommitSparkline(
+            p.monthlyContributions.slice(-8),
+            rightWidth - 24,
+            32,
+            theme.title,
+            theme.accent || theme.title
+          )}
+        </g>
+      `,
+    })}
   </g>
 </svg>`;
 }
@@ -692,63 +703,88 @@ export function renderV1ActivitySvg(data, theme, options = {}) {
     { label: 'LAST 30 DAYS', value: `${cal.last30DaysCount || 0}`, dot: '#10b981' },
   ];
 
+  const scaleColors = theme.heatmapLevels || ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
+  const scaleX = contentWidth - 110;
+  const scaleSvg = `
+    <g transform="translate(${scaleX}, 7)">
+      <text x="0" y="8" class="stat-lbl" font-size="8">Less</text>
+      ${scaleColors.map((c, i) => `<rect x="${24 + i * 10}" y="1" width="7" height="7" rx="1.5" fill="${c}" />`).join('')}
+      <text x="${24 + scaleColors.length * 10 + 4}" y="8" class="stat-lbl" font-size="8">More</text>
+    </g>
+  `;
+
+  const availHeatmapW = contentWidth - 24;
+  const cellGap = 1.5;
+  const cellWidth = Math.max(4, Number(((availHeatmapW - 52 * cellGap) / 53).toFixed(2)));
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
     <clipPath id="avatar-clip-activity">
       <circle cx="18" cy="18" r="16" />
     </clipPath>
-    ${renderPremiumDefs(idPrefix, theme, theme.title, theme.accent)}
+    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
   </defs>
-  <style>${renderPremiumStyle(theme)}</style>
+  <style>
+    ${renderCardStyles(theme)}
+    .name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: -0.02em; fill: ${theme.title}; }
+    .handle { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 11.5px; font-weight: 500; fill: ${theme.accent || theme.secondaryText}; }
+    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11px; fill: ${theme.text}; opacity: 0.92; }
+  </style>
 
-  ${renderGlassFrame(width, height, idPrefix, 14)}
+  ${renderCardFrame(width, height, idPrefix, theme, 14)}
 
   <g transform="translate(22, 18)">
     <g transform="translate(0, 0)">
       ${renderAvatarRing(18, 18, 16, 'avatar-clip-activity', p.avatarDataUri, p.name.charAt(0).toUpperCase(), idPrefix)}
-      <text x="44" y="15" class="name" font-size="15">${p.name} // Contribution Matrix</text>
-      <text x="44" y="31" class="handle" font-size="11.5">${p.handle} · Joined ${p.createdAtYear || 2024}</text>
+      <text x="44" y="15" class="name">${escapeXml(p.name)} // Contribution Matrix</text>
+      <text x="44" y="31" class="handle">${p.handle} · Joined ${p.createdAtYear || 2024}</text>
       ${p.bio ? `<text x="44" y="47" class="bio-text" font-size="11">${escapeXml(fitText(p.rawBio, 11, contentWidth - 48))}</text>` : ''}
     </g>
 
-    ${renderBentoBox(
-      0,
-      p.bio ? 56 : 46,
-      contentWidth,
-      p.bio ? 96 : 106,
+    <!-- Heatmap Bento Box with Header & Scale -->
+    ${renderBentoTile({
+      x: 0,
+      y: p.bio ? 56 : 46,
+      width: contentWidth,
+      height: p.bio ? 96 : 106,
       theme,
       idPrefix,
-      9,
-      `<g transform="translate(10, 10)">
-        ${renderHeatmapMatrix({
-          weeks: cal.weeks,
-          x: 0,
-          y: 0,
-          cellWidth: Math.max(4, Math.floor((contentWidth - 20 - 53 * 1.5) / 53)),
-          cellGap: 1.5,
-          cols: 53,
-          theme,
-        })}
-      </g>`
-    )}
+      rx: 9,
+      children: `
+        <text x="12" y="15" class="stat-lbl">53-WEEK CONTRIBUTION CADENCE</text>
+        ${scaleSvg}
+        <g transform="translate(12, 24)">
+          ${renderHeatmapMatrix({
+            weeks: cal.weeks,
+            x: 0,
+            y: 0,
+            cellWidth,
+            cellGap,
+            cols: 53,
+            theme,
+          })}
+        </g>
+      `,
+    })}
 
+    <!-- Bottom Cadence Bento Tiles -->
     <g transform="translate(0, 162)">
       ${cadenceStats
         .map((st, idx) =>
-          renderBentoBox(
-            idx * (colWidth + 8),
-            0,
-            colWidth,
-            52,
+          renderBentoTile({
+            x: idx * (colWidth + 8),
+            y: 0,
+            width: colWidth,
+            height: 52,
             theme,
             idPrefix,
-            8,
-            `<g transform="translate(11, 16)">
+            rx: 8,
+            children: `<g transform="translate(11, 16)">
               <circle cx="4" cy="-3" r="3.5" fill="${st.dot}" />
               <text x="12" y="0" class="stat-lbl streak">${st.label}</text>
               <text x="0" y="21" class="stat-val" font-size="15">${escapeXml(String(st.value))}</text>
-            </g>`
-          )
+            </g>`,
+          })
         )
         .join('')}
     </g>

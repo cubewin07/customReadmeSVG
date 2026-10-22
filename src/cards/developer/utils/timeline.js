@@ -1,9 +1,17 @@
 /**
- * Master Timeline (24s) Animation Utilities for SMIL
+ * Master Timeline (36s) Animation Utilities for SMIL
  * Pure SVG vector animation helpers without JavaScript or external dependencies.
+ *
+ * Loop schedule:
+ *   0.0 -  3.4  INTRO   arcade boot / player-one scoreboard
+ *   3.4 - 15.4  ACT 1   SHIP    (desk + hologram)
+ *  15.4 - 21.4  ACT 2   RUN     (contribution platformer)
+ *  21.4 - 27.4  ACT 3   BUILD   (voxel city)
+ *  27.4 - 32.8  ACT 4   ORBIT   (language universe)
+ *  32.8 - 36.0  OUTRO   continue? countdown + sign-off
  */
 
-export const T = 24.0;
+export const T = 36.0;
 export const W = 1150;
 export const H = 370;
 export const SW = 584;
@@ -11,15 +19,50 @@ export const SH = 366;
 export const SX = 566;
 export const SY = 4;
 
+/** Master-timeline start of each segment (seconds). */
+export const ACT = {
+  intro: 0,
+  ship: 3.4,
+  run: 15.4,
+  build: 21.4,
+  orbit: 27.4,
+  outro: 32.8,
+};
+
+/**
+ * Render-time offset (seconds) added to every keyframe time produced by norm().
+ * Legacy acts are authored in act-local time (0..24); wrapping their render in
+ * withShift(ACT.ship, ...) places them on the master timeline without rewriting
+ * every keyframe. Rendering is synchronous, so a module-level value is safe.
+ */
+let SHIFT = 0;
+
+export function withShift(seconds, fn) {
+  const prev = SHIFT;
+  SHIFT = seconds;
+  try {
+    return fn();
+  } finally {
+    SHIFT = prev;
+  }
+}
+
+/** Fraction (0..1) of the master timeline for an act-local time under the current shift. */
+export function frac(t) {
+  return Math.min(1, Math.max(0, (t + SHIFT) / T));
+}
+
 /**
  * Normalizes an array of [time, ...values] pairs so that:
+ * 0. Every time is offset by the active render shift (see withShift).
  * 1. It is sorted chronologically.
  * 2. It begins at t = 0 (cloned from first keyframe if needed).
  * 3. It terminates at t = T (cloned from last keyframe if needed).
  * 4. Duplicate timestamps within 1e-6 are merged.
  */
 export function norm(pairs) {
-  const sorted = [...pairs].sort((a, b) => a[0] - b[0]);
+  const shifted = SHIFT === 0 ? pairs : pairs.map((p) => [Math.min(T, p[0] + SHIFT), ...p.slice(1)]);
+  const sorted = [...shifted].sort((a, b) => a[0] - b[0]);
   let list = sorted;
   if (list.length === 0) return [[0, 0], [T, 0]];
   if (list[0][0] > 0) {
@@ -28,14 +71,24 @@ export function norm(pairs) {
   if (list[list.length - 1][0] < T) {
     list = [...list, [T, ...list[list.length - 1].slice(1)]];
   }
-  const out = [];
+  const dedup = [];
   for (const p of list) {
-    if (out.length && Math.abs(out[out.length - 1][0] - p[0]) < 1e-5) {
-      out[out.length - 1] = p;
+    if (dedup.length && Math.abs(dedup[dedup.length - 1][0] - p[0]) < 1e-5) {
+      dedup[dedup.length - 1] = p;
     } else {
-      out.push(p);
+      dedup.push(p);
     }
   }
+  if (dedup.length <= 2) return dedup;
+  const sig = (p) => p.slice(1).map(fmt).join(',');
+  const out = [dedup[0]];
+  for (let i = 1; i < dedup.length - 1; i++) {
+    if (sig(out[out.length - 1]) === sig(dedup[i]) && sig(dedup[i]) === sig(dedup[i + 1])) {
+      continue;
+    }
+    out.push(dedup[i]);
+  }
+  out.push(dedup[dedup.length - 1]);
   return out;
 }
 
@@ -120,6 +173,21 @@ export function pulse(a, b, f = 0.2) {
 }
 
 /**
+ * Opacity keyframes for slot `i` of `n` equal slots across the whole loop (cross-fading).
+ * With n === 1 the element is always visible.
+ */
+export function rotate(n, i, f = 0.35) {
+  if (n <= 1) return [[0, 1], [T, 1]];
+  const slot = T / n;
+  const a = i * slot;
+  const b = (i + 1) * slot;
+  const pairs = [[0, i === 0 ? 1 : 0]];
+  if (i > 0) pairs.push([a, 0], [a + f, 1]);
+  pairs.push([b - f, 1], [b, 0]);
+  return pairs;
+}
+
+/**
  * Night-time opacity curve across 24s (active during dawn/night hours 18s-24s and 0s-3.6s).
  */
 export const NIGHT = [
@@ -170,7 +238,8 @@ export function shade(hex, k) {
  */
 export function rollCounter(x, y, val, color = '#e6edf3') {
   const str = String(val);
-  let out = '';
+  const cid = `rc${x}_${y}`;
+  let out = `<clipPath id="${cid}"><rect width="14" height="24"/></clipPath>`;
   for (let k = 0; k < str.length; k++) {
     const ch = str[k];
     const digit = parseInt(ch, 10);
@@ -178,18 +247,13 @@ export function rollCounter(x, y, val, color = '#e6edf3') {
       out += `<text class="t" x="${x + 13 * k + 6}" y="${y + 18}" text-anchor="middle" font-size="21" font-weight="800" fill="${color}">${ch}</text>`;
       continue;
     }
-    const tgt = (10 + digit) * 24;
+    const steps = 10 + digit;
+    const tgt = steps * 24;
     let strip = '';
-    for (let n = 0; n < 20; n++) {
-      strip += `<tspan x="6.5" dy="${n === 0 ? 0 : 24}">${n % 10}</tspan>`;
+    for (let n = 0; n <= steps; n++) {
+      strip += `<tspan x="7" dy="${n === 0 ? 0 : 24}">${n % 10}</tspan>`;
     }
-    out += `<svg x="${x + 13 * k}" y="${y}" width="13" height="24" overflow="hidden">
-      <g transform="translate(0, -${tgt})">
-        <animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite"
-          keyTimes="0;0.0083;0.075;1" values="0 0;0 0;0 -${tgt};0 -${tgt}" calcMode="spline" keySplines="0 0 1 1;0.16 0.8 0.3 1;0 0 1 1"/>
-        <text class="t" y="18" text-anchor="middle" font-size="21" font-weight="800" fill="${color}">${strip}</text>
-      </g>
-    </svg>`;
+    out += `<g transform="translate(${x + 13 * k},${y})" clip-path="url(#${cid})"><g transform="translate(0, -${tgt})"><animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite" keyTimes="0;0.01;0.075;1" values="0 0;0 0;0 -${tgt};0 -${tgt}"/><text class="t" y="18" text-anchor="middle" font-size="21" font-weight="800" fill="${color}">${strip}</text></g></g>`;
   }
   return out;
 }

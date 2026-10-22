@@ -295,6 +295,20 @@ export const DEVELOPER_QUERY = `
         nodes {
           stargazerCount
           forkCount
+          isFork
+          primaryLanguage {
+            name
+            color
+          }
+          languages(first: 4, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
         }
       }
       pinnedItems(first: 6, types: [REPOSITORY]) {

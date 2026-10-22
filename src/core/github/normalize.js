@@ -523,19 +523,42 @@ export function normalizeDeveloperData(rawData, options = {}) {
     }
   }
 
-  // 3. Live Tech Arsenal aggregation from repositories & language nodes
+  // 3. Live Tech Arsenal aggregation from repositories & language nodes (forks excluded)
   const langCountMap = new Map();
+  const langColorMap = new Map();
+  const shareMap = new Map();
   for (const r of [...repos, ...pinnedNodes, ...topNodes]) {
+    if (r.isFork) continue;
     if (r.primaryLanguage?.name) {
       langCountMap.set(r.primaryLanguage.name, (langCountMap.get(r.primaryLanguage.name) || 0) + 10);
+      if (r.primaryLanguage.color) langColorMap.set(r.primaryLanguage.name, r.primaryLanguage.color);
     }
     const edges = r.languages?.edges || [];
     for (const { node, size } of edges) {
       if (node?.name) {
         langCountMap.set(node.name, (langCountMap.get(node.name) || 0) + (size || 1));
+        if (node.color) langColorMap.set(node.name, node.color);
       }
     }
   }
+  // Language shares: bytes across owned, non-fork repos only (pinned/top lists would double count)
+  for (const r of repos) {
+    if (r.isFork) continue;
+    for (const { node, size } of (r.languages?.edges || [])) {
+      if (node?.name) shareMap.set(node.name, (shareMap.get(node.name) || 0) + (size || 0));
+    }
+  }
+  const shareTotal = Array.from(shareMap.values()).reduce((a, b) => a + b, 0);
+  const langShares = shareTotal > 0
+    ? Array.from(shareMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([lname, bytes]) => ({
+        name: lname,
+        color: langColorMap.get(lname) || '#58a6ff',
+        pct: Math.max(1, Math.round((bytes / shareTotal) * 100)),
+      }))
+    : [];
   const extractedTech = Array.from(langCountMap.entries())
     .sort((a, b) => b[1] - a[1])
     .map(([tname]) => tname)
@@ -581,6 +604,31 @@ export function normalizeDeveloperData(rawData, options = {}) {
     }
   }
 
+  // 5. Honest calendar insights (longest streak, peak day, weekday rhythm, active days)
+  let longestStreak = 0;
+  let run = 0;
+  let peakDay = null;
+  let activeDays = 0;
+  const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
+  for (const d of allDays) {
+    if (d.count > 0) {
+      run++;
+      activeDays++;
+      if (run > longestStreak) longestStreak = run;
+    } else {
+      run = 0;
+    }
+    if (!peakDay || d.count > peakDay.count) peakDay = { count: d.count, date: d.date };
+    const wd = new Date(`${d.date}T12:00:00Z`).getUTCDay();
+    if (Number.isInteger(wd)) weekdayTotals[wd] += d.count;
+  }
+  const totalContribs = weekdayTotals.reduce((a, b) => a + b, 0);
+  const busiestWeekday = totalContribs > 0 ? weekdayTotals.indexOf(Math.max(...weekdayTotals)) : -1;
+  if (peakDay && peakDay.count === 0) peakDay = null;
+  const accountDays = user.createdAt
+    ? Math.max(0, Math.floor(((options.now || Date.now()) - new Date(user.createdAt).getTime()) / 86400000))
+    : 0;
+
   const createdAtYear = user.createdAt ? new Date(user.createdAt).getFullYear() : 2024;
 
   return {
@@ -605,6 +653,15 @@ export function normalizeDeveloperData(rawData, options = {}) {
     commitSha,
     annualCommits,
     streak,
+    longestStreak,
+    activeDays,
+    totalDays: allDays.length,
+    peakDay,
+    busiestWeekday,
+    accountDays,
+    location: user.location || '',
+    company: user.company || '',
+    langShares,
     repos: normalizedRepos.length > 0 ? normalizedRepos : undefined,
     counts,
   };

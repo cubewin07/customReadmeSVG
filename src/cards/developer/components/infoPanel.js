@@ -1,6 +1,6 @@
 import { escapeXml } from '../../../svg/escape.js';
 import { measureText, fitText, wrapText } from '../../../svg/text.js';
-import { rollCounter, star, anim, pulse, rotate, sla, ACT, T } from '../utils/timeline.js';
+import { rollCounter, star, anim, rotate, sla, ACT, T } from '../utils/timeline.js';
 import { rankMessages, statusMessages, fmtInt } from '../utils/insights.js';
 import { BRAND_COLORS } from './sharedDefs.js';
 
@@ -65,7 +65,6 @@ export function renderInfoPanel(data, theme, sceneAccent = null) {
   // Developer activity (honest metrics only)
   const isFallback = data.source === 'fallback';
   const annualCommitsVal = data.annualCommits || (data.counts ? data.counts.reduce((a, b) => a + (b || 0), 0) : 0);
-  const totalStarsVal = data.stats?.[1]?.value ?? data.stats?.stars ?? 0;
   const commitSha = data.commitSha || '–';
   const langCount = Array.isArray(data.langShares) && data.langShares.length > 0
     ? data.langShares.length

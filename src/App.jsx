@@ -4,6 +4,7 @@ import './App.css';
 const THEMES = [
   { id: 'dark', name: 'Dark' },
   { id: 'light', name: 'Light' },
+  { id: 'obsidian', name: 'Obsidian' },
   { id: 'radical', name: 'Radical' },
   { id: 'nord', name: 'Nord' },
   { id: 'gruvbox', name: 'Gruvbox' },
@@ -329,6 +330,12 @@ function App() {
                     >
                       Full Stacked Bars
                     </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'evolution' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('evolution')}
+                    >
+                      🚀 Stack Evolution
+                    </button>
                   </div>
                 </div>
 
@@ -422,6 +429,18 @@ function App() {
                     onClick={() => setStatsLayout('compact')}
                   >
                     📱 Compact Banner
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'hud' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('hud')}
+                  >
+                    🛡️ Cyber Telemetry HUD
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'streak' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('streak')}
+                  >
+                    🔥 Streak Consistency
                   </button>
                 </div>
               </div>

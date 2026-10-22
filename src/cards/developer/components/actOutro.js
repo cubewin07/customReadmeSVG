@@ -1,6 +1,6 @@
 import { escapeXml } from '../../../svg/escape.js';
 import { measureText, fitText } from '../../../svg/text.js';
-import { anim, tr, sl, sla, pulse } from '../utils/timeline.js';
+import { anim, sl, sla, pulse } from '../utils/timeline.js';
 import { scoreRows, earnedAchievements } from '../utils/insights.js';
 import { PERSONA } from '../data/persona.js';
 

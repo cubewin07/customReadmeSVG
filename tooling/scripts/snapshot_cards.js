@@ -279,7 +279,7 @@ const CARDS_CONFIG = [
   {
     id: 'languages',
     card: languagesCard,
-    layouts: ['polyglot', 'donut', 'list', 'compact'],
+    layouts: ['polyglot', 'donut', 'list', 'compact', 'evolution'],
   },
   {
     id: 'repos',
@@ -289,7 +289,7 @@ const CARDS_CONFIG = [
   {
     id: 'stats',
     card: statsCard,
-    layouts: ['ring', 'bars', 'hero', 'dashboard', 'compact'],
+    layouts: ['ring', 'bars', 'hero', 'dashboard', 'compact', 'streak', 'hud'],
   },
   {
     id: 'developer',

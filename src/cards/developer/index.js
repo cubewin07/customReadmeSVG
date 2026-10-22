@@ -3,13 +3,15 @@ import { DEVELOPER_QUERY } from '../../core/github/queries.js';
 import { normalizeDeveloperData } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { DEFAULT_DEVELOPER_PROFILE } from './data/defaultProfile.js';
-import { tr, W, H, SX, SY } from './utils/timeline.js';
+import { tr, W, H, SX, SY, ACT, withShift } from './utils/timeline.js';
 import { renderSharedDefs } from './components/sharedDefs.js';
 import { renderInfoPanel } from './components/infoPanel.js';
 import { renderSkyAtmosphere } from './components/skyAtmosphere.js';
 import { renderActDesk } from './components/actDesk.js';
 import { renderActRunner } from './components/actRunner.js';
 import { renderActCity } from './components/actCity.js';
+import { renderActOrbit } from './components/actOrbit.js';
+import { renderActIntro, renderActOutro } from './components/actOutro.js';
 import { renderChapterTracker } from './components/chapterTracker.js';
 
 import { BRAND_COLORS } from './components/sharedDefs.js';
@@ -144,22 +146,31 @@ export const developerCard = {
       ${renderInfoPanel(profile, theme, sceneAccent)}
     </g>
 
-    <!-- Right/Bottom Column: 24s Master Timeline Cyber World -->
+    <!-- Right/Bottom Column: 36s Master Timeline Cyber World -->
     <g class="dev-scene" transform="translate(${sceneX},${sceneY})" clip-path="url(#scene)">
       <!-- Always-on Day/Night Sky & Celestial Paths -->
-      ${renderSkyAtmosphere(profile.streak)}
+      ${withShift(ACT.ship, () => renderSkyAtmosphere(profile.streak))}
 
-      <!-- Act 1 (0s - 12s): Workstation Desk, Ship-it Story & Hologram Pinned Repos -->
-      ${renderActDesk(profile, theme)}
+      <!-- Act 1 (3.4s - 15.4s): Workstation Desk, Ship-it Story & Hologram Pinned Repos -->
+      ${withShift(ACT.ship, () => renderActDesk(profile, theme))}
 
-      <!-- Act 2 (12s - 18s): Platformer Runner on Real Contribution Terrain -->
-      ${renderActRunner(profile.counts)}
+      <!-- Intro (0.0s - 3.4s): Arcade Boot & Player 1 Scoreboard -->
+      ${withShift(ACT.intro, () => renderActIntro(profile, theme))}
 
-      <!-- Act 3 (18s - 24s): 3D Isometric Voxel City Built from Commits -->
-      ${renderActCity(profile.counts)}
+      <!-- Act 2 (15.4s - 21.4s): Platformer Runner on Real Contribution Terrain -->
+      ${withShift(ACT.ship, () => renderActRunner(profile.counts))}
 
-      <!-- Unified 3-Act Chapter Tracker HUD (3 pips + progress bar + fact per act) -->
-      ${renderChapterTracker(profile, theme)}
+      <!-- Act 3 (21.4s - 27.4s): 3D Isometric Voxel City Built from Commits -->
+      ${withShift(ACT.ship, () => renderActCity(profile.counts))}
+
+      <!-- Act 4 (27.4s - 32.8s): Polyglot Language Universe -->
+      ${withShift(ACT.orbit, () => renderActOrbit(profile, theme))}
+
+      <!-- Outro (32.8s - 36.0s): Player Card Sign-Off & Continue Countdown -->
+      ${withShift(ACT.outro, () => renderActOutro(profile, theme, options))}
+
+      <!-- Unified Chapter Tracker HUD -->
+      ${withShift(ACT.ship, () => renderChapterTracker(profile, theme))}
     </g>
   </g>
 
@@ -171,6 +182,7 @@ export const developerCard = {
     return rawSvg
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(/>\s+</g, '><')
+      .replace(/\s{2,}/g, ' ')
       .trim();
   },
 };

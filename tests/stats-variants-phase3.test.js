@@ -113,3 +113,24 @@ test('Stats card supports canonical widths (830 full, 405 half, 495 legacy)', ()
   assertValidXml(legacySvg);
   assert.ok(legacySvg.includes('width="495"'));
 });
+
+test('Stats redesign audit assertions: streak 405px bounds, dynamic crest tier & radar vertices, hud full width scaling', () => {
+  // 1. streak layout at 405px
+  const streakHalfSvg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'streak', width: 'half' });
+  assertValidXml(streakHalfSvg);
+  assert.ok(streakHalfSvg.includes('width="405"'));
+
+  // 2. crest layout reflects rank.level dynamically, doesn't hardcode LEVEL 4 CREST, renders vertices
+  const crestSvg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'crest' });
+  assertValidXml(crestSvg);
+  assert.ok(!crestSvg.includes('LEVEL 4 CREST'), 'Should not hardcode LEVEL 4 CREST');
+  assert.ok(crestSvg.includes('TIER') || crestSvg.includes('STANDING'), 'Should render dynamic tier or standing');
+  assert.ok(crestSvg.includes('<circle'), 'Must render radar vertex circles');
+
+  // 3. hud layout scales modules proportionally at width: 'full' (830px)
+  const hudFullSvg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'hud', width: 'full' });
+  assertValidXml(hudFullSvg);
+  assert.ok(hudFullSvg.includes('width="830"'));
+  // Module width at 830px should be > 200px (not fixed at 130px)
+  assert.ok(!hudFullSvg.includes('width="130"'), 'HUD modules should scale dynamically on 830px full width');
+});

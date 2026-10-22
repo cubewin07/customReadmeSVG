@@ -1,6 +1,7 @@
 /**
  * Data Normalization Helpers for GitHub GraphQL API Responses
  */
+import { wrapText } from '../../svg/text.js';
 
 /**
  * Normalizes user profile response.
@@ -639,10 +640,15 @@ export function normalizeDeveloperData(rawData, options = {}) {
     joinedYear: createdAtYear,
     role: user.bio ? user.bio.split('.')[0] : 'Full-Stack Engineer & Creative Coder',
     status: user.status?.message ? user.status.message.replace(/^:[a-z0-9_+-]+:\s*/, '') : `MEMBER SINCE ${createdAtYear}`,
-    focus: [
-      user.bio || 'Crafting interactive web apps & reactive UI systems',
-      'with dynamic, game-inspired SVG animation engines.',
-    ],
+    focus: user.bio
+      ? (() => {
+          const lines = wrapText(user.bio, 14.5, 468, 2);
+          return [lines[0] || '', lines[1] || ''];
+        })()
+      : [
+          'Crafting interactive web apps & reactive UI systems',
+          'with dynamic, game-inspired SVG animation engines.',
+        ],
     tech,
     stats: [
       { label: 'REPOSITORIES', value: totalRepos },

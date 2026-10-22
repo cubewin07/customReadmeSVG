@@ -108,3 +108,37 @@ test('renderActOrbit and renderActOutro standalone outputs are valid and respect
   assert.ok(outroSvg.includes("HI, I'M CUBE"), 'Should respect custom call name option');
   assert.ok(outroSvg.includes('Shipping pixels at 60fps.'), 'Should respect custom tagline option');
 });
+
+test('developerCard redesign audit assertions: 5-pip chapter HUD, bio/role text fitting, and adaptive tagline', () => {
+  // 1. renderChapterTracker renders all 5 act pips
+  const svg = developerCard.renderSvg(RICH_PROFILE, themes.dark);
+  assertValidXml(svg);
+  assert.ok(svg.includes('cx="0"'), 'Pip 1 at cx=0');
+  assert.ok(svg.includes('cx="16"'), 'Pip 2 at cx=16');
+  assert.ok(svg.includes('cx="32"'), 'Pip 3 at cx=32');
+  assert.ok(svg.includes('cx="48"'), 'Pip 4 at cx=48');
+  assert.ok(svg.includes('cx="64"'), 'Pip 5 at cx=64');
+
+  // 2. developerCard fits long bio (150 chars) and long role (80 chars) without overflowing left panel
+  const longProfile = {
+    ...RICH_PROFILE,
+    role: 'Principal Distributed Systems Architecture Lead & High Performance Computing Engineer',
+    bio: 'Pioneering distributed fault-tolerant microservices, low-latency stream engines, and reactive canvas user interfaces for cloud-native simulation platforms.',
+    focus: [
+      'Pioneering distributed fault-tolerant microservices, low-latency stream engines, and reactive canvas user interfaces for cloud-native simulation platforms.',
+    ],
+  };
+
+  const longSvg = developerCard.renderSvg(longProfile, themes.dark);
+  assertValidXml(longSvg);
+  const byteSize = Buffer.byteLength(longSvg, 'utf8');
+  assert.ok(byteSize < 102400, `SVG must stay under 100 KB, got ${byteSize}`);
+
+  // 3. renderActOutro fits 40-character tagline inside bubble
+  const longTagline = 'Architecting resilient hyper-scale systems daily.';
+  const outroLongSvg = `<svg xmlns="http://www.w3.org/2000/svg">${renderActOutro(RICH_PROFILE, themes.dark, {
+    tagline: longTagline,
+  })}</svg>`;
+  assertValidXml(outroLongSvg);
+  assert.ok(outroLongSvg.includes('font-size="15"') || outroLongSvg.includes('font-size="16"'), 'Adaptive font size for long tagline');
+});

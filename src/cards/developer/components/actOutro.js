@@ -1,4 +1,5 @@
 import { escapeXml } from '../../../svg/escape.js';
+import { measureText, fitText } from '../../../svg/text.js';
 import { anim, tr, sl, sla, pulse } from '../utils/timeline.js';
 import { scoreRows, earnedAchievements } from '../utils/insights.js';
 import { PERSONA } from '../data/persona.js';
@@ -10,7 +11,9 @@ import { PERSONA } from '../data/persona.js';
  */
 export function renderActIntro(profile = {}, theme = {}) {
   const accent = theme.accent || '#58a6ff';
-  const handle = escapeXml(profile.handle || '@cubewin07');
+  const rawHandle = profile.handle || '@cubewin07';
+  const handle = escapeXml(rawHandle);
+  const cursorX = Math.round(measureText(rawHandle, 22) * 1.08) + 64;
   const rows = scoreRows(profile);
 
   let rowsSvg = '';
@@ -29,7 +32,7 @@ export function renderActIntro(profile = {}, theme = {}) {
     <text class="m" x="56" y="88" font-size="10.5" font-weight="700" letter-spacing="1.4" fill="#3fb950">ARCADE OS // BOOT SEQUENCE</text>
     <text class="m" x="528" y="88" text-anchor="end" font-size="10.5" font-weight="800" fill="#f59e0b">1UP • PLAYER 01</text>
     <text class="m" x="56" y="122" font-size="22" font-weight="800" fill="#e6edf3">${handle}</text>
-    <rect x="${62 + handle.length * 13}" y="103" width="9" height="21" fill="${accent}">${sla('opacity', ['1', '0', '1'], 0.6)}</rect>
+    <rect x="${cursorX}" y="103" width="9" height="21" fill="${accent}">${sla('opacity', ['1', '0', '1'], 0.6)}</rect>
     ${rowsSvg}
     <text class="m" x="292" y="326" text-anchor="middle" font-size="10.5" font-weight="700" letter-spacing="1.5" fill="#9db7e8">STAGE 01 START • READY</text>
   </g>`;
@@ -44,7 +47,9 @@ export function renderActIntro(profile = {}, theme = {}) {
 export function renderActOutro(profile = {}, theme = {}, options = {}) {
   const accent = theme.accent || '#58a6ff';
   const callName = escapeXml(options.call || options.callName || profile.callName || PERSONA.callName);
-  const tagline = escapeXml(options.tagline || profile.tagline || PERSONA.tagline);
+  const rawTagline = options.tagline || profile.tagline || PERSONA.tagline;
+  const tagFontSize = rawTagline.length > 28 ? 15 : rawTagline.length > 22 ? 17 : 19;
+  const tagline = escapeXml(fitText(rawTagline, tagFontSize, 302));
   const handle = escapeXml(profile.handle || '@cubewin07');
 
   const badges = earnedAchievements(profile);
@@ -79,7 +84,7 @@ export function renderActOutro(profile = {}, theme = {}, options = {}) {
       <polygon points="0,52 -18,62 0,68" fill="#0e192b" stroke="${accent}" stroke-width="1.4"/>
       <line x1="0" y1="53" x2="0" y2="67" stroke="#0e192b" stroke-width="2.2"/>
       <text class="m" x="20" y="28" font-size="10.5" font-weight="700" letter-spacing="0.8" fill="#38bdf8">HI, I'M ${callName.toUpperCase()} • ${handle}</text>
-      <text class="t" x="20" y="58" font-size="19" font-weight="800" fill="#e6edf3">“${tagline}”</text>
+      <text class="t" x="20" y="58" font-size="${tagFontSize}" font-weight="800" fill="#e6edf3">“${tagline}”</text>
     </g>
 
     <!-- Earned Achievements -->

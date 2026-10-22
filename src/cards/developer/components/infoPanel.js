@@ -1,5 +1,5 @@
 import { escapeXml } from '../../../svg/escape.js';
-import { measureText, fitText } from '../../../svg/text.js';
+import { measureText, fitText, wrapText } from '../../../svg/text.js';
 import { rollCounter, star, anim, pulse, rotate, sla, ACT, T } from '../utils/timeline.js';
 import { rankMessages, statusMessages, fmtInt } from '../utils/insights.js';
 import { BRAND_COLORS } from './sharedDefs.js';
@@ -29,24 +29,38 @@ export function renderInfoPanel(data, theme, sceneAccent = null) {
   const nameFit = fitText(rawName, 34, 500);
   const name = escapeXml(nameFit);
   const nameW = Math.min(500, Math.ceil(measureText(nameFit, 34) * 1.12) + 6);
-  const handle = escapeXml(data.handle || '@cubewin07');
-  const role = escapeXml(data.role || 'Full-Stack Engineer & Creative Coder');
+
+  const rawHandle = data.handle || '@cubewin07';
+  const handleW = Math.round(measureText(rawHandle, 16));
+  const maxRoleW = Math.max(180, 500 - handleW - 24);
+  const rawRole = data.role || 'Full-Stack Engineer & Creative Coder';
+  const role = escapeXml(fitText(rawRole, 16, maxRoleW));
+  const handle = escapeXml(rawHandle);
+
   const joinedYear = data.joinedYear || (data.createdAt ? new Date(data.createdAt).getFullYear() : 2024);
   const customStatus = data.customStatus
     ? data.customStatus.replace(/^:[a-z0-9_+-]+:\s*/, '')
     : null;
 
-  // Focus lines (split or fallback)
+  // Focus lines (split or fallback, safely fitted to avoid scene overlap)
   let focus1 = 'Crafting interactive web apps & reactive UI systems';
   let focus2 = 'with dynamic, game-inspired SVG animation engines.';
   if (Array.isArray(data.focus) && data.focus.length > 0) {
-    focus1 = data.focus[0] || focus1;
-    focus2 = data.focus[1] || '';
+    if (data.focus.length === 1 || !data.focus[1]) {
+      const wrapped = wrapText(data.focus[0], 14.5, 468, 2);
+      focus1 = wrapped[0] || focus1;
+      focus2 = wrapped[1] || '';
+    } else {
+      focus1 = data.focus[0] || focus1;
+      focus2 = data.focus[1] || '';
+    }
   } else if (typeof data.focus === 'string') {
-    const parts = data.focus.split('.');
-    focus1 = parts[0] ? parts[0] + '.' : focus1;
-    focus2 = parts.slice(1).join('.').trim();
+    const wrapped = wrapText(data.focus, 14.5, 468, 2);
+    focus1 = wrapped[0] || focus1;
+    focus2 = wrapped[1] || '';
   }
+  focus1 = fitText(focus1, 14.5, 468);
+  if (focus2) focus2 = fitText(focus2, 14.5, 468);
 
   // Developer activity (honest metrics only)
   const isFallback = data.source === 'fallback';

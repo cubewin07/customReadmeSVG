@@ -151,13 +151,13 @@ export function renderActDesk(data, theme = {}) {
       const x = HX - 52 + kx * 13 + row * 1.5;
       const y = 306 + row * 9;
       if ((kx + row) % 2 === 0) {
-        activeKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}"/>`;
+        activeKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1"/>`;
       } else {
-        staticKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1" fill="${accent}" opacity="0.25"/>`;
+        staticKeys += `<rect x="${x}" y="${y}" width="9" height="5" rx="1"/>`;
       }
     }
   }
-  const keycapsSvg = `${staticKeys}<g opacity="0.4">${sla('opacity', ['.25', '1', '.25'], 0.6)}${activeKeys}</g>`;
+  const keycapsSvg = `<g fill="${accent}" opacity="0.25">${staticKeys}</g><g fill="${accent}" opacity="0.4">${sla('opacity', ['.25', '1', '.25'], 0.6)}${activeKeys}</g>`;
 
   // Right arm gesture schedule
   const grest = [

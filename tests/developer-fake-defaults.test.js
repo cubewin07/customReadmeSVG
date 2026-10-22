@@ -39,7 +39,7 @@ test('renderChapterTracker renders honest 0 commits and 0 streak instead of fake
 
   const svg = renderChapterTracker(profile, {});
   assert.ok(!svg.includes('142'), 'Chapter tracker must not contain hardcoded 142 commits');
-  assert.ok(svg.includes('(0 COMMITS)'), 'Chapter tracker must display (0 COMMITS) when count is 0');
+  assert.ok(svg.includes('(0C)') || svg.includes('(0 COMMITS)'), 'Chapter tracker must display (0C) when count is 0');
   assert.ok(!svg.includes('14-day'), 'Chapter tracker must not fall back to 14-day streak');
   assert.ok(svg.includes('0-day streak'), 'Chapter tracker should display honest 0-day streak');
 });

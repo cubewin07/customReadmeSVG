@@ -56,20 +56,22 @@ export function renderActRunner(counts = []) {
     { x: 610, w: 95, h: 100, antenna: true },
   ];
 
-  let farSkylineSvg = '';
+  let farRects = '';
+  let winBlueD = '';
+  let winGoldD = '';
+  let antennaD = '';
   let antennaLightsSvg = '';
   for (const b of farSkyline) {
     const yTop = 300 - b.h;
-    farSkylineSvg += `
-      <rect x="${b.x}" y="${yTop}" width="${b.w}" height="${b.h + 70}" fill="#080e1a" opacity="0.85"/>
-      <line x1="${b.x + 6}" y1="${yTop + 14}" x2="${b.x + b.w - 6}" y2="${yTop + 14}" stroke="#58a6ff" stroke-opacity="0.3" stroke-dasharray="3 4"/>
-      <line x1="${b.x + 6}" y1="${yTop + 24}" x2="${b.x + b.w - 6}" y2="${yTop + 24}" stroke="#ffd76a" stroke-opacity="0.25" stroke-dasharray="3 4"/>
-      ${b.antenna ? `<line x1="${b.x + b.w / 2}" y1="${yTop}" x2="${b.x + b.w / 2}" y2="${yTop - 12}" stroke="#2a3547" stroke-width="1.2"/>` : ''}`;
+    farRects += `<rect x="${b.x}" y="${yTop}" width="${b.w}" height="${b.h + 70}"/>`;
+    winBlueD += `M${b.x + 6} ${yTop + 14}H${b.x + b.w - 6}`;
+    winGoldD += `M${b.x + 6} ${yTop + 24}H${b.x + b.w - 6}`;
     if (b.antenna) {
+      antennaD += `M${b.x + b.w / 2} ${yTop}V${yTop - 12}`;
       antennaLightsSvg += `<circle cx="${b.x + b.w / 2}" cy="${yTop - 12}" r="1.5" fill="#ff5f56"/>`;
     }
   }
-  farSkylineSvg += `<g><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite"/>${antennaLightsSvg}</g>`;
+  const farSkylineSvg = `<g fill="#080e1a" opacity="0.85">${farRects}</g><path d="${winBlueD}" stroke="#58a6ff" stroke-opacity="0.3" stroke-dasharray="3 4" fill="none"/><path d="${winGoldD}" stroke="#ffd76a" stroke-opacity="0.25" stroke-dasharray="3 4" fill="none"/><path d="${antennaD}" stroke="#2a3547" stroke-width="1.2" fill="none"/><g><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite"/>${antennaLightsSvg}</g>`;
 
   // Layer 2: Midground Skybridge with Speeding Data Packet
   let skybridgeSvg = `
@@ -85,18 +87,30 @@ export function renderActRunner(counts = []) {
 
   // Layer 3: Beveled Contribution Terrain Pillars
   let terrainSvg = '';
+  let seamPathD = '';
+  let bevelPathD = '';
+  const bodyByLv = { 1: '', 2: '', 3: '', 4: '' };
+  const capByLv = { 1: '', 2: '', 3: '', 4: '' };
   const candidateStarIndices = [9, 17, 25, 33];
   const starsAt = candidateStarIndices.filter(c => c < N && lvl(cData[c]) > 0);
 
   for (let c = 0; c < N; c++) {
     const lv = lvl(cData[c]);
     if (lv === 0) continue; // Gap/pit!
+    const x = c * 24;
     const y = getTop(c);
+    bodyByLv[lv] += `M${x} ${y}h23v${SH - y}h-23Z`;
+    capByLv[lv] += `M${x} ${y}h23v5h-23Z`;
+    seamPathD += `M${x + 11.5} ${y + 5}V${SH}`;
+    bevelPathD += `M${x} ${y}H${x + 23}`;
+  }
+  for (let lv = 1; lv <= 4; lv++) {
+    if (!bodyByLv[lv]) continue;
     const col = CUBE_COLORS[lv];
-    terrainSvg += `<rect x="${c * 24}" y="${y}" width="23" height="${SH - y}" fill="${shade(col, 0.45)}"/>`
-      + `<line x1="${c * 24 + 11.5}" y1="${y + 5}" x2="${c * 24 + 11.5}" y2="${SH}" stroke="#000" stroke-opacity="0.25"/>`
-      + `<rect x="${c * 24}" y="${y}" width="23" height="5" fill="${col}"/>`
-      + `<line x1="${c * 24}" y1="${y}" x2="${c * 24 + 23}" y2="${y}" stroke="#fff" stroke-width="1" stroke-opacity="0.6"/>`;
+    terrainSvg += `<path d="${bodyByLv[lv]}" fill="${shade(col, 0.45)}"/><path d="${capByLv[lv]}" fill="${col}"/>`;
+  }
+  if (seamPathD) {
+    terrainSvg += `<path d="${seamPathD}" stroke="#000" stroke-opacity="0.25" fill="none"/><path d="${bevelPathD}" stroke="#fff" stroke-width="1" stroke-opacity="0.6" fill="none"/>`;
   }
 
   // Spinning Stars with Glowing Halos

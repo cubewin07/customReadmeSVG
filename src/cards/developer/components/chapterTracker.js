@@ -73,9 +73,25 @@ export function renderChapterTracker(profile, theme = {}) {
 
     <!-- Act 3 Caption (18s - 24s) -->
     <g opacity="0">
-      ${anim('opacity', [[0, 0], [17.8, 0], [18.2, 1], [23.8, 1], [24, 0]])}
+      ${anim('opacity', pulse(18.0, 23.8, 0.2))}
       <text class="m" x="78" y="18" font-size="10.5" font-weight="800" letter-spacing="0.6" fill="#e6edf3">
-        <tspan fill="#a78bfa">ACT 03 // BUILD</tspan> • 7-WEEK VOXEL CITY (${totalCommits} COMMITS)
+        <tspan fill="#a78bfa">ACT 03 // BUILD</tspan> • 7-WK VOXEL CITY (${totalCommits}C)
+      </text>
+    </g>
+
+    <!-- Act 4 Caption (24s - 29.4s local / 27.4s - 32.8s master) -->
+    <g opacity="0">
+      ${anim('opacity', pulse(24.0, 29.2, 0.2))}
+      <text class="m" x="78" y="18" font-size="10.5" font-weight="800" letter-spacing="0.6" fill="#e6edf3">
+        <tspan fill="#38bdf8">ACT 04 // ORBIT</tspan> • LANGUAGE UNIVERSE
+      </text>
+    </g>
+
+    <!-- Outro Caption (29.4s - 32.6s local / 32.8s - 36.0s master) -->
+    <g opacity="0">
+      ${anim('opacity', [[0, 0], [29.2, 0], [29.5, 1], [32.6, 1]])}
+      <text class="m" x="78" y="18" font-size="10.5" font-weight="800" letter-spacing="0.6" fill="#e6edf3">
+        <tspan fill="#ff7b72">ACT 05 // SIGN-OFF</tspan> • CONTINUE? COUNTDOWN
       </text>
     </g>
 

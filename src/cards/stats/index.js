@@ -2,12 +2,12 @@ import { graphql } from '../../core/github/client.js';
 import { STATS_QUERY } from '../../core/github/queries.js';
 import { normalizeStats } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
+import { fitText, measureText } from '../../svg/text.js';
 import { icons } from '../../svg/icons.js';
 import { calculateRank } from '../../core/stats/rank.js';
 import { renderCardHeader } from '../../svg/header.js';
 import { resolveTheme } from '../../svg/theme.js';
 import { resolveCardWidth } from '../../svg/layout.js';
-import { renderMetricTile } from '../../svg/tile.js';
 import {
   renderCardDefs,
   renderCardStyles,
@@ -62,12 +62,12 @@ function computeRealMetricDeltas(data) {
     const recent3 = monthly.slice(-3).reduce((a, b) => a + (b || 0), 0);
     const prev3 = monthly.slice(-6, -3).reduce((a, b) => a + (b || 0), 0);
     if (prev3 > 0) {
-      commitDelta = Math.round(((recent3 - prev3) / prev3) * 100);
+      commitDelta = Math.max(-99, Math.min(99, Math.round(((recent3 - prev3) / prev3) * 100)));
     } else if (recent3 > 0) {
-      commitDelta = 100;
+      commitDelta = 45;
     }
   } else if ((data?.totalCommits ?? 0) > 0) {
-    commitDelta = Math.min(99, Math.max(5, Math.round((data.totalCommits / Math.max(1, data.totalRepos || 10)) * 2)));
+    commitDelta = Math.min(42, Math.max(4, Math.round(Math.log10((data.totalCommits || 1) + 1) * 11)));
   }
 
   const prs = data?.pullRequests ?? 0;
@@ -76,10 +76,10 @@ function computeRealMetricDeltas(data) {
   const stars = data?.totalStars ?? 0;
   const repos = Math.max(1, data?.totalRepos ?? 1);
 
-  const prDelta = prs > 0 ? Math.min(99, Math.max(1, Math.round((prs / Math.max(1, (data?.totalCommits || 100) / 10)) * 10))) : 0;
-  const revDelta = reviews > 0 ? Math.min(99, Math.max(1, Math.round((reviews / Math.max(1, prs || 1)) * 25))) : 0;
-  const issueDelta = issues > 0 ? Math.min(99, Math.max(1, Math.round((issues / repos) * 15))) : 0;
-  const starDelta = stars > 0 ? Math.min(99, Math.max(1, Math.round((stars / repos) * 10))) : 0;
+  const prDelta = prs > 0 ? Math.min(38, Math.max(2, Math.round(Math.log10(prs + 1) * 14))) : 0;
+  const revDelta = reviews > 0 ? Math.min(34, Math.max(2, Math.round(Math.log10(reviews + 1) * 15))) : 0;
+  const issueDelta = issues > 0 ? Math.min(29, Math.max(1, Math.round((issues / repos) * 12))) : 0;
+  const starDelta = stars > 0 ? Math.min(46, Math.max(3, Math.round(Math.log10(stars + 1) * 14))) : 0;
 
   return {
     commits: commitDelta,
@@ -138,16 +138,16 @@ export function renderV1RingSvg(data, theme, options = {}) {
   const deltas = computeRealMetricDeltas(data);
 
   const metrics = [
-    { label: 'COMMITS', value: totalCommits.toLocaleString(), icon: icons.commits(theme.iconColor), delta: deltas.commits },
-    { label: 'PULL REQUESTS', value: pullRequests.toLocaleString(), icon: icons.pullRequest(theme.accent || theme.title), delta: deltas.prs },
-    { label: 'REVIEWS', value: reviews.toLocaleString(), icon: icons.eye(theme.iconColor), delta: deltas.reviews },
-    { label: 'ISSUES', value: issues.toLocaleString(), icon: icons.zap(theme.iconColor), delta: deltas.issues },
-    { label: 'STARS', value: totalStars.toLocaleString(), icon: icons.star(theme.iconColor), delta: deltas.stars },
+    { label: 'COMMITS', value: totalCommits.toLocaleString(), raw: totalCommits, max: 1500, color: theme.title || '#58a6ff', icon: icons.commits(theme.iconColor), delta: deltas.commits },
+    { label: 'PULL REQUESTS', value: pullRequests.toLocaleString(), raw: pullRequests, max: 100, color: '#a855f7', icon: icons.pullRequest(theme.accent || theme.title), delta: deltas.prs },
+    { label: 'REVIEWS', value: reviews.toLocaleString(), raw: reviews, max: 50, color: '#00f2fe', icon: icons.eye(theme.iconColor), delta: deltas.reviews },
+    { label: 'ISSUES', value: issues.toLocaleString(), raw: issues, max: 50, color: '#f59e0b', icon: icons.zap(theme.iconColor), delta: deltas.issues },
+    { label: 'STARS', value: totalStars.toLocaleString(), raw: totalStars, max: 500, color: '#e3b341', icon: icons.star(theme.iconColor), delta: deltas.stars },
   ];
 
   const podW = width <= 450 ? 116 : 144;
   const rightW = contentWidth - podW - 12;
-  const ringRadius = width <= 450 ? 30 : 36;
+  const ringRadius = width <= 450 ? 30 : 34;
 
   const topBadgeText = totalCommits > 0
     ? `⚡ ${totalCommits.toLocaleString()} Commits`
@@ -159,7 +159,7 @@ export function renderV1RingSvg(data, theme, options = {}) {
   </defs>
   <style>
     ${renderCardStyles(theme)}
-    .rank-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-weight: 700; font-size: 10px; fill: ${theme.secondaryText}; text-transform: uppercase; letter-spacing: 0.6px; }
+    .rank-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-weight: 700; font-size: 9.5px; fill: ${theme.secondaryText}; text-transform: uppercase; letter-spacing: 0.6px; }
   </style>
 
   ${renderCardFrame(width, height, idPrefix, theme, 14)}
@@ -186,13 +186,14 @@ export function renderV1RingSvg(data, theme, options = {}) {
           score: rank.score,
           level: rank.level,
           x: podW / 2,
-          y: 52,
+          y: 49,
           radius: ringRadius,
           strokeWidth: 6.5,
-          label: `Score ${rank.score}/100`,
+          label: 'RANK',
           theme,
         })}
-        <text x="${podW / 2}" y="118" text-anchor="middle" class="rank-title">Overall Rank</text>
+        <text x="${podW / 2}" y="108" text-anchor="middle" class="rank-title">Overall Rank</text>
+        <text x="${podW / 2}" y="123" text-anchor="middle" class="font-mono" font-size="9.5" font-weight="700" fill="${theme.title}">Score ${rank.score}/100</text>
       `,
     })}
 
@@ -210,11 +211,20 @@ export function renderV1RingSvg(data, theme, options = {}) {
           ${metrics
             .map((m, idx) => {
               const y = idx * 24;
+              const barStartX = 114;
+              const barEndX = rightW - 142;
+              const barW = Math.max(0, barEndX - barStartX);
+              const fillRatio = m.raw > 0 ? Math.min(1, Math.max(0.12, Math.log10(m.raw + 1) / Math.log10(m.max + 1))) : 0;
+              const fillW = Math.round(barW * fillRatio);
               return `
               <g transform="translate(0, ${y})">
                 <g transform="translate(0, 1)">${m.icon}</g>
                 <text x="22" y="12" class="stat-lbl">${m.label}</text>
-                <text x="${rightW - 74}" y="12" text-anchor="end" class="stat-val" font-size="12.5">${m.value}</text>
+                ${barW >= 28 ? `
+                  <rect x="${barStartX}" y="6.5" width="${barW}" height="4" rx="2" fill="${theme.barBg || '#21262d'}" opacity="0.65" />
+                  ${fillW > 0 ? `<rect x="${barStartX}" y="6.5" width="${fillW}" height="4" rx="2" fill="${m.color}" opacity="0.85" />` : ''}
+                ` : ''}
+                <text x="${rightW - 74}" y="12" text-anchor="end" class="stat-val" font-size="12">${m.value}</text>
                 <g transform="translate(${rightW - 64}, 0)">
                   ${renderDeltaChip({ delta: m.delta, x: 0, y: 0, theme })}
                 </g>
@@ -337,7 +347,8 @@ export function renderV1MixSvg(data, theme, options = {}) {
 
     <!-- Milestone Caption -->
     <g transform="translate(0, 154)">
-      <text x="0" y="0" class="caption-text">🌟 <tspan font-weight="700" fill="${theme.title}">${totalContributions.toLocaleString()}</tspan> lifetime contributions • Score ${rank.score}/100</text>
+      <circle cx="4" cy="-3.5" r="3" fill="${theme.accent || theme.title || '#58a6ff'}" class="pulse-dot" />
+      <text x="13" y="0" class="caption-text"><tspan font-weight="700" fill="${theme.title}">${totalContributions.toLocaleString()}</tspan> lifetime contributions • Score ${rank.score}/100</text>
     </g>
   </g>
 </svg>`;
@@ -457,12 +468,16 @@ export function renderV1CrestSvg(data, theme, options = {}) {
       idPrefix,
       rx: 10,
       children: `
-        <rect x="14" y="14" width="${leftPodW - 28}" height="20" rx="10" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-        <text x="${leftPodW / 2}" y="27.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="${theme.title}">TIER ${rank.level} // STANDING</text>
+        <rect x="14" y="12" width="${leftPodW - 28}" height="20" rx="10" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
+        <text x="${leftPodW / 2}" y="25.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="${theme.title}">TIER ${rank.level} // STANDING</text>
 
-        <text x="${leftPodW / 2}" y="78" text-anchor="middle" class="hero-grade">${rank.level}</text>
-        <text x="${leftPodW / 2}" y="104" text-anchor="middle" class="hero-score">Score: <tspan fill="${theme.title}" font-weight="800">${rank.score} / 100</tspan></text>
-        <text x="${leftPodW / 2}" y="128" text-anchor="middle" class="font-ui" font-size="8.5" fill="${theme.secondaryText}">Scored across 5 vectors</text>
+        <!-- Heraldic Shield Polygon -->
+        <polygon points="${leftPodW / 2},37 ${leftPodW / 2 + 28},48 ${leftPodW / 2 + 24},78 ${leftPodW / 2},92 ${leftPodW / 2 - 24},78 ${leftPodW / 2 - 28},48" fill="${accentColor}" fill-opacity="0.1" stroke="${accentColor}" stroke-width="1.2" stroke-opacity="0.45" />
+        <text x="${leftPodW / 2}" y="76" text-anchor="middle" class="hero-grade" font-size="34">${rank.level}</text>
+        <text x="${leftPodW / 2}" y="108" text-anchor="middle" class="hero-score">Score: <tspan fill="${theme.title}" font-weight="800">${rank.score} / 100</tspan></text>
+        <rect x="24" y="115" width="${leftPodW - 48}" height="4" rx="2" fill="${theme.barBg || '#21262d'}" />
+        <rect x="24" y="115" width="${Math.max(6, Math.round(((leftPodW - 48) * rank.score) / 100))}" height="4" rx="2" fill="${accentColor}" />
+        <text x="${leftPodW / 2}" y="133" text-anchor="middle" class="font-ui" font-size="8.5" fill="${theme.secondaryText}">Scored across 5 vectors</text>
       `,
     })}
 
@@ -505,13 +520,18 @@ export function renderV1YearSvg(data, theme, options = {}) {
   const monthly = data?.monthlyContributions || [80, 110, 95, 140, 160, 210, 180, 195, 150, 175, 220, 135];
   const monthLabels = data?.monthLabels || ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
   const maxMonthly = Math.max(...monthly, 1);
-  const bestMonth = data?.bestMonth || { name: 'Peak', count: maxMonthly };
+  const peakIdx = monthly.indexOf(maxMonthly);
+  const peakMonthName = monthLabels[peakIdx] || 'Peak';
+  const bestMonth = data?.bestMonth || { name: peakMonthName, count: maxMonthly };
+  const bestMonthDisplay = bestMonth.name === 'Peak'
+    ? `Peak (${bestMonth.count})`
+    : `${bestMonth.name} • ${bestMonth.count} Peak`;
 
   const kpiW = Math.floor((contentWidth - 16) / 3);
   const kpis = [
     { label: 'TOTAL CONTRIBUTIONS', val: totalContributions.toLocaleString() },
     { label: 'LONGEST STREAK', val: `${maxStreak} Days` },
-    { label: 'BEST MONTH', val: `${bestMonth.name} (${bestMonth.count})` },
+    { label: 'BEST MONTH', val: fitText(bestMonthDisplay, 12.5, kpiW - 18) },
   ];
 
   const barMaxHeight = 56;
@@ -730,30 +750,44 @@ export function renderV1StreakSvg(data, theme, options = {}) {
   <g transform="translate(24, 48)">
     <!-- Left Column: Current & Longest Streak Tiles -->
     <g transform="translate(0, 0)">
-      ${renderMetricTile({
+      ${renderBentoTile({
         x: 0,
         y: 0,
         width: leftColWidth,
         height: 68,
-        label: 'ACTIVE STREAK',
-        value: `${currentStreak} DAYS`,
-        icon: icons.flame('#f59e0b'),
-        subtext: currentStreak > 0 ? 'Active Today' : 'No streak',
-        accentColor: '#f59e0b',
         theme,
+        idPrefix,
+        rx: 8,
+        accentColor: '#f59e0b',
+        accentPosition: 'left',
+        children: `
+          <g transform="translate(12, 10)">
+            <g transform="translate(${leftColWidth - 36}, 0)">${icons.flame('#f59e0b')}</g>
+            <text x="0" y="10" class="stat-lbl">ACTIVE STREAK</text>
+            <text x="0" y="30" class="stat-val" font-size="16">${currentStreak} DAYS</text>
+            <text x="0" y="46" class="font-ui" font-size="9.5" fill="${theme.secondaryText}">${currentStreak > 0 ? 'Active Today' : 'No streak'}</text>
+          </g>
+        `,
       })}
 
-      ${renderMetricTile({
+      ${renderBentoTile({
         x: 0,
         y: 76,
         width: leftColWidth,
         height: 68,
-        label: 'LONGEST STREAK',
-        value: `${maxStreak} DAYS`,
-        icon: icons.star('#e3b341'),
-        subtext: 'All-Time Record',
-        accentColor: '#e3b341',
         theme,
+        idPrefix,
+        rx: 8,
+        accentColor: '#e3b341',
+        accentPosition: 'left',
+        children: `
+          <g transform="translate(12, 10)">
+            <g transform="translate(${leftColWidth - 36}, 0)">${icons.star('#e3b341')}</g>
+            <text x="0" y="10" class="stat-lbl">LONGEST STREAK</text>
+            <text x="0" y="30" class="stat-val" font-size="16">${maxStreak} DAYS</text>
+            <text x="0" y="46" class="font-ui" font-size="9.5" fill="${theme.secondaryText}">All-Time Record</text>
+          </g>
+        `,
       })}
     </g>
 
@@ -796,8 +830,8 @@ export function renderV1StreakSvg(data, theme, options = {}) {
  * 7. Flagship Cyberpunk Telemetry HUD (Responsive Grid Scaling)
  */
 export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
-  const name = escapeXml(data?.name || data?.login || options.username || 'Developer');
-  const login = escapeXml(data?.login || options.username || 'developer');
+  const rawName = data?.name || data?.login || options.username || 'Developer';
+  const rawLogin = data?.login || options.username || 'developer';
   const totalCommits = data?.totalCommits ?? 0;
   const totalContributions = data?.totalContributions ?? totalCommits;
   const pullRequests = data?.pullRequests ?? 0;
@@ -839,9 +873,18 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
   const modW = Math.floor((gridW - 10) / 2);
   const modH = 58;
 
-  const circleR = width <= 440 ? 34 : 42;
+  const circleR = width <= 440 ? 31 : 36;
   const circleC = 2 * Math.PI * circleR;
   const strokeOffset = circleC - (circleC * (rank.percentile / 100));
+
+  const formatHudNum = (n) => (n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n.toLocaleString());
+  const impactLabel = `⚡ ${formatHudNum(totalContributions)} IMPACT`;
+  const beaconW = Math.max(134, Math.ceil(measureText(impactLabel, 9.5)) + 36);
+  const maxHeaderW = width - beaconW - 56;
+  const fittedName = fitText(rawName, 16, Math.max(110, maxHeaderW - 90));
+  const name = escapeXml(fittedName);
+  const fittedLogin = fitText(rawLogin, 13, Math.max(60, maxHeaderW - measureText(fittedName, 16) - 24));
+  const login = escapeXml(fittedLogin);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
@@ -861,8 +904,8 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
     ${renderCardStyles(theme)}
     .hud-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 16px; fill: ${title}; }
     .hud-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; }
-    .hud-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 18px; fill: ${title}; font-variant-numeric: tabular-nums; }
-    .hud-grade { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 900; font-size: 34px; fill: ${title}; }
+    .hud-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 17px; fill: ${title}; font-variant-numeric: tabular-nums; }
+    .hud-grade { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 900; font-size: 30px; fill: ${title}; }
   </style>
 
   <rect x="0.5" y="0.5" rx="14" width="${width - 1}" height="${height - 1}" fill="url(#cyber-bg)" stroke="${border}"/>
@@ -876,25 +919,25 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
 
   <!-- Header -->
   <g transform="translate(24, 0)">
-    <text class="hud-mono" x="0" y="24" font-size="9" font-weight="700" letter-spacing="1.2" fill="${accent}">SYS.DEV // TELEMETRY HUD</text>
-    <text class="hud-title" x="0" y="44">${name} <tspan fill="${subtext}" font-size="13" font-weight="500">(@${login})</tspan></text>
+    <text class="hud-mono" x="0" y="22" font-size="9" font-weight="700" letter-spacing="1.2" fill="${accent}">SYS.DEV // TELEMETRY HUD</text>
+    <text class="hud-title" x="0" y="42">${name} <tspan fill="${subtext}" font-size="12.5" font-weight="500">(@${login})</tspan></text>
   </g>
 
   <!-- Live Status Beacon Capsule -->
-  <g transform="translate(${width - 162}, 20)">
-    <rect x="0" y="0" width="138" height="24" rx="12" fill="${isLight ? '#f1f5f9' : '#0c1624'}" stroke="${border}" stroke-width="1.2"/>
+  <g transform="translate(${width - beaconW - 24}, 18)">
+    <rect x="0" y="0" width="${beaconW}" height="24" rx="12" fill="${isLight ? '#f1f5f9' : '#0c1624'}" stroke="${border}" stroke-width="1.2"/>
     <circle cx="14" cy="12" r="3.5" fill="#22c55e"/>
     <circle cx="14" cy="12" r="3.5" fill="none" stroke="#22c55e" stroke-width="1.2" opacity="0.6">
       <animate attributeName="r" values="3.5;9" dur="2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="0.6;0" dur="2s" repeatCount="indefinite"/>
     </circle>
-    <text class="hud-mono" x="25" y="15.5" font-size="9.5" font-weight="800" letter-spacing="0.5" fill="${accent}">⚡ ${totalContributions.toLocaleString()} IMPACT</text>
+    <text class="hud-mono" x="25" y="15.5" font-size="9.5" font-weight="800" letter-spacing="0.5" fill="${accent}">${impactLabel}</text>
   </g>
 
-  <line x1="24" y1="56" x2="${width - 24}" y2="56" stroke="${subtleBorder}" stroke-width="1" opacity="0.6"/>
+  <line x1="24" y1="54" x2="${width - 24}" y2="54" stroke="${subtleBorder}" stroke-width="1" opacity="0.6"/>
 
   <!-- Zone A: Proportional Tactical Bento Modules -->
-  <g transform="translate(24, 68)">
+  <g transform="translate(24, 66)">
     <!-- Module 1: Contributions -->
     ${renderBentoTile({
       x: 0,
@@ -909,7 +952,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
       children: `
         <g transform="translate(10, 8)">
           <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="${subtext}">CONTRIBUTIONS</text>
-          <text class="hud-val" x="0" y="32">${totalContributions.toLocaleString()}</text>
+          <text class="hud-val" x="0" y="33">${formatHudNum(totalContributions)}</text>
         </g>
       `,
     })}
@@ -928,7 +971,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
       children: `
         <g transform="translate(10, 8)">
           <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="${subtext}">COMMITS PUSHED</text>
-          <text class="hud-val" x="0" y="32">${totalCommits.toLocaleString()}</text>
+          <text class="hud-val" x="0" y="33">${formatHudNum(totalCommits)}</text>
         </g>
       `,
     })}
@@ -947,7 +990,8 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
       children: `
         <g transform="translate(10, 8)">
           <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="${subtext}">PULL REQUESTS</text>
-          <text class="hud-val" x="0" y="32">${pullRequests} <tspan fill="${subtext}" font-size="11" font-weight="500">+${reviews} Reviews</tspan></text>
+          <text class="hud-val" x="0" y="33">${pullRequests}</text>
+          <text class="hud-mono" x="${modW - 20}" y="33" text-anchor="end" fill="${subtext}" font-size="10" font-weight="600">+${reviews} Reviews</text>
         </g>
       `,
     })}
@@ -966,14 +1010,15 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
       children: `
         <g transform="translate(10, 8)">
           <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="${subtext}">ACTIVE STREAK</text>
-          <text class="hud-val" x="0" y="32">${streak} <tspan fill="${subtext}" font-size="11" font-weight="500">Peak: ${maxStreak}d</tspan></text>
+          <text class="hud-val" x="0" y="33">${streak}d</text>
+          <text class="hud-mono" x="${modW - 20}" y="33" text-anchor="end" fill="${subtext}" font-size="10" font-weight="600">Peak: ${maxStreak}d</text>
         </g>
       `,
     })}
   </g>
 
   <!-- Zone B: Radial Gauge Bento Pod -->
-  <g transform="translate(${24 + gridW + 14}, 68)">
+  <g transform="translate(${24 + gridW + 14}, 66)">
     ${renderBentoTile({
       x: 0,
       y: 0,
@@ -983,16 +1028,16 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
       idPrefix,
       rx: 8,
       children: `
-        <g transform="translate(${gaugePodW / 2}, 52)">
-          <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${subtleBorder}" stroke-width="7"/>
-          <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${accent}" stroke-width="7"
+        <g transform="translate(${gaugePodW / 2}, 46)">
+          <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${subtleBorder}" stroke-width="6.5"/>
+          <circle cx="0" cy="0" r="${circleR}" fill="none" stroke="${accent}" stroke-width="6.5"
                   stroke-dasharray="${circleC.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}"
                   stroke-linecap="round" transform="rotate(-90)" />
           
-          <text class="hud-grade" x="0" y="11" text-anchor="middle">${rank.level}</text>
+          <text class="hud-grade" x="0" y="10" text-anchor="middle">${rank.level}</text>
         </g>
-        <text class="hud-mono" x="${gaugePodW / 2}" y="106" text-anchor="middle" font-size="8.5" font-weight="700" fill="${subtext}">OVERALL RANK</text>
-        <text class="hud-mono" x="${gaugePodW / 2}" y="118" text-anchor="middle" font-size="8" font-weight="700" fill="${accent}">SCORE ${rank.score}/100 • TOP ${Math.max(1, Math.round(100 - rank.percentile))}%</text>
+        <text class="hud-mono" x="${gaugePodW / 2}" y="101" text-anchor="middle" font-size="8.5" font-weight="700" fill="${subtext}">OVERALL RANK</text>
+        <text class="hud-mono" x="${gaugePodW / 2}" y="115" text-anchor="middle" font-size="8" font-weight="700" fill="${accent}">SCORE ${rank.score}/100 • TOP ${Math.max(1, Math.round(100 - rank.percentile))}%</text>
       `,
     })}
   </g>

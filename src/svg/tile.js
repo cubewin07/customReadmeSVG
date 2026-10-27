@@ -35,13 +35,14 @@ export function renderMetricTile({
   accentColor = null,
   theme = {},
 }) {
-  const innerPadX = 12;
+  const innerPadX = width < 92 ? 10 : 12;
   const contentWidth = width - innerPadX * 2;
+  const showIcon = Boolean(icon && width >= 88);
 
   // Format and fit text safely
-  const labelText = escapeXml(fitText(String(label).toUpperCase(), 9.5, contentWidth - (icon ? 18 : 0)));
+  const labelText = escapeXml(fitText(String(label).toUpperCase(), 9, contentWidth - (showIcon ? 16 : 0)));
   const valString = String(value);
-  const valFontSize = valString.length > 7 ? 16 : 18;
+  const valFontSize = valString.length > 7 ? 15 : 17;
   const valText = escapeXml(fitText(valString, valFontSize, contentWidth));
 
   const deltaColor = deltaType === 'positive'
@@ -50,23 +51,17 @@ export function renderMetricTile({
       ? (theme.negative || '#f85149')
       : (theme.neutral || theme.secondaryText || '#8b949e');
 
-  const deltaBg = deltaType === 'positive'
-    ? 'rgba(63, 185, 80, 0.15)'
-    : deltaType === 'negative'
-      ? 'rgba(248, 81, 73, 0.15)'
-      : 'rgba(139, 148, 158, 0.15)';
-
   const accentBar = accentColor
-    ? `<rect x="0" y="0" width="3.5" height="${height}" rx="1.75" fill="${accentColor}" />`
+    ? `<rect x="0" y="6" width="3" height="${Math.max(8, height - 12)}" rx="1.5" fill="${accentColor}" opacity="0.9" />`
     : '';
 
-  const iconSvg = icon
-    ? `<g transform="translate(${width - innerPadX - 14}, 9)">${icon}</g>`
+  const iconSvg = showIcon
+    ? `<g transform="translate(${width - innerPadX - 13}, 8)">${icon}</g>`
     : '';
 
   const deltaSvg = delta ? `
     <g transform="translate(${innerPadX + Math.min(contentWidth - 45, Math.ceil(valString.length * (valFontSize * 0.58)) + 8)}, 32)">
-      <rect x="0" y="0" width="${Math.max(34, delta.length * 6 + 10)}" height="15" rx="7.5" fill="${deltaBg}" />
+      <rect x="0" y="0" width="${Math.max(34, delta.length * 6 + 10)}" height="15" rx="7.5" fill="${deltaColor}" fill-opacity="0.16" />
       <text x="${Math.max(34, delta.length * 6 + 10) / 2}" y="10.5" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="${deltaColor}">${escapeXml(delta)}</text>
     </g>` : '';
 
@@ -80,10 +75,10 @@ export function renderMetricTile({
       ${accentBar}
       <g transform="translate(${innerPadX}, 0)">
         <!-- Visible Label -->
-        <text x="0" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="${theme.secondaryText}">${labelText}</text>
+        <text x="0" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" letter-spacing="0.4" fill="${theme.secondaryText}">${labelText}</text>
         
         <!-- Hero Number -->
-        <text x="0" y="${subtext ? 36 : 42}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${valFontSize}" font-weight="800" fill="${theme.title}">${valText}</text>
+        <text x="0" y="${subtext ? 36 : 41}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${valFontSize}" font-weight="800" fill="${theme.title}">${valText}</text>
       </g>
       ${iconSvg}
       ${deltaSvg}

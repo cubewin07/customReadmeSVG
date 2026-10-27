@@ -63,8 +63,8 @@ export function renderProgressRing({
       />
       
       <!-- Center Content -->
-      <text x="0" y="3" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="${theme.title}">${escapeXml(level)}</text>
-      <text x="0" y="16" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, monospace" font-size="8.5" font-weight="700" fill="${theme.secondaryText}">${escapeXml(label)}</text>
+      <text x="0" y="2" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-size="${radius <= 36 ? 20 : 22}" font-weight="800" fill="${theme.title}">${escapeXml(level)}</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, monospace" font-size="${String(label).length > 8 ? '7' : '8'}" font-weight="700" fill="${theme.secondaryText}">${escapeXml(label)}</text>
     </g>`;
 }
 
@@ -128,12 +128,15 @@ export function renderStackedBar({
  */
 export function renderCommitSparkline(bins = [0,0,0,0,0,0,0,0], width = 80, height = 24, strokeColor = '#58a6ff', fillColor = 'none') {
   const safeBins = bins.length === 8 ? bins : (bins.slice(0, 8).concat(new Array(Math.max(0, 8 - bins.length)).fill(0)));
-  const max = Math.max(...safeBins, 1);
+  const rawMax = Math.max(...safeBins);
+  const max = Math.max(rawMax, 1);
   const step = width / 7;
 
   const points = safeBins.map((val, idx) => {
     const x = Math.round(idx * step);
-    const y = Math.round((height - 3) - (val / max) * (height - 6));
+    const y = rawMax === 0
+      ? Math.round(height * 0.65)
+      : Math.round((height - 4) - (val / max) * (height - 8));
     return `${x},${y}`;
   });
 
@@ -145,7 +148,7 @@ export function renderCommitSparkline(bins = [0,0,0,0,0,0,0,0], width = 80, heig
 
   return `
     <g class="sparkline">
-      ${fillColor && fillColor !== 'none' ? `<path d="${areaData}" fill="${fillColor}" opacity="0.25" />` : ''}
+      ${fillColor && fillColor !== 'none' ? `<path d="${areaData}" fill="${fillColor}" opacity="0.22" />` : ''}
       <path d="${pathData}" fill="none" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
       <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="${strokeColor}" />
     </g>`;
@@ -173,15 +176,26 @@ export function renderHeatmapMatrix({
   theme = {},
 }) {
   const levels = theme.heatmapLevels || ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
-  const displayWeeks = weeks.slice(Math.max(0, weeks.length - cols));
+  const sliced = Array.isArray(weeks) ? weeks.slice(Math.max(0, weeks.length - cols)) : [];
+  const padCount = Math.max(0, cols - sliced.length);
+  const displayWeeks = [
+    ...Array.from({ length: padCount }, () => ({ contributionDays: [] })),
+    ...sliced,
+  ];
 
   const cells = displayWeeks.map((week, wIdx) => {
     const colX = wIdx * (cellWidth + cellGap);
-    const days = week.contributionDays || [];
+    const daysMap = new Map();
+    for (const day of (week.contributionDays || [])) {
+      if (day && typeof day.weekday === 'number') {
+        daysMap.set(day.weekday, day.contributionCount || 0);
+      }
+    }
 
-    return days.map((day) => {
-      const rowY = (day.weekday || 0) * (cellWidth + cellGap);
-      const count = day.contributionCount || 0;
+    let colRects = '';
+    for (let d = 0; d < 7; d++) {
+      const rowY = d * (cellWidth + cellGap);
+      const count = daysMap.get(d) || 0;
       let levelIdx = 0;
       if (count > 8) levelIdx = 4;
       else if (count > 4) levelIdx = 3;
@@ -189,8 +203,9 @@ export function renderHeatmapMatrix({
       else if (count > 0) levelIdx = 1;
 
       const fill = levels[levelIdx] || levels[0];
-      return `<rect x="${colX}" y="${rowY}" width="${cellWidth}" height="${cellWidth}" rx="1.5" fill="${fill}" />`;
-    }).join('');
+      colRects += `<rect x="${colX}" y="${rowY}" width="${cellWidth}" height="${cellWidth}" rx="1.5" fill="${fill}" />`;
+    }
+    return colRects;
   }).join('');
 
   return `
@@ -230,17 +245,11 @@ export function renderDeltaChip({
       ? (theme.negative || '#f85149')
       : (theme.neutral || '#8b949e');
 
-  const bg = isPositive
-    ? 'rgba(63, 185, 80, 0.15)'
-    : isNegative
-      ? 'rgba(248, 81, 73, 0.15)'
-      : 'rgba(139, 148, 158, 0.15)';
-
   const chipWidth = Math.max(48, Math.round(textVal.length * 6) + 12);
 
   return `
     <g class="delta-chip" transform="translate(${x}, ${y})">
-      <rect x="0" y="0" width="${chipWidth}" height="16" rx="8" fill="${bg}" />
+      <rect x="0" y="0" width="${chipWidth}" height="16" rx="8" fill="${textColor}" fill-opacity="0.16" />
       <text x="${chipWidth / 2}" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="${textColor}">${escapeXml(textVal)}</text>
       ${label ? `<text x="${chipWidth + 6}" y="11" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" fill="${theme.secondaryText}">${escapeXml(label)}</text>` : ''}
     </g>`;
@@ -253,7 +262,7 @@ export function renderTopicChips(topics = [], maxCount = 3, maxWidth = 180, them
   if (!topics || !topics.length) return '';
   const displayTopics = topics.slice(0, maxCount);
   let currentX = 0;
-  const chipBg = theme.badgeBg || 'rgba(110, 118, 129, 0.15)';
+  const chipBg = (theme.badgeBg && !String(theme.badgeBg).startsWith('rgba')) ? theme.badgeBg : (theme.barBg || '#21262d');
   const chipText = theme.secondaryText || '#8b949e';
 
   const chipsSvg = displayTopics.map((rawTopic) => {
@@ -265,7 +274,7 @@ export function renderTopicChips(topics = [], maxCount = 3, maxWidth = 180, them
 
     return `
       <g transform="translate(${x}, 0)">
-        <rect x="0" y="0" width="${chipWidth}" height="16" rx="8" fill="${chipBg}" />
+        <rect x="0" y="0" width="${chipWidth}" height="16" rx="8" fill="${chipBg}" stroke="${theme.subtleBorder || theme.border || '#30363d'}" stroke-opacity="0.6" stroke-width="0.75" />
         <text x="${chipWidth / 2}" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="500" fill="${chipText}">${escapeXml(topic)}</text>
       </g>`;
   }).join('');
@@ -312,12 +321,12 @@ export function renderReleaseTag(tagName, theme = {}) {
   if (!tagName) return '';
   const escaped = escapeXml(tagName);
   const tagWidth = Math.max(36, Math.round(escaped.length * 6) + 16);
-  const bg = theme.badgeBg || 'rgba(56, 139, 253, 0.15)';
+  const bg = (theme.badgeBg && !String(theme.badgeBg).startsWith('rgba')) ? theme.badgeBg : (theme.barBg || '#21262d');
   const textCol = theme.iconColor || theme.title || '#58a6ff';
 
   return `
     <g class="release-tag">
-      <rect x="0" y="0" width="${tagWidth}" height="16" rx="8" fill="${bg}" />
+      <rect x="0" y="0" width="${tagWidth}" height="16" rx="8" fill="${bg}" stroke="${textCol}" stroke-opacity="0.35" stroke-width="0.75" />
       <text x="${tagWidth / 2}" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" fill="${textCol}">${escaped}</text>
     </g>`;
 }
@@ -506,23 +515,26 @@ export function renderBentoTile({
   children = '',
 }) {
   const isLight = theme.bg === '#ffffff' || (theme.bg && String(theme.bg).toLowerCase().includes('fff'));
-  const fillOpacity = isLight ? '0.92' : '0.78';
-  const specOpacity = isLight ? '0.5' : '0.15';
+  const fillOpacity = isLight ? '0.94' : '0.82';
+  const specOpacity = isLight ? '0.35' : '0.07';
   const clsAttr = className ? ` class="${className}"` : '';
+  const tileBg = (theme.cardBg && !String(theme.cardBg).startsWith('rgba')) ? theme.cardBg : (isLight ? '#f6f8fa' : '#161b22');
 
   let accentSvg = '';
   if (accentColor) {
     if (accentPosition === 'top') {
-      accentSvg = `<rect x="0" y="0" width="${width}" height="3.5" rx="1.75" fill="${accentColor}" />`;
+      const topInset = Math.min(rx + 2, Math.floor(width * 0.2));
+      accentSvg = `<rect x="${topInset}" y="0.5" width="${Math.max(8, width - topInset * 2)}" height="2.5" rx="1.25" fill="${accentColor}" opacity="0.9" />`;
     } else {
-      accentSvg = `<rect x="0" y="0" width="3.5" height="${height}" rx="1.75" fill="${accentColor}" />`;
+      const sideInset = Math.min(rx, Math.floor(height * 0.22));
+      accentSvg = `<rect x="0.5" y="${sideInset}" width="3" height="${Math.max(8, height - sideInset * 2)}" rx="1.5" fill="${accentColor}" opacity="0.9" />`;
     }
   }
 
   return `
     <g${clsAttr} transform="translate(${x}, ${y})">
-      <rect x="0" y="0" width="${width}" height="${height}" rx="${rx}" fill="${theme.cardBg}" fill-opacity="${fillOpacity}" stroke="url(#${idPrefix}-tile-rim)" stroke-width="1" />
-      <line x1="${rx}" y1="0.5" x2="${width - rx}" y2="0.5" stroke="#ffffff" stroke-opacity="${specOpacity}" stroke-width="1" />
+      <rect x="0" y="0" width="${width}" height="${height}" rx="${rx}" fill="${tileBg}" fill-opacity="${fillOpacity}" stroke="url(#${idPrefix}-tile-rim)" stroke-width="1" />
+      <line x1="${rx + 2}" y1="0.75" x2="${Math.max(rx + 4, width - rx - 2)}" y2="0.75" stroke="#ffffff" stroke-opacity="${specOpacity}" stroke-width="0.75" />
       ${accentSvg}
       ${children}
     </g>
@@ -532,23 +544,21 @@ export function renderBentoTile({
 /**
  * 17. Metallic / Glass Rank Standing Badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Slate)
  */
-export function renderRankBadge({ x = 0, y = 0, rank = 1, width = 38, height = 18, theme = {} }) {
+export function renderRankBadge({ x = 0, y = 0, rank = 1, width = 34, height = 18, theme = {} }) {
   const tierStyles = {
-    1: { bg: 'rgba(234, 179, 8, 0.18)', border: '#eab308', text: '#eab308', label: '#1 🥇' },
-    2: { bg: 'rgba(148, 163, 184, 0.18)', border: '#94a3b8', text: '#94a3b8', label: '#2 🥈' },
-    3: { bg: 'rgba(217, 119, 6, 0.18)', border: '#d97706', text: '#d97706', label: '#3 🥉' },
+    1: { color: '#eab308', label: '#1' },
+    2: { color: '#94a3b8', label: '#2' },
+    3: { color: '#d97706', label: '#3' },
   };
-  const st = tierStyles[rank] || {
-    bg: theme.badgeBg || 'rgba(139, 148, 158, 0.12)',
-    border: theme.subtleBorder || theme.border || '#30363d',
-    text: theme.secondaryText || '#8b949e',
-    label: `#${rank}`,
-  };
+  const st = tierStyles[rank];
+  const fillCol = st ? st.color : (theme.secondaryText || '#8b949e');
+  const borderCol = st ? st.color : (theme.subtleBorder || theme.border || '#30363d');
+  const label = st ? st.label : `#${rank}`;
 
   return `
     <g class="rank-badge" transform="translate(${x}, ${y})">
-      <rect x="0" y="0" width="${width}" height="${height}" rx="${Math.round(height / 2)}" fill="${st.bg}" stroke="${st.border}" stroke-opacity="0.6" stroke-width="1" />
-      <text x="${width / 2}" y="${Math.round(height * 0.68)}" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', monospace" font-size="9.5" font-weight="800" fill="${st.text}">${escapeXml(st.label)}</text>
+      <rect x="0" y="0" width="${width}" height="${height}" rx="${Math.round(height / 2)}" fill="${fillCol}" fill-opacity="0.16" stroke="${borderCol}" stroke-opacity="0.6" stroke-width="1" />
+      <text x="${width / 2}" y="${Math.round(height * 0.68)}" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', monospace" font-size="9.5" font-weight="800" fill="${fillCol}">${escapeXml(label)}</text>
     </g>
   `;
 }

@@ -147,30 +147,32 @@ export const developerCard = {
     </g>
 
     <!-- Right/Bottom Column: 36s Master Timeline Cyber World -->
-    <g class="dev-scene" transform="translate(${sceneX},${sceneY})" clip-path="url(#scene)">
-      <!-- Always-on Day/Night Sky & Celestial Paths -->
-      ${withShift(ACT.ship, () => renderSkyAtmosphere(profile.streak))}
+    <g class="dev-scene" transform="translate(${sceneX},${sceneY})">
+      <g clip-path="url(#scene)">
+        <!-- Always-on Day/Night Sky & Celestial Paths -->
+        ${withShift(ACT.ship, () => renderSkyAtmosphere(profile.streak))}
 
-      <!-- Act 1 (3.4s - 15.4s): Workstation Desk, Ship-it Story & Hologram Pinned Repos -->
-      ${withShift(ACT.ship, () => renderActDesk(profile, theme))}
+        <!-- Act 1 (3.4s - 15.4s): Workstation Desk, Ship-it Story & Hologram Pinned Repos -->
+        ${withShift(ACT.ship, () => renderActDesk(profile, theme))}
 
-      <!-- Intro (0.0s - 3.4s): Arcade Boot & Player 1 Scoreboard -->
-      ${withShift(ACT.intro, () => renderActIntro(profile, theme))}
+        <!-- Intro (0.0s - 3.4s): Arcade Boot & Player 1 Scoreboard -->
+        ${withShift(ACT.intro, () => renderActIntro(profile, theme))}
 
-      <!-- Act 2 (15.4s - 21.4s): Platformer Runner on Real Contribution Terrain -->
-      ${withShift(ACT.ship, () => renderActRunner(profile.counts))}
+        <!-- Act 2 (15.4s - 21.4s): Platformer Runner on Real Contribution Terrain -->
+        ${withShift(ACT.ship, () => renderActRunner(profile.counts))}
 
-      <!-- Act 3 (21.4s - 27.4s): 3D Isometric Voxel City Built from Commits -->
-      ${withShift(ACT.ship, () => renderActCity(profile.counts))}
+        <!-- Act 3 (21.4s - 27.4s): 3D Isometric Voxel City Built from Commits -->
+        ${withShift(ACT.ship, () => renderActCity(profile.counts))}
 
-      <!-- Act 4 (27.4s - 32.8s): Polyglot Language Universe -->
-      ${withShift(ACT.orbit, () => renderActOrbit(profile, theme))}
+        <!-- Act 4 (27.4s - 32.8s): Polyglot Language Universe -->
+        ${withShift(ACT.orbit, () => renderActOrbit(profile, theme))}
 
-      <!-- Outro (32.8s - 36.0s): Player Card Sign-Off & Continue Countdown -->
-      ${withShift(ACT.outro, () => renderActOutro(profile, theme, options))}
+        <!-- Outro (32.8s - 36.0s): Player Card Sign-Off & Continue Countdown -->
+        ${withShift(ACT.outro, () => renderActOutro(profile, theme, options))}
 
-      <!-- Unified Chapter Tracker HUD -->
-      ${withShift(ACT.ship, () => renderChapterTracker(profile, theme))}
+        <!-- Unified Chapter Tracker HUD -->
+        ${withShift(ACT.ship, () => renderChapterTracker(profile, theme))}
+      </g>
     </g>
   </g>
 

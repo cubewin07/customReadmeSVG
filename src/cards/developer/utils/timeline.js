@@ -251,9 +251,9 @@ export function rollCounter(x, y, val, color = '#e6edf3') {
     const tgt = steps * 24;
     let strip = '';
     for (let n = 0; n <= steps; n++) {
-      strip += `<tspan x="7" dy="${n === 0 ? 0 : 24}">${n % 10}</tspan>`;
+      strip += `<text x="7" y="${18 + n * 24}">${n % 10}</text>`;
     }
-    out += `<g transform="translate(${x + 13 * k},${y})" clip-path="url(#${cid})"><g transform="translate(0, -${tgt})"><animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite" keyTimes="0;0.01;0.075;1" values="0 0;0 0;0 -${tgt};0 -${tgt}"/><text class="t" y="18" text-anchor="middle" font-size="21" font-weight="800" fill="${color}">${strip}</text></g></g>`;
+    out += `<g transform="translate(${x + 13 * k},${y})"><g clip-path="url(#${cid})"><g transform="translate(0, -${tgt})" class="t" text-anchor="middle" font-size="21" font-weight="800" fill="${color}"><animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite" keyTimes="0;0.01;0.075;1" values="0 0;0 0;0 -${tgt};0 -${tgt}"/>${strip}</g></g></g>`;
   }
   return out;
 }

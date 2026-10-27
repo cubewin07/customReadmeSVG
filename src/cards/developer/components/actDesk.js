@@ -113,13 +113,17 @@ export function renderActDesk(data, theme = {}) {
       const repoName = r.name || '';
       const nameFontSize = repoName.length > 15 ? '11.5' : '13.5';
       const truncatedName = repoName.length > 21 ? repoName.slice(0, 18) + '...' : repoName;
-      const descText = r.description ? (r.description.length > 32 ? r.description.slice(0, 29) + '...' : r.description) : '';
-      const sparklineArr = Array.isArray(r.sparkline) && r.sparkline.length > 0 ? r.sparkline : [1, 1, 1, 1, 1, 1, 1, 1];
+      const rawDesc = r.description || r.desc || '';
+      const descText = rawDesc ? (rawDesc.length > 26 ? rawDesc.slice(0, 24) + '…' : rawDesc) : '';
+      const langLabel = r.language || r.lang || r.primaryLanguage?.name || 'Code';
+      const langCol = r.color || r.primaryLanguage?.color || '#58a6ff';
+      const starVal = r.stars ?? r.stargazerCount ?? 0;
+      const sparklineArr = Array.isArray(r.sparkline) && r.sparkline.length > 0 ? r.sparkline : [2, 4, 3, 6, 5, 8, 7, 9];
       const pts = sparklineArr.map((v, i) => `${(-68 + i * 19.4).toFixed(1)},${(44 - v * 2.2).toFixed(1)}`).join(' ');
       const areaPts = `-68,44 ${pts} ${( -68 + (sparklineArr.length - 1) * 19.4).toFixed(1)},44`;
 
       repoSlidesSvg += `
-        <g opacity="0">
+        <g opacity="${k === 0 ? 1 : 0}">
           ${anim('opacity', pulse(a, b - 0.2, 0.25))}
           ${tr([
             [a - 0.01, 14, 0],
@@ -131,9 +135,9 @@ export function renderActDesk(data, theme = {}) {
           <text class="m" x="-68" y="-34" font-size="7.5" letter-spacing="1.2" fill="#4fd1ff" opacity="0.9">PINNED REPOSITORY</text>
           <text class="m" x="-68" y="-15" font-size="${nameFontSize}" font-weight="700" fill="#eaf6ff">${escapeXml(truncatedName)}</text>
           <text class="t" x="-68" y="0" font-size="9.5" fill="#9fc3d9">${escapeXml(descText)}</text>
-          <circle cx="-64" cy="14" r="4" fill="${r.color || '#58a6ff'}"/>
-          <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(r.language || 'Code')}</text>
-          <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${r.stars || 0}</text>
+          <circle cx="-64" cy="14" r="4" fill="${langCol}"/>
+          <text class="t" x="-56" y="17.5" font-size="10" fill="#cfe9f7">${escapeXml(langLabel)}</text>
+          <text class="t" x="68" y="17.5" text-anchor="end" font-size="10.5" font-weight="700" fill="#ffd76a">★ ${starVal}</text>
           <polygon points="${areaPts}" fill="url(#holoAreaGrad)"/>
           <polyline points="${pts}" fill="none" stroke="#4fd1ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
         </g>
@@ -466,14 +470,14 @@ export function renderActDesk(data, theme = {}) {
       <text class="m" x="108" y="20" text-anchor="middle" font-size="8.5" fill="#6e7681">editor.js</text>
 
       <!-- Code Syntax Lines -->
-      <g opacity="0">
+      <g opacity="1">
         ${anim('opacity', [[0.35, 0], [0.5, 1]])}
         <rect x="16" y="34" width="46" height="5" rx="2.5" fill="#58a6ff"/>
         <rect x="67" y="34" width="30" height="5" rx="2.5" fill="#bc8cff" opacity="0.7"/>
         <rect x="16" y="45" width="26" height="5" rx="2.5" fill="#3fb950"/>
         <rect x="47" y="45" width="62" height="5" rx="2.5" fill="#3fb950" opacity="0.7"/>
       </g>
-      <g opacity="0">
+      <g opacity="1">
         ${anim('opacity', [[0.95, 0], [1.1, 1]])}
         <rect x="28" y="56" width="58" height="5" rx="2.5" fill="#f0883e"/>
         <rect x="91" y="56" width="24" height="5" rx="2.5" fill="#8b949e" opacity="0.7"/>

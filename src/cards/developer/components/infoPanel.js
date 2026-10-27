@@ -15,13 +15,16 @@ import { BRAND_COLORS } from './sharedDefs.js';
  *  - Telemetry strip tracks all six segments of the loop (boot, ship, run, build, orbit, continue).
  */
 export function renderInfoPanel(data, theme, sceneAccent = null) {
-  const accent = sceneAccent || theme.accent || '#58a6ff';
+  const rawAccent = sceneAccent || theme.accent || '#58a6ff';
   const subtext = theme.subtext || '#8b949e';
   const cardBg = theme.cardBg || '#161b22';
   const border = theme.border || '#232a35';
   const text = theme.text || '#c9d1d9';
   const title = theme.title || '#e6edf3';
   const isLight = theme.cardBg === '#ffffff' || (theme.bg && theme.bg.toLowerCase().includes('fff'));
+  const accent = (isLight && ['#f1e05a', '#ffe885', '#ffd76a'].includes(String(rawAccent).toLowerCase()))
+    ? (theme.title || '#0969da')
+    : rawAccent;
   const badgeBg = theme.badgeBg || (isLight ? '#f2f4f8' : '#1c222c');
   const badgeBorder = theme.badgeBorder || (isLight ? '#e1e4e8' : '#2b3340');
 
@@ -121,7 +124,7 @@ export function renderInfoPanel(data, theme, sceneAccent = null) {
           <rect x="${cx}" y="${cy}" width="${w}" height="${h}" rx="6" fill="${badgeBg}" stroke="${badgeBorder}"/>
           <line x1="${cx + 3}" y1="${cy + 1}" x2="${cx + w - 3}" y2="${cy + 1}" stroke="#fff" stroke-opacity="0.12"/>
           <circle cx="${cx + 9}" cy="${cy + h / 2}" r="2.8" fill="${brandCol}"/>
-          <text class="t" x="${cx + 17}" y="${cy + h / 2 + 4}" font-size="11" font-weight="600" fill="${text}">${escapeXml(tname)}${share ? `<tspan fill="${subtext}" font-weight="700" dx="4">${share.pct}%</tspan>` : ''}</text>
+          <text class="t" x="${cx + 17}" y="${cy + h / 2 + 4}" font-size="11" font-weight="600" fill="${text}">${escapeXml(tname)}${share ? `<tspan fill="${subtext}" font-weight="700"> ${share.pct}%</tspan>` : ''}</text>
         </g>`;
       cx += w + 8;
     }
@@ -201,7 +204,7 @@ export function renderInfoPanel(data, theme, sceneAccent = null) {
   </rect>
 
   <!-- Handle & Role Subtitle -->
-  <text class="t" x="32" y="86" font-size="16">
+  <text class="t" x="32" y="86" font-size="16" fill="${subtext}">
     <tspan fill="${accent}" font-weight="600">${handle}</tspan>
     <tspan fill="${subtext}"> • ${role}</tspan>
   </text>

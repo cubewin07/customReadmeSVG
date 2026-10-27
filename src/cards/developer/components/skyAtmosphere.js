@@ -105,7 +105,7 @@ export function renderSkyAtmosphere() {
   </g>
 
   <!-- Celestial Sun Orbit with Solar Flares -->
-  <g>
+  <g opacity="0">
     ${anim('opacity', [[0, 0], [2.4, 0], [3.6, 1], [15.6, 1], [17, 0]])}
     <animateMotion dur="${T}s" repeatCount="indefinite" path="M40 240 Q292 -110 544 240" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;${frac(2.4).toFixed(3)};${frac(16.8).toFixed(3)};1"/>
     <!-- Outer Solar Flare Atmosphere -->
@@ -115,7 +115,7 @@ export function renderSkyAtmosphere() {
   </g>
 
   <!-- Celestial Crescent Moon Orbit with Subtle Craters -->
-  <g>
+  <g opacity="0">
     ${anim('opacity', [[0, 0], [16.3, 0], [17.5, 1], [22.2, 1], [23.3, 0]])}
     <animateMotion dur="${T}s" repeatCount="indefinite" path="M60 230 Q292 -100 524 230" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;${frac(16.3).toFixed(3)};${frac(23.3).toFixed(3)};1"/>
     <!-- Moon Ambient Glow -->

@@ -126,6 +126,7 @@ function renderV1GridSvg(data, theme, options = {}) {
   
   ${renderCardHeader({
     title: `Top Repositories (${username})`,
+    badgeText: `📦 ${reposList.length} Repositories`,
     width,
     theme,
   })}
@@ -146,35 +147,43 @@ function renderV1GridSvg(data, theme, options = {}) {
               const langColor = repo.primaryLanguage?.color || '#858585';
               const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
               const rawName = repo.name || 'Unnamed';
-              const name = escapeXml(fitText(rawName, 13, colWidth - 44));
+              const name = escapeXml(fitText(rawName, 13.5, colWidth - 44));
               const rawDesc = repo.description || 'No description provided';
-              const desc = escapeXml(fitText(rawDesc, 10.5, colWidth - 24));
               const rawPushedTime = formatRelativeTime(repo.pushedAt || repo.updatedAt);
-              const pushedTime = colWidth < 210 ? rawPushedTime : `pushed ${rawPushedTime}`;
+              const pushedTime = colWidth >= 260 ? `pushed ${rawPushedTime}` : rawPushedTime;
               const formattedStars = formatCount(repo.stargazerCount);
               const formattedForks = formatCount(repo.forkCount);
 
               let currentX = 0;
               let langSvg = '';
               if (langName) {
-                const fittedLang = escapeXml(fitText(langName, 10, 60));
-                langSvg = `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="12" y="0">${fittedLang}</text>`;
-                currentX = 12 + Math.ceil(fittedLang.length * 6) + 8;
+                const maxLangPx = colWidth < 210 ? 48 : 62;
+                const fittedLang = fitText(langName, 10, maxLangPx);
+                langSvg = `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0">${escapeXml(fittedLang)}</text>`;
+                currentX = 11 + Math.ceil(measureText(fittedLang, 10.5)) + 10;
               }
 
               const starX = currentX;
               const starTextX = starX + 15;
-              const starWidth = 15 + Math.ceil(formattedStars.length * 6.2);
+              const starWidth = 15 + Math.ceil(formattedStars.length * 6.4);
 
               const forkX = starX + starWidth + 8;
               const forkTextX = forkX + 15;
+              const forkEnd = forkTextX + Math.ceil(formattedForks.length * 6.4);
+              const pushedW = pushedTime ? Math.ceil(pushedTime.length * 6.2) : 0;
+              const showPushed = Boolean(pushedTime && forkEnd + pushedW + 8 <= colWidth - 20);
 
-              const topicSvg =
-                repo.topics && repo.topics.length
-                  ? `<g transform="translate(0, 31)">${renderTopicChips(repo.topics, 3, colWidth - 24, theme)}</g>`
-                  : repo.languages && repo.languages.length
-                  ? `<g transform="translate(0, 34)">${renderLanguageBar(repo.languages, colWidth - 28, 4.5, theme)}</g>`
-                  : '';
+              const hasTopics = Boolean(repo.topics && repo.topics.length);
+              const hasLangBar = Boolean(repo.languages && repo.languages.length);
+              const descLines = (!hasTopics && !hasLangBar)
+                ? wrapText(rawDesc, 10.5, colWidth - 26, 2)
+                : [fitText(rawDesc, 10.5, colWidth - 26)];
+
+              const topicSvg = hasTopics
+                ? `<g transform="translate(0, 32)">${renderTopicChips(repo.topics, 3, colWidth - 24, theme)}</g>`
+                : hasLangBar
+                ? `<g transform="translate(0, 35)">${renderLanguageBar(repo.languages, colWidth - 28, 4.5, theme)}</g>`
+                : `<g transform="translate(0, 44)">${renderLanguageBar([{ name: langName || 'Code', color: langColor, percentage: 100 }], colWidth - 28, 3.5, theme)}</g>`;
 
               return renderBentoTile({
                 x,
@@ -195,7 +204,7 @@ function renderV1GridSvg(data, theme, options = {}) {
                     </g>
 
                     <!-- Description -->
-                    <text x="0" y="26" class="repo-desc">${desc}</text>
+                    ${descLines.map((dLine, dIdx) => `<text x="0" y="${25 + dIdx * 12.5}" class="repo-desc"><tspan>${escapeXml(dLine)}</tspan></text>`).join('')}
 
                     <!-- Topics / Proportions -->
                     ${topicSvg}
@@ -207,7 +216,7 @@ function renderV1GridSvg(data, theme, options = {}) {
                       <text x="${starTextX}" y="0">${formattedStars}</text>
                       <g transform="translate(${forkX}, -10)">${icons.fork(theme.secondaryText)}</g>
                       <text x="${forkTextX}" y="0">${formattedForks}</text>
-                      ${pushedTime ? `<text x="${colWidth - 24}" y="0" text-anchor="end" fill="${theme.secondaryText}">${pushedTime}</text>` : ''}
+                      ${showPushed ? `<text x="${colWidth - 24}" y="0" text-anchor="end" fill="${theme.secondaryText}">${pushedTime}</text>` : ''}
                     </g>
                   </g>
                 `,
@@ -232,20 +241,26 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
 
   const heroHeight = 110;
   const subTileHeight = 68;
-  const cardHeight = subRepos.length > 0 ? Math.max(220, 65 + heroHeight + 14 + subTileHeight) : 190;
+  const cardHeight = subRepos.length > 0 ? Math.max(220, 65 + heroHeight + 14 + subTileHeight) : 182;
   const contentWidth = width - 48;
 
   const heroLangColor = heroRepo?.primaryLanguage?.color || '#858585';
+  const heroLangName = heroRepo?.primaryLanguage?.name || 'Code';
   const heroRawName = heroRepo ? heroRepo.name : 'No Repo';
-  const heroNameFit = fitText(heroRawName, 15, contentWidth - 110);
+  const heroNameFit = fitText(heroRawName, 15.5, contentWidth - 115);
   const heroName = escapeXml(heroNameFit);
-  const heroNameW = Math.round(measureText(heroNameFit, 15));
-  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 11, contentWidth - 28, 2) : [];
+  const heroNameW = Math.round(measureText(heroNameFit, 15.5));
+  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 11, contentWidth - 32, 2) : [];
   const heroRelease = heroRepo?.latestRelease || null;
   const heroStars = heroRepo ? formatCount(heroRepo.stargazerCount) : '0';
   const heroForks = heroRepo ? formatCount(heroRepo.forkCount) : '0';
   const heroSparkline = heroRepo?.sparkline || [0, 0, 0, 0, 0, 0, 0, 0];
-  const heroLanguages = heroRepo?.languages || [];
+  const heroLanguages = (heroRepo?.languages && heroRepo.languages.length > 0)
+    ? heroRepo.languages
+    : [{ name: heroLangName, color: heroLangColor, percentage: 100 }];
+  const heroTopics = (heroRepo?.topics && heroRepo.topics.length > 0)
+    ? heroRepo.topics
+    : [heroLangName.toLowerCase(), `updated ${formatRelativeTime(heroRepo?.pushedAt || heroRepo?.updatedAt) || 'recently'}`];
 
   const subColWidth = subRepos.length === 1 ? contentWidth : Math.floor((contentWidth - 12) / 2);
 
@@ -298,30 +313,20 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
             </g>
 
             <!-- Line 2: 2-line wrapped description -->
-            <text x="0" y="30" class="hero-desc">
-              ${heroDescLines.map((line, lIdx) => `<tspan x="0" dy="${lIdx === 0 ? 0 : 14}">${escapeXml(line)}</tspan>`).join('')}
-            </text>
-            
+            ${heroDescLines.map((line, lIdx) => `<text x="0" y="${29 + lIdx * 13.5}" class="hero-desc"><tspan>${escapeXml(line)}</tspan></text>`).join('')}
+
             <!-- Line 3: Topics -->
-            ${
-              heroRepo.topics && heroRepo.topics.length
-                ? `
-              <g transform="translate(0, ${heroDescLines.length > 1 ? 60 : 48})">
-                ${renderTopicChips(heroRepo.topics, 3, contentWidth - 110, theme)}
-              </g>
-            `
-                : ''
-            }
+            <g transform="translate(0, 56)">
+              ${renderTopicChips(heroTopics, 3, contentWidth - 110, theme)}
+            </g>
 
             <!-- Line 4: Languages bar + Stats + Sparkline -->
-            <g transform="translate(0, 86)" class="repo-meta">
-              ${heroLanguages.length ? `<g transform="translate(0, -6)">${renderLanguageBar(heroLanguages, 110, 5, theme)}</g>` : ''}
-              
-              <g transform="translate(${heroLanguages.length ? 122 : 0}, -10)">${icons.star(theme.iconColor)}</g>
-              <text x="${heroLanguages.length ? 138 : 16}" y="0">${heroStars}</text>
-              
-              <g transform="translate(${heroLanguages.length ? 180 : 58}, -10)">${icons.fork(theme.secondaryText)}</g>
-              <text x="${heroLanguages.length ? 196 : 74}" y="0">${heroForks}</text>
+            <g transform="translate(0, 88)" class="repo-meta">
+              <g transform="translate(0, -6)">${renderLanguageBar(heroLanguages, 100, 5, theme)}</g>
+              <g transform="translate(112, -10)">${icons.star(theme.iconColor)}</g>
+              <text x="128" y="0">${heroStars}</text>
+              <g transform="translate(${128 + Math.ceil(heroStars.length * 6) + 12}, -10)">${icons.fork(theme.secondaryText)}</g>
+              <text x="${128 + Math.ceil(heroStars.length * 6) + 28}" y="0">${heroForks}</text>
 
               <!-- 8-week Commit Sparkline -->
               <g transform="translate(${contentWidth - 96}, -12)">
@@ -361,6 +366,8 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
               const starW = 14 + Math.ceil(formattedStars.length * 6);
               const forkX = starX + starW + 8;
               const forkTextX = forkX + 14;
+              const forkEnd = forkTextX + Math.ceil(formattedForks.length * 6);
+              const showUpdated = Boolean(updatedTime && forkEnd + Math.ceil(updatedTime.length * 6) + 8 <= subColWidth - 20);
 
               return renderBentoTile({
                 x,
@@ -380,14 +387,14 @@ function renderV1FeaturedSvg(data, theme, options = {}) {
                     </g>
 
                     <text x="0" y="27" class="repo-desc">${desc}</text>
-                    
+
                     <g transform="translate(0, 46)" class="repo-meta">
                       ${langSvg}
                       <g transform="translate(${starX}, -10)">${icons.star(theme.iconColor)}</g>
                       <text x="${starTextX}" y="0">${formattedStars}</text>
                       <g transform="translate(${forkX}, -10)">${icons.fork(theme.secondaryText)}</g>
                       <text x="${forkTextX}" y="0">${formattedForks}</text>
-                      ${updatedTime ? `<text x="${subColWidth - 20}" y="0" text-anchor="end" fill="${theme.secondaryText}">${updatedTime}</text>` : ''}
+                      ${showUpdated ? `<text x="${subColWidth - 20}" y="0" text-anchor="end" fill="${theme.secondaryText}">${updatedTime}</text>` : ''}
                     </g>
                   </g>
                 `,
@@ -423,14 +430,31 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
   const heroLangColor = heroRepo?.primaryLanguage?.color || '#858585';
   const heroLangName = heroRepo?.primaryLanguage?.name ? heroRepo.primaryLanguage.name : null;
   const heroRawName = heroRepo ? heroRepo.name : 'No Repo';
-  const heroName = escapeXml(fitText(heroRawName, 15, leftColWidth - 36));
-  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 10.5, leftColWidth - 28, 3) : [];
+  const heroName = escapeXml(fitText(heroRawName, 15.5, leftColWidth - 38));
+  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 11, leftColWidth - 30, 3) : [];
   const heroUpdated = heroRepo ? formatRelativeTime(heroRepo.pushedAt || heroRepo.updatedAt) : '';
   const heroStars = heroRepo ? formatCount(heroRepo.stargazerCount) : '0';
   const heroForks = heroRepo ? formatCount(heroRepo.forkCount) : '0';
-  const heroWatchers = heroRepo ? formatCount(heroRepo.watchers) : '0';
+  const heroWatchers = heroRepo ? formatCount(heroRepo.watchers ?? heroRepo.watchersCount ?? 0) : '0';
   const heroSparkline = heroRepo?.sparkline || [0, 0, 0, 0, 0, 0, 0, 0];
-  const heroLastCommit = heroRepo?.lastCommit || null;
+  const heroLastCommit = heroRepo?.lastCommit || {
+    sha: 'latest',
+    message: `Active development · updated ${heroUpdated || 'recently'}`,
+  };
+
+  let heroFooterX = 0;
+  let heroLangSvg = '';
+  if (heroLangName) {
+    const fittedHeroLang = fitText(heroLangName, 10, leftColWidth < 215 ? 46 : 64);
+    heroLangSvg = `<circle cx="4" cy="-3.5" r="3.5" fill="${heroLangColor}" /><text x="11" y="0">${escapeXml(fittedHeroLang)}</text>`;
+    heroFooterX = 11 + Math.ceil(measureText(fittedHeroLang, 10.5)) + 10;
+  }
+  const hStarX = heroFooterX;
+  const hStarTextX = hStarX + 14;
+  const hForkX = hStarTextX + Math.ceil(heroStars.length * 6.4) + 8;
+  const hForkTextX = hForkX + 14;
+  const hEyeX = hForkTextX + Math.ceil(heroForks.length * 6.4) + 8;
+  const hEyeTextX = hEyeX + 15;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
   <defs>
@@ -481,47 +505,40 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
               <text x="20" y="12" class="hero-name">${heroName}</text>
             </g>
 
-            <!-- Spotlight Badge -->
-            <rect x="0" y="24" width="95" height="18" rx="9" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-            <text x="47" y="36" text-anchor="middle" class="badge-text">⭐ #1 Spotlight</text>
+            <!-- Spotlight Badge + Updated Recency -->
+            <rect x="0" y="22" width="94" height="18" rx="9" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
+            <text x="47" y="34" text-anchor="middle" class="badge-text">#1 Spotlight</text>
+            ${heroUpdated ? `<text x="${leftColWidth - 28}" y="34" text-anchor="end" class="commit-text" font-size="9">${heroUpdated}</text>` : ''}
 
-            <!-- Multi-line Description (wrapped to 3 lines) -->
-            <text x="0" y="58" class="hero-desc">
-              ${heroDescLines.map((l, idx) => `<tspan x="0" dy="${idx === 0 ? 0 : 13}">${escapeXml(l)}</tspan>`).join('')}
-            </text>
+            <!-- Multi-line Description (wrapped to 3 lines with explicit y) -->
+            ${heroDescLines.map((l, idx) => `<text x="0" y="${54 + idx * 13.5}" class="hero-desc"><tspan>${escapeXml(l)}</tspan></text>`).join('')}
             
             <!-- Inset Telemetry Box (Commit + Sparkline) -->
-            ${
-              heroLastCommit
-                ? `
-              <g transform="translate(0, 108)">
-                <rect x="0" y="0" width="56" height="16" rx="4" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-                <text x="28" y="11.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="${theme.iconColor || theme.title}">${escapeXml(heroLastCommit.sha || 'commit')}</text>
-                <text x="64" y="11.5" class="commit-text">${escapeXml(fitText(heroLastCommit.message, 9.5, leftColWidth - 100))}</text>
-              </g>
-            `
-                : ''
-            }
-
-            <!-- 8-week Activity Sparkline -->
-            <g transform="translate(0, 136)">
-              ${renderCommitSparkline(heroSparkline, leftColWidth - 28, 20, theme.iconColor || '#58a6ff')}
+            <g transform="translate(0, 102)">
+              <rect x="0" y="0" width="54" height="16" rx="4" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
+              <text x="27" y="11" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="${theme.iconColor || theme.title}">${escapeXml(heroLastCommit.sha || 'commit')}</text>
+              <text x="60" y="11" class="commit-text">${escapeXml(fitText(heroLastCommit.message, 9.5, leftColWidth - 94))}</text>
             </g>
 
-            <!-- Hero Footer Stats (Stars, Forks, Watchers, Pushed Date) -->
+            <!-- 8-week Activity Sparkline -->
+            <g transform="translate(0, 126)">
+              <text x="0" y="8" class="stat-lbl" font-size="8">8-WEEK VELOCITY</text>
+              <g transform="translate(0, 13)">
+                ${renderCommitSparkline(heroSparkline, leftColWidth - 28, 20, theme.iconColor || '#58a6ff')}
+              </g>
+            </g>
+
+            <!-- Hero Footer Stats (Language, Stars, Forks, Watchers) -->
             <g transform="translate(0, 186)" class="repo-meta">
-              ${heroLangName ? `<circle cx="4" cy="-3.5" r="3.5" fill="${heroLangColor}" /><text x="12" y="0">${escapeXml(fitText(heroLangName, 9.5, 45))}</text>` : ''}
+              ${heroLangSvg}
+              <g transform="translate(${hStarX}, -10)">${icons.star(theme.iconColor)}</g>
+              <text x="${hStarTextX}" y="0">${heroStars}</text>
               
-              <g transform="translate(56, -10)">${icons.star(theme.iconColor)}</g>
-              <text x="70" y="0">${heroStars}</text>
-              
-              <g transform="translate(104, -10)">${icons.fork(theme.secondaryText)}</g>
-              <text x="118" y="0">${heroForks}</text>
+              <g transform="translate(${hForkX}, -10)">${icons.fork(theme.secondaryText)}</g>
+              <text x="${hForkTextX}" y="0">${heroForks}</text>
 
-              <g transform="translate(150, -10)">${icons.eye(theme.secondaryText)}</g>
-              <text x="166" y="0">${heroWatchers}</text>
-
-              ${heroUpdated ? `<text x="${leftColWidth - 28}" y="0" text-anchor="end" fill="${theme.secondaryText}">${heroUpdated}</text>` : ''}
+              <g transform="translate(${hEyeX}, -10)">${icons.eye(theme.secondaryText)}</g>
+              <text x="${hEyeTextX}" y="0">${heroWatchers}</text>
             </g>
           </g>
         `,
@@ -534,12 +551,19 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
             const y = idx * 74;
             const langColor = repo.primaryLanguage?.color || '#858585';
             const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-            const displayLang = langName ? escapeXml(fitText(langName, 9.5, 55)) : '';
+            const fittedSideLang = langName ? fitText(langName, 9.5, rightColWidth < 165 ? 42 : 55) : '';
+            const displayLang = fittedSideLang ? escapeXml(fittedSideLang) : '';
             const rawName = repo.name || '';
-            const name = escapeXml(fitText(rawName, 12, rightColWidth - 36));
-            const desc = escapeXml(fitText(repo.description || (repo.lastCommit?.message || 'Repository'), 9.5, rightColWidth - 22));
+            const name = escapeXml(fitText(rawName, 12.5, rightColWidth - 36));
+            const desc = escapeXml(fitText(repo.description || (repo.lastCommit?.message || 'Repository'), 10, rightColWidth - 22));
             const formattedStars = formatCount(repo.stargazerCount);
             const formattedForks = formatCount(repo.forkCount);
+
+            const sideLangW = fittedSideLang ? 12 + Math.ceil(measureText(fittedSideLang, 10)) + 8 : 0;
+            const sStarX = sideLangW;
+            const sStarTextX = sStarX + 14;
+            const sForkX = sStarTextX + Math.ceil(formattedStars.length * 6.4) + 8;
+            const sForkTextX = sForkX + 14;
 
             return renderBentoTile({
               x: 0,
@@ -561,11 +585,11 @@ function renderV1SpotlightSvg(data, theme, options = {}) {
                   <text x="0" y="27" class="side-desc">${desc}</text>
 
                   <g transform="translate(0, 44)" class="repo-meta">
-                    ${displayLang ? `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="12" y="0">${displayLang}</text>` : ''}
-                    <g transform="translate(68, -10)">${icons.star(theme.iconColor)}</g>
-                    <text x="82" y="0">${formattedStars}</text>
-                    <g transform="translate(116, -10)">${icons.fork(theme.secondaryText)}</g>
-                    <text x="130" y="0">${formattedForks}</text>
+                    ${displayLang ? `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0">${displayLang}</text>` : ''}
+                    <g transform="translate(${sStarX}, -10)">${icons.star(theme.iconColor)}</g>
+                    <text x="${sStarTextX}" y="0">${formattedStars}</text>
+                    <g transform="translate(${sForkX}, -10)">${icons.fork(theme.secondaryText)}</g>
+                    <text x="${sForkTextX}" y="0">${formattedForks}</text>
                   </g>
                 </g>
               `,
@@ -596,8 +620,8 @@ function renderV1TimelineSvg(data, theme, options = {}) {
     })
     .slice(0, 5);
 
-  const itemGap = 64;
-  const cardHeight = Math.max(180, 65 + sortedRepos.length * itemGap);
+  const itemGap = 62;
+  const cardHeight = Math.max(180, 62 + sortedRepos.length * itemGap);
   const stemHeight = Math.max(20, (sortedRepos.length - 1) * itemGap);
   const contentWidth = width - 48;
   const repoBoxWidth = contentWidth - 36;
@@ -640,24 +664,30 @@ function renderV1TimelineSvg(data, theme, options = {}) {
           const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
           const rawName = repo.name || 'Unnamed';
           const pushedTime = formatRelativeTime(repo.pushedAt || repo.updatedAt);
+          const pushedLabel = width <= 440 ? pushedTime : (pushedTime ? `pushed ${pushedTime}` : '');
           const formattedStars = formatCount(repo.stargazerCount);
           const formattedForks = formatCount(repo.forkCount);
           const commit = repo.lastCommit || null;
           const commitSha = commit?.sha ? escapeXml(commit.sha) : '';
           const commitMsg = commit?.message
-            ? escapeXml(fitText(commit.message, 10, repoBoxWidth - 110))
+            ? escapeXml(fitText(commit.message, 10.5, repoBoxWidth - 96))
             : repo.description
-            ? escapeXml(fitText(repo.description, 10, repoBoxWidth - 30))
-            : 'No commit message';
+            ? escapeXml(fitText(repo.description, 10.5, repoBoxWidth - 32))
+            : 'Active repository update';
 
-          // Dynamically anchor metadata relative to repoBoxWidth
-          const pushedX = repoBoxWidth - 14;
-          const forkX = repoBoxWidth - (width <= 440 ? 68 : 118);
-          const starX = repoBoxWidth - (width <= 440 ? 116 : 166);
-          const langX = repoBoxWidth - 238;
-          const showLang = width > 440 && langName;
-          const nameMaxWidth = Math.max(90, (showLang ? langX : starX) - 24);
-          const name = escapeXml(fitText(rawName, 13, nameMaxWidth));
+          // Dynamically anchor metadata right-to-left relative to repoBoxWidth
+          const pushedX = repoBoxWidth - 18;
+          const pushedW = pushedLabel ? Math.ceil(pushedLabel.length * 6.2) + 12 : 0;
+          const forkSlotW = 16 + Math.ceil(formattedForks.length * 6.5) + 10;
+          const forkX = pushedX - pushedW - forkSlotW + 6;
+          const starSlotW = 16 + Math.ceil(formattedStars.length * 6.5) + 10;
+          const starX = forkX - starSlotW;
+          const fittedLang = langName ? fitText(langName, 9.5, 56) : '';
+          const langSlotW = fittedLang ? 10 + Math.ceil(measureText(fittedLang, 10)) + 12 : 0;
+          const langX = starX - langSlotW;
+          const showLang = Boolean(width > 440 && fittedLang && langX > 180);
+          const nameMaxWidth = Math.max(85, (showLang ? langX : starX) - 24);
+          const name = escapeXml(fitText(rawName, 12.5, nameMaxWidth));
 
           return `
           <g transform="translate(0, ${y})">
@@ -684,12 +714,12 @@ function renderV1TimelineSvg(data, theme, options = {}) {
                     <text x="18" y="11" class="repo-name">${name}</text>
 
                     <g class="repo-meta">
-                      ${showLang ? `<circle cx="${langX}" cy="7.5" r="3.5" fill="${langColor}" /><text x="${langX + 8}" y="11">${escapeXml(fitText(langName, 9.5, 55))}</text>` : ''}
+                      ${showLang ? `<circle cx="${langX}" cy="7.5" r="3.5" fill="${langColor}" /><text x="${langX + 8}" y="11">${escapeXml(fittedLang)}</text>` : ''}
                       <g transform="translate(${starX}, 1)">${icons.star(theme.iconColor)}</g>
                       <text x="${starX + 16}" y="11">${formattedStars}</text>
                       <g transform="translate(${forkX}, 1)">${icons.fork(theme.secondaryText)}</g>
                       <text x="${forkX + 16}" y="11">${formattedForks}</text>
-                      ${pushedTime ? `<text x="${pushedX}" y="11" text-anchor="end" fill="${theme.secondaryText}">pushed ${pushedTime}</text>` : ''}
+                      ${pushedLabel ? `<text x="${pushedX}" y="11" text-anchor="end" fill="${theme.secondaryText}">${pushedLabel}</text>` : ''}
                     </g>
                   </g>
 
@@ -733,7 +763,7 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
   const maxStars = Math.max(...reposList.map((r) => r.stargazerCount || 0), 1);
   const rowHeight = 50;
   const rowGap = 58;
-  const cardHeight = Math.max(160, 65 + reposList.length * rowGap);
+  const cardHeight = Math.max(160, 62 + reposList.length * rowGap);
   const contentWidth = width - 48;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
@@ -766,21 +796,29 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
             .map((repo, idx) => {
               const y = idx * rowGap;
               const langColor = repo.primaryLanguage?.color || '#858585';
+              const langName = repo.primaryLanguage?.name || null;
               const rawName = repo.name || 'Unnamed';
 
               const formattedStars = formatCount(repo.stargazerCount);
               const formattedForks = formatCount(repo.forkCount);
-              const formattedWatchers = formatCount(repo.watchers);
+              const formattedWatchers = formatCount(repo.watchers ?? repo.watchersCount ?? 0);
 
-              const rightMargin = contentWidth - 14;
-              const watchersX = rightMargin - 36;
-              const forksX = watchersX - 48;
-              const starsX = forksX - 48;
-              const nameMaxWidth = Math.max(120, starsX - 56);
-              const name = escapeXml(fitText(rawName, 12.5, nameMaxWidth));
+              const rightMargin = contentWidth - 18;
+              const watchersSlotW = 16 + Math.ceil(formattedWatchers.length * 6.5) + 6;
+              const watchersX = rightMargin - watchersSlotW;
+              const forksSlotW = 16 + Math.ceil(formattedForks.length * 6.5) + 12;
+              const forksX = watchersX - forksSlotW;
+              const starsSlotW = 16 + Math.ceil(formattedStars.length * 6.5) + 12;
+              const starsX = forksX - starsSlotW;
+              const fittedLang = (width >= 480 && langName) ? fitText(langName, 9.5, 58) : '';
+              const langSlotW = fittedLang ? 10 + Math.ceil(measureText(fittedLang, 10)) + 14 : 0;
+              const langX = starsX - langSlotW;
+
+              const nameMaxWidth = Math.max(95, (fittedLang ? langX : starsX) - 66);
+              const name = escapeXml(fitText(rawName, 13, nameMaxWidth));
 
               const barWidthMax = contentWidth - 64;
-              const barWidth = Math.max(6, Math.round(((repo.stargazerCount || 0) / maxStars) * barWidthMax));
+              const barWidth = Math.max(8, Math.round(((repo.stargazerCount || 0) / maxStars) * barWidthMax));
 
               return renderBentoTile({
                 x: 0,
@@ -795,8 +833,8 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
                 children: `
                   <g transform="translate(10, 8)">
                     <!-- Rank Badge -->
-                    <g transform="translate(0, 0)">
-                      ${renderRankBadge({ x: 0, y: 0, rank: idx + 1, width: 34, height: 20, theme })}
+                    <g transform="translate(0, 1)">
+                      ${renderRankBadge({ x: 0, y: 0, rank: idx + 1, width: 34, height: 18, theme })}
                     </g>
 
                     <!-- Title -->
@@ -805,27 +843,29 @@ function renderV1LeaderboardSvg(data, theme, options = {}) {
                       <text x="18" y="11" class="repo-name" font-size="12.5">${name}</text>
                     </g>
 
+                    ${fittedLang ? `<g transform="translate(${langX}, 14)" class="repo-meta"><circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0" fill="${theme.secondaryText}">${escapeXml(fittedLang)}</text></g>` : ''}
+
                     <!-- Stars Count -->
-                    <g transform="translate(${starsX - 10}, 14)" class="repo-meta">
+                    <g transform="translate(${starsX}, 14)" class="repo-meta">
                       <g transform="translate(0, -10)">${icons.star(theme.iconColor)}</g>
                       <text x="15" y="0" font-weight="bold">${formattedStars}</text>
                     </g>
 
                     <!-- Forks Count -->
-                    <g transform="translate(${forksX - 10}, 14)" class="repo-meta">
+                    <g transform="translate(${forksX}, 14)" class="repo-meta">
                       <g transform="translate(0, -10)">${icons.fork(theme.secondaryText)}</g>
                       <text x="15" y="0">${formattedForks}</text>
                     </g>
 
                     <!-- Watchers Count -->
-                    <g transform="translate(${watchersX - 10}, 14)" class="repo-meta">
+                    <g transform="translate(${watchersX}, 14)" class="repo-meta">
                       <g transform="translate(0, -10)">${icons.eye(theme.secondaryText)}</g>
                       <text x="15" y="0">${formattedWatchers}</text>
                     </g>
 
                     <!-- 2nd Tier: Proportional Stars Bar -->
                     <g transform="translate(42, 28)" class="stars-bar">
-                      <rect x="0" y="0" width="${barWidthMax}" height="4" rx="2" fill="${theme.barBg || '#21262d'}" opacity="0.4" />
+                      <rect x="0" y="0" width="${barWidthMax}" height="4" rx="2" fill="${theme.barBg || '#21262d'}" opacity="0.45" />
                       <rect x="0" y="0" width="${barWidth}" height="4" rx="2" fill="${langColor}" />
                     </g>
                   </g>

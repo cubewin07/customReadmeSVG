@@ -100,14 +100,28 @@ export function renderCompactLayout(data, theme, options = {}) {
   const idPrefix = 'lang-compact';
   const barWidth = width - 48;
 
-  const segments = topLangs.map((l) => ({
-    label: l.name,
-    color: l.color,
-    percentage: l.percentage,
-  }));
-
   const numCols = width >= 800 ? 5 : width <= 450 ? 2 : 3;
+  const maxSlots = numCols * 2;
   const colWidth = Math.floor((barWidth - (numCols - 1) * 10) / numCols);
+
+  const displayLangs = topLangs.slice(0, maxSlots);
+  const shownPerc = displayLangs.reduce((acc, l) => acc + (l.percentage || 0), 0);
+  const otherPerc = parseFloat(Math.max(0, 100 - shownPerc).toFixed(1));
+  if (displayLangs.length > 0 && displayLangs.length < maxSlots && otherPerc >= 0.5) {
+    displayLangs.push({
+      name: 'Other',
+      color: theme.secondaryText || '#8b949e',
+      percentage: otherPerc,
+    });
+  }
+
+  const segments = displayLangs.length > 0
+    ? displayLangs.map((l) => ({
+        label: l.name,
+        color: l.color,
+        percentage: l.percentage,
+      }))
+    : [{ label: 'None', color: theme.barBg || '#21262d', percentage: 100 }];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
@@ -116,7 +130,7 @@ export function renderCompactLayout(data, theme, options = {}) {
   <style>
     ${renderCardStyles(theme)}
     .lang-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 600; font-size: 10.5px; fill: ${theme.title}; }
-    .lang-perc { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10.5px; fill: ${theme.secondaryText}; }
+    .lang-perc { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10px; fill: ${theme.secondaryText}; }
   </style>
 
   ${renderCardFrame(width, height, idPrefix, theme, 12)}
@@ -143,31 +157,43 @@ export function renderCompactLayout(data, theme, options = {}) {
     </g>
 
     <!-- Bento Legend Pills -->
-    <g transform="translate(0, 28)">
-      ${topLangs
-        .slice(0, numCols * 2)
-        .map((lang, idx) => {
-          const col = idx % numCols;
-          const row = Math.floor(idx / numCols);
-          const x = col * (colWidth + 10);
-          const y = row * 22;
+    <g transform="translate(0, 26)">
+      ${
+        displayLangs.length > 0
+          ? displayLangs
+              .map((lang, idx) => {
+                const col = idx % numCols;
+                const row = Math.floor(idx / numCols);
+                const x = col * (colWidth + 10);
+                const y = row * 23;
 
-          return renderBentoTile({
-            x,
-            y,
-            width: colWidth,
-            height: 20,
-            theme,
-            idPrefix,
-            rx: 5,
-            children: `
-              <circle cx="8" cy="10" r="3.5" fill="${lang.color}" />
-              <text x="16" y="13.5" class="lang-name">${escapeXml(fitText(lang.name, 10.5, colWidth - 46))}</text>
-              <text x="${colWidth - 8}" y="13.5" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
-            `,
-          });
-        })
-        .join('')}
+                return renderBentoTile({
+                  x,
+                  y,
+                  width: colWidth,
+                  height: 20,
+                  theme,
+                  idPrefix,
+                  rx: 5,
+                  children: `
+                    <circle cx="8" cy="10" r="3.5" fill="${lang.color}" />
+                    <text x="16" y="13.5" class="lang-name">${escapeXml(fitText(lang.name, 10.5, colWidth - 52))}</text>
+                    <text x="${colWidth - 8}" y="13.5" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
+                  `,
+                });
+              })
+              .join('')
+          : renderBentoTile({
+              x: 0,
+              y: 4,
+              width: barWidth,
+              height: 34,
+              theme,
+              idPrefix,
+              rx: 6,
+              children: `<text x="${barWidth / 2}" y="21" text-anchor="middle" class="meta-text">No language telemetry detected yet</text>`,
+            })
+      }
     </g>
   </g>
 </svg>`;
@@ -181,14 +207,14 @@ export function renderDonutLayout(data, theme, options = {}) {
   const count = parseInt(options.langs_count || options.count || '5', 10);
   const filteredLangs = filterLanguages(data.languages || [], options);
   const totalLangsCount = filteredLangs.length;
-  const totalRepos = data.totalRepos || 24;
+  const totalRepos = data.totalRepos ?? (totalLangsCount > 0 ? 24 : 0);
 
   const topLangs = filteredLangs.slice(0, count);
   const topTotalPerc = topLangs.reduce((acc, l) => acc + l.percentage, 0);
-  const otherPerc = Math.max(0, parseFloat((100 - topTotalPerc).toFixed(1)));
+  const otherPerc = topLangs.length > 0 ? Math.max(0, parseFloat((100 - topTotalPerc).toFixed(1))) : 0;
 
   const width = resolveCardWidth(options.width, 495);
-  const height = 225;
+  const height = 216;
   const idPrefix = 'lang-donut';
   const contentWidth = width - 48;
 
@@ -196,23 +222,26 @@ export function renderDonutLayout(data, theme, options = {}) {
   const legendW = contentWidth - podW - 12;
 
   const cx = podW / 2;
-  const cy = 68;
-  const r = width <= 450 ? 36 : 44;
+  const cy = 66;
+  const r = width <= 450 ? 36 : 43;
   const C = 2 * Math.PI * r;
+  const hasMultipleSegments = topLangs.length + (otherPerc > 0 ? 1 : 0) > 1;
+  const segGap = hasMultipleSegments ? 2.0 : 0;
 
   let accumulatedPercent = 0;
 
   const donutSegments = topLangs
     .map((lang) => {
       const strokeLength = (lang.percentage / 100) * C;
-      const strokeGap = C - strokeLength;
+      const visibleLen = Math.max(1, strokeLength - segGap);
+      const strokeGap = C - visibleLen;
       const strokeOffset = C - (accumulatedPercent / 100) * C;
       accumulatedPercent += lang.percentage;
 
-      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${lang.color}" stroke-width="14"
-              stroke-dasharray="${Math.max(0, strokeLength - 1.2).toFixed(2)} ${strokeGap.toFixed(2)}"
+      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${lang.color}" stroke-width="13"
+              stroke-dasharray="${visibleLen.toFixed(2)} ${strokeGap.toFixed(2)}"
               stroke-dashoffset="${strokeOffset.toFixed(2)}"
-              stroke-linecap="round"
+              stroke-linecap="butt"
               transform="rotate(-90 ${cx} ${cy})" />`;
     })
     .join('');
@@ -221,18 +250,26 @@ export function renderDonutLayout(data, theme, options = {}) {
     otherPerc > 0
       ? (() => {
           const strokeLength = (otherPerc / 100) * C;
-          const strokeGap = C - strokeLength;
+          const visibleLen = Math.max(1, strokeLength - segGap);
+          const strokeGap = C - visibleLen;
           const strokeOffset = C - (accumulatedPercent / 100) * C;
-          return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${theme.secondaryText}" stroke-width="14" opacity="0.35"
-                  stroke-dasharray="${Math.max(0, strokeLength - 1.2).toFixed(2)} ${strokeGap.toFixed(2)}"
+          return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${theme.secondaryText}" stroke-width="13" opacity="0.45"
+                  stroke-dasharray="${visibleLen.toFixed(2)} ${strokeGap.toFixed(2)}"
                   stroke-dashoffset="${strokeOffset.toFixed(2)}"
-                  stroke-linecap="round"
+                  stroke-linecap="butt"
                   transform="rotate(-90 ${cx} ${cy})" />`;
         })()
       : '';
 
-  const topLangName = topLangs[0] ? escapeXml(fitText(topLangs[0].name, 12, r * 1.45)) : '';
-  const topLangPerc = topLangs[0] ? `${topLangs[0].percentage}%` : '';
+  const topLangName = topLangs[0] ? escapeXml(fitText(topLangs[0].name, 11.5, r * 1.4)) : 'No Data';
+  const topLangPerc = topLangs[0] ? `${topLangs[0].percentage}%` : '0%';
+
+  const legendItems = [
+    ...topLangs,
+    ...(otherPerc > 0 ? [{ name: 'Other', color: theme.secondaryText, percentage: otherPerc, isOther: true }] : []),
+  ];
+  const rowStep = legendItems.length <= 4 ? 26 : 22;
+  const legendStartY = Math.max(13, Math.round((144 - ((legendItems.length - 1) * rowStep + 16)) / 2));
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
@@ -242,7 +279,7 @@ export function renderDonutLayout(data, theme, options = {}) {
     ${renderCardStyles(theme)}
     .lang-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 11.5px; fill: ${theme.title}; }
     .lang-perc { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px; fill: ${theme.secondaryText}; }
-    .center-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 12.5px; fill: ${theme.title}; }
+    .center-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 11.5px; fill: ${theme.title}; }
     .center-sub { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10px; fill: ${theme.secondaryText}; }
     .caption-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: ${theme.secondaryText}; }
   </style>
@@ -267,12 +304,12 @@ export function renderDonutLayout(data, theme, options = {}) {
       idPrefix,
       rx: 10,
       children: `
-        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${theme.barBg || '#21262d'}" stroke-width="14" opacity="0.4" />
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${theme.barBg || '#21262d'}" stroke-width="13" opacity="0.45" />
         ${donutSegments}
         ${otherSegment}
         <text x="${cx}" y="${cy - 2}" text-anchor="middle" class="center-title">${topLangName}</text>
-        <text x="${cx}" y="${cy + 13}" text-anchor="middle" class="center-sub">${topLangPerc}</text>
-        <text x="${podW / 2}" y="132" text-anchor="middle" class="stat-lbl">${totalRepos} REPOSITORIES</text>
+        <text x="${cx}" y="${cy + 12}" text-anchor="middle" class="center-sub">${topLangPerc}</text>
+        <text x="${podW / 2}" y="131" text-anchor="middle" class="stat-lbl">${totalRepos} REPOSITORIES</text>
       `,
     })}
 
@@ -285,36 +322,28 @@ export function renderDonutLayout(data, theme, options = {}) {
       theme,
       idPrefix,
       rx: 10,
-      children: `
-        <g transform="translate(12, 12)">
-          ${topLangs
+      children:
+        legendItems.length > 0
+          ? `
+        <g transform="translate(14, ${legendStartY})">
+          ${legendItems
             .map((lang, idx) => {
-              const y = idx * 23;
-              const miniBarW = Math.max(6, Math.round((lang.percentage / 100) * (legendW - 100)));
+              const y = idx * rowStep;
+              const trackW = legendW - 44;
+              const miniBarW = Math.max(6, Math.round((lang.percentage / 100) * trackW));
               return `
               <g transform="translate(0, ${y})">
-                <circle cx="5" cy="5" r="4.5" fill="${lang.color}" />
-                <text x="16" y="9" class="lang-name">${escapeXml(fitText(lang.name, 11.5, legendW - 90))}</text>
-                <text x="${legendW - 24}" y="9" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
-                <rect x="16" y="14" width="${legendW - 40}" height="3" rx="1.5" fill="${theme.barBg || '#21262d'}" opacity="0.4" />
-                <rect x="16" y="14" width="${miniBarW}" height="3" rx="1.5" fill="${lang.color}" />
+                <circle cx="5" cy="5" r="4" fill="${lang.color}" ${lang.isOther ? 'opacity="0.55"' : ''} />
+                <text x="15" y="9" class="lang-name">${escapeXml(fitText(lang.name, 11.5, legendW - 92))}</text>
+                <text x="${legendW - 28}" y="9" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
+                <rect x="15" y="13.5" width="${trackW}" height="3" rx="1.5" fill="${theme.barBg || '#21262d'}" opacity="0.45" />
+                <rect x="15" y="13.5" width="${miniBarW}" height="3" rx="1.5" fill="${lang.color}" ${lang.isOther ? 'opacity="0.55"' : ''} />
               </g>`;
             })
             .join('')}
-
-          ${
-            otherPerc > 0
-              ? `
-            <g transform="translate(0, ${topLangs.length * 23})">
-              <circle cx="5" cy="5" r="4.5" fill="${theme.secondaryText}" opacity="0.5" />
-              <text x="16" y="9" class="lang-name">Other</text>
-              <text x="${legendW - 24}" y="9" text-anchor="end" class="lang-perc">${otherPerc}%</text>
-            </g>
-          `
-              : ''
-          }
         </g>
-      `,
+      `
+          : `<text x="${legendW / 2}" y="76" text-anchor="middle" class="meta-text">No language distribution available</text>`,
     })}
   </g>
 </svg>`;
@@ -331,7 +360,7 @@ export function renderListLayout(data, theme, options = {}) {
   const topLangs = filteredLangs.slice(0, count);
 
   const width = resolveCardWidth(options.width, 495);
-  const height = 225;
+  const height = topLangs.length > 0 ? Math.max(204, 58 + topLangs.length * 32) : 140;
   const idPrefix = 'lang-list';
   const contentWidth = width - 48;
 
@@ -342,7 +371,7 @@ export function renderListLayout(data, theme, options = {}) {
   <style>
     ${renderCardStyles(theme)}
     .lang-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 12px; fill: ${theme.title}; }
-    .lang-meta { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 9.5px; fill: ${theme.secondaryText}; }
+    .lang-meta { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 9.5px; fill: ${theme.secondaryText}; }
     .lang-perc { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11.5px; fill: ${theme.title}; }
   </style>
 
@@ -355,35 +384,51 @@ export function renderListLayout(data, theme, options = {}) {
     theme,
   })}
 
-  <g transform="translate(24, 48)">
-    ${topLangs
-      .map((lang, idx) => {
-        const y = idx * 30;
-        const barW = Math.max(10, Math.round((lang.percentage / 100) * contentWidth));
-        const repoStr = `${lang.repoCount || 1} repos`;
-        const recentStr = lang.lastUsedMonthsAgo <= 1 ? 'Recent' : `${lang.lastUsedMonthsAgo || 2}mo ago`;
+  <g transform="translate(24, 46)">
+    ${
+      topLangs.length > 0
+        ? topLangs
+            .map((lang, idx) => {
+              const y = idx * 32;
+              const trackW = contentWidth - 16;
+              const barW = Math.max(8, Math.round((lang.percentage / 100) * trackW));
+              const repoCount = lang.repoCount || 1;
+              const repoStr = `${repoCount} ${repoCount === 1 ? 'repo' : 'repos'}`;
+              const recentStr = lang.lastUsedMonthsAgo <= 1 ? 'Recent' : `${lang.lastUsedMonthsAgo || 2}mo ago`;
 
-        return renderBentoTile({
-          x: 0,
-          y,
-          width: contentWidth,
-          height: 26,
-          theme,
-          idPrefix,
-          rx: 6,
-          children: `
-            <g transform="translate(6, 4)">
-              ${renderRankBadge({ x: 0, y: 0, rank: idx + 1, width: 34, height: 18, theme })}
-            </g>
-            <circle cx="52" cy="13" r="4.5" fill="${lang.color}" />
-            <text x="62" y="16" class="lang-name">${escapeXml(fitText(lang.name, 12, 100))}</text>
-            <text x="${contentWidth - 76}" y="16" text-anchor="end" class="lang-meta">📦 ${repoStr} · 🕒 ${recentStr}</text>
-            <text x="${contentWidth - 10}" y="16" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
-            <line x1="0" y1="25.5" x2="${barW}" y2="25.5" stroke="${lang.color}" stroke-width="1.5" />
-          `,
-        });
-      })
-      .join('')}
+              return renderBentoTile({
+                x: 0,
+                y,
+                width: contentWidth,
+                height: 27,
+                theme,
+                idPrefix,
+                rx: 6,
+                children: `
+                  <g transform="translate(6, 4.5)">
+                    ${renderRankBadge({ x: 0, y: 0, rank: idx + 1, width: 32, height: 17, theme })}
+                  </g>
+                  <circle cx="48" cy="13" r="4" fill="${lang.color}" />
+                  <text x="58" y="16.5" class="lang-name">${escapeXml(fitText(lang.name, 12, Math.max(80, contentWidth - 235)))}</text>
+                  <text x="${contentWidth - 68}" y="16" text-anchor="end" class="lang-meta">${repoStr} · ${recentStr}</text>
+                  <text x="${contentWidth - 10}" y="16.5" text-anchor="end" class="lang-perc">${lang.percentage}%</text>
+                  <rect x="8" y="23" width="${trackW}" height="2" rx="1" fill="${theme.barBg || '#21262d'}" opacity="0.45" />
+                  <rect x="8" y="23" width="${barW}" height="2" rx="1" fill="${lang.color}" />
+                `,
+              });
+            })
+            .join('')
+        : renderBentoTile({
+            x: 0,
+            y: 8,
+            width: contentWidth,
+            height: 54,
+            theme,
+            idPrefix,
+            rx: 8,
+            children: `<text x="${contentWidth / 2}" y="31" text-anchor="middle" class="meta-text">No ranked languages available</text>`,
+          })
+    }
   </g>
 </svg>`;
 }
@@ -402,7 +447,7 @@ export function renderPolyglotLayout(data, theme, options = {}) {
   const hasExtra = extraLangs.length > 0;
 
   const width = resolveCardWidth(options.width, 495);
-  const height = hasExtra ? 255 : 225;
+  const height = hasExtra ? 232 : 202;
   const idPrefix = 'lang-poly';
   const contentWidth = width - 48;
   const mosaicHeight = 138;
@@ -413,10 +458,10 @@ export function renderPolyglotLayout(data, theme, options = {}) {
       ? primaryLangs[0].percentage / Math.max(1, primaryLangs[0].percentage + (primaryLangs[1]?.percentage || 25))
       : 1;
   const leftRatio = primaryLangs.length > 1 ? Math.max(0.42, Math.min(0.58, rawLeftRatio)) : 1;
-  const leftW = Math.round(contentWidth * leftRatio) - 4;
+  const leftW = Math.round(contentWidth * leftRatio) - (primaryLangs.length > 1 ? 4 : 0);
   const rightW = contentWidth - leftW - 8;
 
-  const l1 = primaryLangs[0] || { name: 'Code', color: '#58a6ff', percentage: 100 };
+  const l1 = primaryLangs[0] || { name: 'No Language Telemetry', color: theme.title || '#58a6ff', percentage: 0 };
   const l2 = primaryLangs[1];
   const l3 = primaryLangs[2];
   const l4 = primaryLangs[3];
@@ -432,14 +477,38 @@ export function renderPolyglotLayout(data, theme, options = {}) {
   const rTopH = l4 ? Math.round(mosaicHeight * 0.54) - 3 : mosaicHeight;
   const rBotH = mosaicHeight - rTopH - 6;
 
+  const renderTreemapCell = (lang, x, y, cellW, cellH, isCompact = false) => {
+    const padX = isCompact ? 11 : 14;
+    const barTrackW = Math.max(16, cellW - padX * 2);
+    const barFillW = Math.max(6, Math.round(((lang.percentage || 0) / 100) * barTrackW));
+    const titleFont = isCompact ? 10.5 : 11.5;
+    const percFont = isCompact ? 12 : 14;
+    const isShortCell = cellH < 52 && !isCompact;
+
+    return `
+      <g transform="translate(${x}, ${y})" class="treemap-cell">
+        <rect width="${cellW}" height="${cellH}" rx="8" fill="${theme.cardBg}" stroke="${lang.color}" stroke-opacity="0.55" stroke-width="1.1" />
+        <rect width="${cellW}" height="${cellH}" rx="8" fill="${lang.color}" fill-opacity="0.11" />
+        <circle cx="${padX}" cy="15" r="${isCompact ? 3.5 : 4}" fill="${lang.color}" />
+        <text x="${padX + 9}" y="18.5" class="tile-title" font-size="${titleFont}">${escapeXml(fitText(lang.name, titleFont, isShortCell ? cellW - padX * 2 - 52 : cellW - padX - 18))}</text>
+        ${
+          isShortCell
+            ? `<text x="${cellW - padX}" y="19" text-anchor="end" class="tile-perc" font-size="13">${lang.percentage}%</text>`
+            : `<text x="${padX}" y="${isCompact ? 36 : 41}" class="tile-perc" font-size="${percFont}">${lang.percentage}%</text>`
+        }
+        <rect x="${padX}" y="${cellH - 9}" width="${barTrackW}" height="3" rx="1.5" fill="${theme.barBg || '#21262d'}" opacity="0.5" />
+        <rect x="${padX}" y="${cellH - 9}" width="${barFillW}" height="3" rx="1.5" fill="${lang.color}" />
+      </g>`;
+  };
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
     ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
   </defs>
   <style>
     ${renderCardStyles(theme)}
-    .tile-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 11.5px; fill: ${theme.title}; }
-    .tile-perc { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 14px; fill: ${theme.title}; }
+    .tile-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; fill: ${theme.text}; }
+    .tile-perc { font-family: 'JetBrains Mono', monospace; font-weight: 800; fill: ${theme.title}; }
   </style>
 
   ${renderCardFrame(width, height, idPrefix, theme, 14)}
@@ -454,73 +523,11 @@ export function renderPolyglotLayout(data, theme, options = {}) {
   <g transform="translate(24, 46)">
     <!-- Treemap Mosaic Container -->
     <g transform="translate(0, 0)">
-      <!-- Left Column: Cell 1 (Dominant Language) -->
-      <g transform="translate(0, 0)" class="treemap-cell">
-        <rect width="${leftW}" height="${l1H}" rx="8" fill="${l1.color}" fill-opacity="0.18" stroke="${l1.color}" stroke-opacity="0.65" stroke-width="1.2" />
-        <line x1="8" y1="0.5" x2="${leftW - 8}" y2="0.5" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
-        <circle cx="16" cy="16" r="4.5" fill="${l1.color}"/>
-        <text x="26" y="20" class="tile-title">${escapeXml(fitText(l1.name, 11.5, leftW - 34))}</text>
-        <text x="16" y="${Math.min(l1H - 10, 42)}" class="tile-perc">${l1.percentage}%</text>
-      </g>
-
-      <!-- Left Column: Cell 3 (if present) -->
-      ${
-        l3
-          ? `
-        <g transform="translate(0, ${l1H + 6})" class="treemap-cell">
-          <rect width="${leftW}" height="${l3H}" rx="8" fill="${l3.color}" fill-opacity="0.18" stroke="${l3.color}" stroke-opacity="0.65" stroke-width="1.2" />
-          <line x1="8" y1="0.5" x2="${leftW - 8}" y2="0.5" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
-          <circle cx="16" cy="16" r="4" fill="${l3.color}"/>
-          <text x="26" y="20" class="tile-title">${escapeXml(fitText(l3.name, 11.5, leftW - 34))}</text>
-          <text x="16" y="${Math.min(l3H - 10, 40)}" class="tile-perc">${l3.percentage}%</text>
-        </g>
-      `
-          : ''
-      }
-
-      <!-- Right Column: Cell 2 (Second Language) -->
-      ${
-        l2
-          ? `
-        <g transform="translate(${leftW + 8}, 0)" class="treemap-cell">
-          <rect width="${rightW}" height="${rTopH}" rx="8" fill="${l2.color}" fill-opacity="0.18" stroke="${l2.color}" stroke-opacity="0.65" stroke-width="1.2" />
-          <line x1="8" y1="0.5" x2="${rightW - 8}" y2="0.5" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
-          <circle cx="16" cy="16" r="4" fill="${l2.color}"/>
-          <text x="26" y="20" class="tile-title">${escapeXml(fitText(l2.name, 11.5, rightW - 34))}</text>
-          <text x="16" y="${Math.min(rTopH - 10, 40)}" class="tile-perc">${l2.percentage}%</text>
-        </g>
-      `
-          : ''
-      }
-
-      <!-- Right Column: Cell 4 & Cell 5 -->
-      ${
-        l4
-          ? `
-        <g transform="translate(${leftW + 8}, ${rTopH + 6})" class="treemap-cell">
-          <rect width="${l5 ? Math.round(rightW * 0.55) - 3 : rightW}" height="${rBotH}" rx="8" fill="${l4.color}" fill-opacity="0.18" stroke="${l4.color}" stroke-opacity="0.65" stroke-width="1.2" />
-          <line x1="6" y1="0.5" x2="${(l5 ? Math.round(rightW * 0.55) - 3 : rightW) - 6}" y2="0.5" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
-          <circle cx="12" cy="14" r="3.5" fill="${l4.color}" />
-          <text x="20" y="17.5" class="tile-title" font-size="10.5">${escapeXml(fitText(l4.name, 10.5, (l5 ? rightW * 0.55 - 3 : rightW) - 26))}</text>
-          <text x="12" y="36" class="tile-perc" font-size="12.5">${l4.percentage}%</text>
-        </g>
-      `
-          : ''
-      }
-
-      ${
-        l5
-          ? `
-        <g transform="translate(${leftW + 8 + Math.round(rightW * 0.55) + 3}, ${rTopH + 6})" class="treemap-cell">
-          <rect width="${Math.round(rightW * 0.45) - 3}" height="${rBotH}" rx="8" fill="${l5.color}" fill-opacity="0.18" stroke="${l5.color}" stroke-opacity="0.65" stroke-width="1.2" />
-          <line x1="6" y1="0.5" x2="${Math.round(rightW * 0.45) - 9}" y2="0.5" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1" />
-          <circle cx="12" cy="14" r="3.5" fill="${l5.color}" />
-          <text x="20" y="17.5" class="tile-title" font-size="10.5">${escapeXml(fitText(l5.name, 10.5, rightW * 0.45 - 26))}</text>
-          <text x="12" y="36" class="tile-perc" font-size="12.5">${l5.percentage}%</text>
-        </g>
-      `
-          : ''
-      }
+      ${renderTreemapCell(l1, 0, 0, leftW, l1H, false)}
+      ${l3 ? renderTreemapCell(l3, 0, l1H + 6, leftW, l3H, false) : ''}
+      ${l2 ? renderTreemapCell(l2, leftW + 8, 0, rightW, rTopH, false) : ''}
+      ${l4 ? renderTreemapCell(l4, leftW + 8, rTopH + 6, l5 ? Math.round(rightW * 0.55) - 3 : rightW, rBotH, true) : ''}
+      ${l5 ? renderTreemapCell(l5, leftW + 8 + Math.round(rightW * 0.55) + 3, rTopH + 6, Math.round(rightW * 0.45) - 3, rBotH, true) : ''}
     </g>
 
     <!-- Secondary Polyglot Chip Strip (Languages #6..#12) -->
@@ -558,21 +565,25 @@ export function renderEvolutionLayout(data, theme, options = {}) {
   const topLangs = filteredLangs.slice(0, 4);
 
   const width = resolveCardWidth(options.width, 495);
-  const height = 230;
+  const height = 238;
   const idPrefix = 'lang-evo';
   const contentWidth = width - 48;
 
-  const establishedSegments = topLangs.map((l) => ({
-    label: l.name,
-    color: l.color,
-    percentage: l.percentage,
-  }));
+  const establishedSegments = topLangs.length > 0
+    ? topLangs.map((l) => ({
+        label: l.name,
+        color: l.color,
+        percentage: l.percentage,
+      }))
+    : [{ label: 'None', color: theme.barBg || '#21262d', percentage: 100 }];
 
-  const recentSegments = topLangs.map((l) => ({
-    label: l.name,
-    color: l.color,
-    percentage: l.recentShare || l.percentage,
-  }));
+  const recentSegments = topLangs.length > 0
+    ? topLangs.map((l) => ({
+        label: l.name,
+        color: l.color,
+        percentage: l.recentShare || l.percentage,
+      }))
+    : [{ label: 'None', color: theme.barBg || '#21262d', percentage: 100 }];
 
   const topShiftLang = topLangs.reduce(
     (max, l) => {
@@ -582,7 +593,8 @@ export function renderEvolutionLayout(data, theme, options = {}) {
     { name: topLangs[0]?.name || 'TypeScript', diff: 0 }
   );
 
-  const colW = Math.floor((contentWidth - (topLangs.length - 1) * 8) / topLangs.length);
+  const numCols = Math.max(1, topLangs.length);
+  const colW = Math.floor((contentWidth - (numCols - 1) * 8) / numCols);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
   <defs>
@@ -610,12 +622,12 @@ export function renderEvolutionLayout(data, theme, options = {}) {
       x: 0,
       y: 0,
       width: contentWidth,
-      height: 84,
+      height: 82,
       theme,
       idPrefix,
       rx: 8,
       children: `
-        <g transform="translate(12, 12)">
+        <g transform="translate(12, 11)">
           <text x="0" y="8" class="bar-label">Established Footprint (All-Time)</text>
           <g transform="translate(0, 14)">
             ${renderStackedBar({
@@ -646,17 +658,18 @@ export function renderEvolutionLayout(data, theme, options = {}) {
     })}
 
     <!-- 4 Individual Bento Trajectory Cards -->
-    <g transform="translate(0, 92)">
+    <g transform="translate(0, 90)">
       ${topLangs
         .map((lang, idx) => {
           const x = idx * (colW + 8);
           const diff = parseFloat(((lang.recentShare || lang.percentage) - lang.percentage).toFixed(1));
+          const shareVal = lang.recentShare ?? lang.percentage;
 
           return renderBentoTile({
             x,
             y: 0,
             width: colW,
-            height: 48,
+            height: 50,
             theme,
             idPrefix,
             rx: 7,
@@ -664,8 +677,9 @@ export function renderEvolutionLayout(data, theme, options = {}) {
             accentPosition: 'left',
             children: `
               <g transform="translate(10, 10)">
-                <circle cx="5" cy="5" r="4" fill="${lang.color}" />
-                <text x="14" y="8.5" class="shift-title">${escapeXml(fitText(lang.name, 11, colW - 30))}</text>
+                <circle cx="4.5" cy="5" r="3.5" fill="${lang.color}" />
+                <text x="12.5" y="8.5" class="shift-title">${escapeXml(fitText(lang.name, 10.5, colW - 52))}</text>
+                <text x="${colW - 18}" y="8.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="${theme.secondaryText}">${shareVal}%</text>
                 <g transform="translate(0, 16)">
                   ${renderDeltaChip({ delta: diff, x: 0, y: 0, theme })}
                 </g>
@@ -677,8 +691,9 @@ export function renderEvolutionLayout(data, theme, options = {}) {
     </g>
 
     <!-- Milestone Caption -->
-    <g transform="translate(0, 150)">
-      <text x="0" y="0" class="caption-text">🚀 Primary focus accelerating in <tspan font-weight="700" fill="${theme.title}">${topShiftLang.name}</tspan> in recent repositories</text>
+    <g transform="translate(4, 160)">
+      <circle cx="4" cy="-3.5" r="3.5" fill="${theme.accent || theme.title}" class="pulse-dot" />
+      <text x="14" y="0" class="caption-text">Primary focus accelerating in <tspan font-weight="700" fill="${theme.title}">${escapeXml(topShiftLang.name)}</tspan> across recent repositories</text>
     </g>
   </g>
 </svg>`;

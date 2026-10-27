@@ -70,6 +70,14 @@ export function validateXml(svg) {
   }
 }
 
+const STANDARD_WEEKS = Array.from({ length: 53 }, (_, w) => ({
+  contributionDays: Array.from({ length: 7 }, (_, d) => ({
+    weekday: d,
+    contributionCount: ((w * 3 + d * 5) % 9 === 0) ? 0 : ((w + d) % 5) * 2 + 1,
+    date: '2026-05-01',
+  })),
+}));
+
 const MOCK_DATA = {
   standard: {
     profile: {
@@ -84,14 +92,25 @@ const MOCK_DATA = {
       location: 'Auckland, NZ',
       websiteUrl: 'https://cubewin.dev',
       createdAt: '2020-03-15T08:00:00Z',
+      currentStreak: 16,
+      maxStreak: 42,
+      totalContributions: 1850,
+      topLanguages: [
+        { name: 'TypeScript', color: '#3178c6', percentage: 45 },
+        { name: 'JavaScript', color: '#f1e05a', percentage: 30 },
+        { name: 'Python', color: '#3572A5', percentage: 15 },
+        { name: 'Rust', color: '#dea584', percentage: 10 },
+      ],
+      topRepo: { name: 'customReadmeSVG', stars: 128 },
+      weeks: STANDARD_WEEKS,
     },
     languages: {
       languages: [
-        { name: 'TypeScript', size: 450000, percentage: 45.0, color: '#3178c6' },
-        { name: 'JavaScript', size: 250000, percentage: 25.0, color: '#f1e05a' },
-        { name: 'Python', size: 150000, percentage: 15.0, color: '#3572A5' },
-        { name: 'HTML', size: 100000, percentage: 10.0, color: '#e34c26' },
-        { name: 'CSS', size: 50000, percentage: 5.0, color: '#563d7c' },
+        { name: 'TypeScript', size: 450000, percentage: 45.0, color: '#3178c6', repoCount: 18 },
+        { name: 'JavaScript', size: 250000, percentage: 25.0, color: '#f1e05a', repoCount: 14 },
+        { name: 'Python', size: 150000, percentage: 15.0, color: '#3572A5', repoCount: 8 },
+        { name: 'HTML', size: 100000, percentage: 10.0, color: '#e34c26', repoCount: 11 },
+        { name: 'CSS', size: 50000, percentage: 5.0, color: '#563d7c', repoCount: 9 },
       ],
       totalSize: 1000000,
     },
@@ -102,6 +121,11 @@ const MOCK_DATA = {
           description: 'Dynamic game-inspired SVG cards for GitHub READMEs',
           stargazerCount: 128,
           forkCount: 24,
+          watchersCount: 19,
+          issuesCount: 4,
+          latestRelease: 'v2.4.0',
+          topics: ['svg', 'github-readme', 'animations'],
+          sparkline: [4, 7, 5, 11, 9, 14, 12, 18],
           primaryLanguage: { name: 'JavaScript', color: '#f1e05a' },
           updatedAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
         },
@@ -110,6 +134,8 @@ const MOCK_DATA = {
           description: 'High performance GSAP-animated portfolio site',
           stargazerCount: 94,
           forkCount: 12,
+          watchersCount: 11,
+          issuesCount: 2,
           primaryLanguage: { name: 'TypeScript', color: '#3178c6' },
           updatedAt: new Date(Date.now() - 3600000 * 24 * 20).toISOString(),
         },
@@ -118,6 +144,8 @@ const MOCK_DATA = {
           description: 'Real-time procedural voxel generation in WebGL',
           stargazerCount: 65,
           forkCount: 8,
+          watchersCount: 9,
+          issuesCount: 1,
           primaryLanguage: { name: 'Rust', color: '#dea584' },
           updatedAt: new Date(Date.now() - 3600000 * 24 * 45).toISOString(),
         },
@@ -126,6 +154,8 @@ const MOCK_DATA = {
           description: 'Distributed workflow automation runner',
           stargazerCount: 42,
           forkCount: 5,
+          watchersCount: 6,
+          issuesCount: 0,
           primaryLanguage: { name: 'Go', color: '#00ADD8' },
           updatedAt: new Date(Date.now() - 3600000 * 24 * 70).toISOString(),
         },
@@ -135,10 +165,17 @@ const MOCK_DATA = {
       name: 'Le Tan Thang',
       login: 'cubewin07',
       totalStars: 420,
-      totalCommits: 2840,
+      totalCommits: 1840,
+      totalContributions: 2150,
+      pullRequests: 86,
+      reviews: 42,
+      issues: 28,
+      currentStreak: 16,
+      maxStreak: 42,
       totalForks: 65,
       totalRepos: 38,
       followers: 142,
+      weeks: STANDARD_WEEKS.slice(-26),
     },
     developer: {
       name: 'Le Tan Thang',
@@ -146,12 +183,28 @@ const MOCK_DATA = {
       handle: '@cubewin07',
       role: 'Full-Stack Engineer & Creative Coder',
       status: 'SHIPPED TO PRODUCTION',
-      focus: ['Systems Architecture', 'Interactive WebGL', 'AI Agent Workflows'],
+      focus: [
+        'Crafting interactive web apps & reactive UI systems',
+        'with dynamic, game-inspired SVG animation engines.',
+      ],
       commitSha: 'c546d68',
-      annualCommits: 2840,
-      primaryTech: ['TypeScript', 'React 19', 'WebGL', 'Node.js', 'Go'],
-      pinnedRepos: [
-        { name: 'customReadmeSVG', desc: 'Game-inspired SVG cards', stars: 128, forks: 24, lang: 'JS', color: '#f1e05a' },
+      annualCommits: 1840,
+      streak: 16,
+      longestStreak: 42,
+      tech: ['TypeScript', 'React', 'JavaScript', 'Node.js', 'Python', 'Rust'],
+      langShares: [
+        { name: 'TypeScript', color: '#3178c6', pct: 45 },
+        { name: 'JavaScript', color: '#f1e05a', pct: 25 },
+        { name: 'Python', color: '#3572A5', pct: 15 },
+        { name: 'Rust', color: '#dea584', pct: 10 },
+      ],
+      stats: [
+        { label: 'REPOSITORIES', value: 38 },
+        { label: 'TOTAL STARS', value: 420 },
+        { label: 'FOLLOWERS', value: 142 },
+      ],
+      repos: [
+        { name: 'customReadmeSVG', desc: 'Game-inspired SVG cards', stars: 128, forks: 24, lang: 'JavaScript', color: '#f1e05a' },
         { name: 'neural-canvas', desc: 'Procedural voxel terrain', stars: 65, forks: 8, lang: 'Rust', color: '#dea584' },
       ],
     },

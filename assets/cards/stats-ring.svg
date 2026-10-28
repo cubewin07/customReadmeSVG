@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195" fill="none">
+  <defs>
+    
+    <linearGradient id="stats-ring-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117" />
+      <stop offset="100%" stop-color="#161b22" />
+    </linearGradient>
+    <linearGradient id="stats-ring-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
+      <stop offset="45%" stop-color="#30363d" stop-opacity="0.65" />
+      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0.35" />
+    </linearGradient>
+    <linearGradient id="stats-ring-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#21262d" stop-opacity="0.45" />
+    </linearGradient>
+    <linearGradient id="stats-ring-brand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#58a6ff" />
+      <stop offset="100%" stop-color="#3fb950" />
+    </linearGradient>
+    <radialGradient id="stats-ring-glow-tl" cx="0%" cy="0%" r="65%">
+      <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="stats-ring-glow-br" cx="100%" cy="100%" r="65%">
+      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.11" />
+      <stop offset="100%" stop-color="#3fb950" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="stats-ring-dots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.8" fill="#8b949e" fill-opacity="0.12" />
+    </pattern>
+  
+  </defs>
+  <style>
+    
+    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: #8b949e; letter-spacing: 0.08em; text-transform: uppercase; }
+    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 14px; fill: #58a6ff; font-variant-numeric: tabular-nums; }
+    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 500; fill: #8b949e; }
+    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
+    
+  
+    .rank-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-weight: 700; font-size: 9.5px; fill: #8b949e; text-transform: uppercase; letter-spacing: 0.6px; }
+  </style>
+
+  
+    <rect x="0.5" y="0.5" rx="14" width="494" height="194" fill="url(#stats-ring-bg)" />
+    <rect x="0.5" y="0.5" rx="14" width="494" height="194" fill="url(#stats-ring-dots)" />
+    <rect x="0.5" y="0.5" rx="14" width="494" height="194" fill="url(#stats-ring-glow-tl)" />
+    <rect x="0.5" y="0.5" rx="14" width="494" height="194" fill="url(#stats-ring-glow-br)" />
+    <path d="M 18,0.5 L 477,0.5" stroke="url(#stats-ring-brand)" stroke-width="2" stroke-linecap="round" opacity="0.85" />
+    <rect x="0.5" y="0.5" rx="14" width="494" height="194" fill="none" stroke="url(#stats-ring-rim)" stroke-width="1" />
+  
+
+  
+    <g transform="translate(24, 24)">
+      <line x1="1.5" y1="-12" x2="1.5" y2="3" stroke="#3fb950" stroke-width="3" stroke-linecap="round" />
+      <text x="10" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.02em" fill="#58a6ff">Tan Thang Le&apos;s Stats</text>
+      
+        <rect x="336" y="-14" width="111" height="20" rx="10" fill="#13233a" stroke="#21262d" stroke-width="1"/>
+        <text x="391.5" y="-0.5" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" font-weight="700" font-size="9.5" fill="#58a6ff">⚡ 1,246 Commits</text>
+      
+    </g>
+
+  <g transform="translate(24, 44)">
+    <!-- Left Column: Rank Reactor Bento Pod -->
+    
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="144" height="138" rx="10" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-ring-tile-rim)" stroke-width="1" />
+      <line x1="12" y1="0.75" x2="132" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
+      
+      
+        
+    <g class="progress-ring" transform="translate(72, 49)">
+      <!-- Outer Tick Track Ring -->
+      <circle cx="0" cy="0" r="40.25" fill="none" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="2 4" />
+
+      <!-- Background Track Circle -->
+      <circle cx="0" cy="0" r="34" fill="none" stroke="#21262d" stroke-width="6.5" />
+      
+      <!-- Progress Arc -->
+      <circle
+        cx="0"
+        cy="0"
+        r="34"
+        fill="none"
+        stroke="#58a6ff"
+        stroke-width="6.5"
+        stroke-dasharray="214"
+        stroke-dashoffset="179"
+        stroke-linecap="round"
+        transform="rotate(-90)"
+      />
+      
+      <!-- Center Content -->
+      <text x="0" y="2" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#58a6ff">C</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, monospace" font-size="8" font-weight="700" fill="#8b949e">RANK</text>
+    </g>
+        <text x="72" y="108" text-anchor="middle" class="rank-title">Overall Rank</text>
+        <text x="72" y="123" text-anchor="middle" class="font-mono" font-size="9.5" font-weight="700" fill="#58a6ff">Score 16.1/100</text>
+      
+    </g>
+  
+
+    <!-- Right Column: 5-Row Bento Metric Strip -->
+    
+    <g transform="translate(156, 0)">
+      <rect x="0" y="0" width="291" height="138" rx="10" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-ring-tile-rim)" stroke-width="1" />
+      <line x1="12" y1="0.75" x2="279" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
+      
+      
+        <g transform="translate(12, 8)">
+          
+              <g transform="translate(0, 0)">
+                <g transform="translate(0, 1)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M10.5 8a2.5 2.5 0 1 1 -5 0 2.5 2.5 0 0 1 5 0zM8 0a.75 .75 0 0 1 .75 .75v1.815a5.503 5.503 0 0 1 3.935 3.935h1.815a.75 .75 0 0 1 0 1.5h-1.815a5.503 5.503 0 0 1 -3.935 3.935v1.815a.75 .75 0 0 1 -1.5 0v-1.815a5.503 5.503 0 0 1 -3.935 -3.935H1.515a.75 .75 0 0 1 0 -1.5h1.815A5.503 5.503 0 0 1 7.25 2.565V.75A.75 .75 0 0 1 8 0z"></path>
+    </svg></g>
+                <text x="22" y="12" class="stat-lbl">COMMITS</text>
+                
+                  <rect x="114" y="6.5" width="35" height="4" rx="2" fill="#21262d" opacity="0.65" />
+                  <rect x="114" y="6.5" width="34" height="4" rx="2" fill="#58a6ff" opacity="0.85" />
+                
+                <text x="217" y="12" text-anchor="end" class="stat-val" font-size="12">1,246</text>
+                <g transform="translate(227, 0)">
+                  
+    <g class="delta-chip" transform="translate(0, 0)">
+      <rect x="0" y="0" width="48" height="16" rx="8" fill="#f85149" fill-opacity="0.16" />
+      <text x="24" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#f85149">▼ -28%</text>
+      
+    </g>
+                </g>
+              </g>
+              <g transform="translate(0, 24)">
+                <g transform="translate(0, 1)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#3fb950" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M7.177 3.073L9.573 .677A.25 .25 0 0 1 10 .854v4.792a.25 .25 0 0 1 -.427 .177L7.177 3.427a.25 .25 0 0 1 0 -.354zM3.75 2.5a.75 .75 0 1 0 0 1.5 .75 .75 0 0 0 0 -1.5zm-2.25 .75a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1 -1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25zM11 2.5h-1V4h1a1 1 0 0 1 1 1v5.628a2.251 2.251 0 1 0 1.5 0V5A2.5 2.5 0 0 0 11 2.5zm1 10.25a.75 .75 0 1 1 1.5 0 .75 .75 0 0 1 -1.5 0zM3.75 12a.75 .75 0 1 0 0 1.5 .75 .75 0 0 0 0 -1.5z"></path>
+    </svg></g>
+                <text x="22" y="12" class="stat-lbl">PULL REQUESTS</text>
+                
+                  <rect x="114" y="6.5" width="35" height="4" rx="2" fill="#21262d" opacity="0.65" />
+                  <rect x="114" y="6.5" width="29" height="4" rx="2" fill="#a855f7" opacity="0.85" />
+                
+                <text x="217" y="12" text-anchor="end" class="stat-val" font-size="12">42</text>
+                <g transform="translate(227, 0)">
+                  
+    <g class="delta-chip" transform="translate(0, 0)">
+      <rect x="0" y="0" width="48" height="16" rx="8" fill="#3fb950" fill-opacity="0.16" />
+      <text x="24" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#3fb950">▲ +23%</text>
+      
+    </g>
+                </g>
+              </g>
+              <g transform="translate(0, 48)">
+                <g transform="translate(0, 1)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119 .119 0 0 1 0 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119 .119 0 0 1 0 -.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 0 0 0 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 0 0 0 -1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 1 0 0 -4 2 2 0 0 0 0 4z"></path>
+    </svg></g>
+                <text x="22" y="12" class="stat-lbl">REVIEWS</text>
+                
+                  <rect x="114" y="6.5" width="35" height="4" rx="2" fill="#21262d" opacity="0.65" />
+                  <rect x="114" y="6.5" width="6" height="4" rx="2" fill="#00f2fe" opacity="0.85" />
+                
+                <text x="217" y="12" text-anchor="end" class="stat-val" font-size="12">1</text>
+                <g transform="translate(227, 0)">
+                  
+    <g class="delta-chip" transform="translate(0, 0)">
+      <rect x="0" y="0" width="48" height="16" rx="8" fill="#3fb950" fill-opacity="0.16" />
+      <text x="24" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#3fb950">▲ +5%</text>
+      
+    </g>
+                </g>
+              </g>
+              <g transform="translate(0, 72)">
+                <g transform="translate(0, 1)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M7.75 0a.75 .75 0 0 1 .68 .44l3.5 7.5a.75 .75 0 0 1 -.68 1.06H7.75l1.5 6a.75 .75 0 0 1 -1.36 .56l-5.5 -8.5a.75 .75 0 0 1 .63 -1.16h3.5L5.02 .44A.75 .75 0 0 1 5.75 0h2z"></path>
+    </svg></g>
+                <text x="22" y="12" class="stat-lbl">ISSUES</text>
+                
+                  <rect x="114" y="6.5" width="35" height="4" rx="2" fill="#21262d" opacity="0.65" />
+                  <rect x="114" y="6.5" width="19" height="4" rx="2" fill="#f59e0b" opacity="0.85" />
+                
+                <text x="217" y="12" text-anchor="end" class="stat-val" font-size="12">7</text>
+                <g transform="translate(227, 0)">
+                  
+    <g class="delta-chip" transform="translate(0, 0)">
+      <rect x="0" y="0" width="48" height="16" rx="8" fill="#3fb950" fill-opacity="0.16" />
+      <text x="24" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#3fb950">▲ +3%</text>
+      
+    </g>
+                </g>
+              </g>
+              <g transform="translate(0, 96)">
+                <g transform="translate(0, 1)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
+    </svg></g>
+                <text x="22" y="12" class="stat-lbl">STARS</text>
+                
+                  <rect x="114" y="6.5" width="35" height="4" rx="2" fill="#21262d" opacity="0.65" />
+                  <rect x="114" y="6.5" width="10" height="4" rx="2" fill="#e3b341" opacity="0.85" />
+                
+                <text x="217" y="12" text-anchor="end" class="stat-val" font-size="12">5</text>
+                <g transform="translate(227, 0)">
+                  
+    <g class="delta-chip" transform="translate(0, 0)">
+      <rect x="0" y="0" width="48" height="16" rx="8" fill="#3fb950" fill-opacity="0.16" />
+      <text x="24" y="11" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#3fb950">▲ +11%</text>
+      
+    </g>
+                </g>
+              </g>
+        </g>
+      
+    </g>
+  
+  </g>
+</svg>

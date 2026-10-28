@@ -20,6 +20,48 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 
 ---
 
+## 🎨 Live Card Showcase
+
+Real SVG outputs generated directly by `customReadmeSVG`:
+
+### 1. Developer Showcase (Flagship Animated Cyber World)
+> 36s synchronized multi-act animation featuring hologram workstation telemetry, platformer contribution runner, and isometric voxel city.
+
+<p align="center">
+  <img src="assets/cards/developer-showcase.svg" alt="Developer Showcase" width="100%" />
+</p>
+
+### 2. GitHub Stats (Telemetry HUD & Ring Gauge)
+> Powered by the enhanced rank scoring engine with impact gating (peer-reviewed PRs, star density, code reviews, and community traction).
+
+<p align="center">
+  <img src="assets/cards/stats-telemetry-hud.svg" alt="GitHub Stats Cyberpunk HUD" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/cards/stats-ring.svg" alt="GitHub Stats Ring Gauge" width="100%" />
+</p>
+
+### 3. Top Languages (Polyglot Treemap) & Top Repositories
+> Proportional mosaic distribution across 12+ languages alongside 2-column repository telemetry with sparklines and release tags.
+
+<p align="center">
+  <img src="assets/cards/languages-polyglot.svg" alt="Top Languages Polyglot" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/cards/repos-grid.svg" alt="Top Repositories Grid" width="100%" />
+</p>
+
+### 4. Profile Overview
+> Glassmorphic executive résumé highlighting tenure, flagship repository, status indicator, and top language.
+
+<p align="center">
+  <img src="assets/cards/profile-overview.svg" alt="Profile Overview" width="100%" />
+</p>
+
+---
+
 ## 📌 Available SVG Routes & Embed Examples
 
 ### Routes

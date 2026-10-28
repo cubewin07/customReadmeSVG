@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import process from 'node:process'
 import { vitePluginSvg } from './src/runtime/vitePluginSvg.js'
 
-// https://vite.dev/config/
+// https://vite.dev/config/ — SVG middleware hot-reloads via ssrLoadModule
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   if (env.VITE_GITHUB_TOKEN && !process.env.VITE_GITHUB_TOKEN) {

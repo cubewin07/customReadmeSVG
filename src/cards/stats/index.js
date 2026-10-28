@@ -126,6 +126,7 @@ export function renderV1RingSvg(data, theme, options = {}) {
   const contentWidth = width - 48;
 
   const totalStars = data?.totalStars ?? 0;
+  const totalForks = data?.totalForks ?? 0;
   const totalCommits = data?.totalCommits ?? 0;
   const pullRequests = data?.pullRequests ?? 0;
   const reviews = data?.reviews ?? 0;
@@ -134,7 +135,17 @@ export function renderV1RingSvg(data, theme, options = {}) {
   const totalRepos = data?.totalRepos ?? 0;
   const totalContributions = data?.totalContributions ?? totalCommits;
 
-  const rank = calculateRank({ totalCommits, totalStars, totalRepos, followers, pullRequests, totalContributions });
+  const rank = calculateRank({
+    totalCommits,
+    totalStars,
+    totalForks,
+    totalRepos,
+    followers,
+    pullRequests,
+    reviews,
+    issues,
+    totalContributions,
+  });
   const deltas = computeRealMetricDeltas(data);
 
   const metrics = [
@@ -258,9 +269,12 @@ export function renderV1MixSvg(data, theme, options = {}) {
   const rank = calculateRank({
     totalCommits,
     totalStars: data?.totalStars ?? 0,
+    totalForks: data?.totalForks ?? 0,
     totalRepos: data?.totalRepos ?? 0,
     followers: data?.followers ?? 0,
     pullRequests,
+    reviews,
+    issues,
     totalContributions,
   });
 
@@ -369,12 +383,24 @@ export function renderV1CrestSvg(data, theme, options = {}) {
   const totalCommits = data?.totalCommits ?? 0;
   const pullRequests = data?.pullRequests ?? 0;
   const reviews = data?.reviews ?? 0;
+  const issues = data?.issues ?? 0;
   const totalStars = data?.totalStars ?? 0;
+  const totalForks = data?.totalForks ?? 0;
   const followers = data?.followers ?? 0;
   const totalRepos = data?.totalRepos ?? 0;
   const totalContributions = data?.totalContributions ?? totalCommits;
 
-  const rank = calculateRank({ totalCommits, totalStars, totalRepos, followers, pullRequests, totalContributions });
+  const rank = calculateRank({
+    totalCommits,
+    totalStars,
+    totalForks,
+    totalRepos,
+    followers,
+    pullRequests,
+    reviews,
+    issues,
+    totalContributions,
+  });
 
   const radarAxes = [
     { label: 'COMMITS', value: totalCommits, max: 1500 },
@@ -630,12 +656,25 @@ export function renderV1TickerSvg(data, theme, options = {}) {
 
   const totalCommits = data?.totalCommits ?? 0;
   const pullRequests = data?.pullRequests ?? 0;
+  const reviews = data?.reviews ?? 0;
+  const issues = data?.issues ?? 0;
   const totalStars = data?.totalStars ?? 0;
+  const totalForks = data?.totalForks ?? 0;
   const followers = data?.followers ?? 0;
   const totalRepos = data?.totalRepos ?? 0;
   const totalContributions = data?.totalContributions ?? totalCommits;
 
-  const rank = calculateRank({ totalCommits, totalStars, totalRepos, followers, pullRequests, totalContributions });
+  const rank = calculateRank({
+    totalCommits,
+    totalStars,
+    totalForks,
+    totalRepos,
+    followers,
+    pullRequests,
+    reviews,
+    issues,
+    totalContributions,
+  });
 
   const gradePillW = 68;
   const tilesStartX = gradePillW + 10;
@@ -836,6 +875,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
   const totalContributions = data?.totalContributions ?? totalCommits;
   const pullRequests = data?.pullRequests ?? 0;
   const reviews = data?.reviews ?? 0;
+  const issues = data?.issues ?? 0;
   const streak = data?.currentStreak ?? (data?.streak ?? 0);
   const maxStreak = data?.maxStreak ?? streak;
   const totalRepos = data?.totalRepos ?? 0;
@@ -850,6 +890,8 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
     totalRepos,
     followers,
     pullRequests,
+    reviews,
+    issues,
     totalContributions,
   });
 

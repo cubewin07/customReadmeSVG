@@ -278,10 +278,10 @@ export function renderV1ClassicSvg(data, theme, options = {}) {
 
   const topLang = p.topLanguages[0];
   const facts = [
-    { label: 'Top language', value: topLang?.name || '–', font: 'ui', swatch: topLang?.color, flex: 1.25 },
-    { label: 'Top repo', value: p.topRepo?.name || '–', font: 'ui', flex: 1.6 },
-    { label: 'Followers', value: formatCount(p.followers), flex: 0.8 },
-    { label: 'Stars', value: formatCount(p.stars), flex: 0.8 },
+    { label: 'Top language', value: topLang?.name || '–', font: 'ui', swatch: topLang?.color, flex: 1.15 },
+    { label: 'Top repo', value: p.topRepo?.name || '–', font: 'ui', flex: 1.8 },
+    { label: 'Followers', value: formatCount(p.followers), flex: 0.7 },
+    { label: 'Stars', value: formatCount(p.stars), flex: 0.7 },
   ];
   const height = ruleY + 58;
 
@@ -322,7 +322,7 @@ export function renderV1HeroSvg(data, theme, options = {}) {
   const faded = theme.bg !== 'transparent';
 
   const avatarR = 30;
-  const avatarCy = bannerH + 4;
+  const avatarCy = bannerH + 8;
   const textX = pad + avatarR * 2 + 16;
   const bioLines = p.bio ? wrapText(p.bio, 12.5, inner - 6, 2) : [];
   const bioY = avatarCy + avatarR + 20;
@@ -351,8 +351,8 @@ export function renderV1HeroSvg(data, theme, options = {}) {
         ${faded ? `<rect x="1" y="1" width="${width - 2}" height="${bannerH + 2}" fill="url(#hero-banner-grad)" />` : ''}
       </g>
       ${renderAvatar({ cx: pad + avatarR, cy: avatarCy, r: avatarR, clipId: 'prof-hero-av', uri: p.avatarDataUri, name: p.name, theme, ring: true })}
-      ${text(textX, avatarCy + 12, fitUi(p.name, 20, width - pad - textX, 600), 'ink', 'font-size="20" font-weight="600"')}
-      ${text(textX, avatarCy + 30, fitMono(p.handle, 12, width - pad - textX), 'mono mut', 'font-size="12"')}
+      ${text(textX, avatarCy + 20, fitUi(p.name, 20, width - pad - textX, 600), 'ink', 'font-size="20" font-weight="600"')}
+      ${text(textX, avatarCy + 37, fitMono(p.handle, 12, width - pad - textX), 'mono mut', 'font-size="12"')}
       ${renderBioLines({ x: pad, y: bioY, lines: bioLines, theme })}
       ${metaRow({ x: pad, y: metaY, maxWidth: inner, items: [
         { text: p.company },
@@ -381,7 +381,7 @@ export function renderV1CompactSvg(data, theme, options = {}) {
   const pad = padX(width) - 2;
   const height = 72;
 
-  const metricsW = width <= 440 ? 150 : 186;
+  const metricsW = width <= 440 ? 172 : 186;
   const metricsX = width - pad - metricsW;
   const textX = pad + 52;
   const room = metricsX - textX - 14;
@@ -396,9 +396,9 @@ export function renderV1CompactSvg(data, theme, options = {}) {
       ${text(textX, 33, fitUi(p.name, 15, room, 600), 'ink', 'font-size="15" font-weight="600"')}
       ${text(textX, 50, fitMono(p.handle, 11.5, room), 'mono mut', 'font-size="11.5"')}
       ${metricRow({ x: metricsX, y: 17, width: metricsW, gap: 8, size: 15, items: [
-        { label: 'Repos', value: formatCount(p.repos) },
-        { label: 'Followers', value: formatCount(p.followers) },
-        { label: 'Active', value: p.accountAgeYears ? `${p.accountAgeYears}y` : '–' },
+        { label: 'Repos', value: formatCount(p.repos), flex: 0.8 },
+        { label: 'Followers', value: formatCount(p.followers), flex: 1.2 },
+        { label: 'Active', value: p.accountAgeYears ? `${p.accountAgeYears}y` : '–', flex: 0.8 },
       ] })}
     `,
   });

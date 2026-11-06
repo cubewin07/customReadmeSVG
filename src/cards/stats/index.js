@@ -478,7 +478,7 @@ export function renderV1CyberTelemetrySvg(data, theme, options = {}) {
         const level = count ? Math.min(4, Math.ceil((count / weeklyMax) * 4)) : 0;
         return `<rect x="${(pad + i * pitch).toFixed(2)}" y="202" width="${(pitch - 2).toFixed(2)}" height="8" rx="2" fill="${level ? levels[level] : theme.barBg}" />`;
       }).join('')}</g>
-      ${text(pad, 224, `${stripWeeks.length} WEEKS`, 'mono mut', 'font-size="9.5" letter-spacing="0.5"')}`
+      ${text(24, 224, `${stripWeeks.length} WEEKS`, 'mono mut', 'font-size="9.5" letter-spacing="0.5"')}`
     : '';
 
   const corner = 10;

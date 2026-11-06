@@ -246,12 +246,19 @@ export function metric({ x = 0, y = 0, label, value, size = 18, maxWidth = 120, 
   </g>`;
 }
 
-/** Equal-width row of metrics separated by whitespace. */
+/** Row of metrics separated by whitespace. Columns share the width by each item's `flex`. */
 export function metricRow({ x = 0, y = 0, width, items = [], size = 18, gap = 14 }) {
   if (!items.length) return '';
-  const colW = (width - gap * (items.length - 1)) / items.length;
+  const room = width - gap * (items.length - 1);
+  const flexTotal = items.reduce((acc, item) => acc + (item.flex || 1), 0);
+  let left = x;
   return items
-    .map((item, i) => metric({ size, ...item, x: Math.round(x + i * (colW + gap)), y, maxWidth: Math.floor(colW) }))
+    .map((item) => {
+      const colW = (room * (item.flex || 1)) / flexTotal;
+      const out = metric({ size, ...item, x: Math.round(left), y, maxWidth: Math.floor(colW) });
+      left += colW + gap;
+      return out;
+    })
     .join('');
 }
 

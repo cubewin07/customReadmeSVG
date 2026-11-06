@@ -77,7 +77,7 @@ test('Profile classic variant renders identity, bio, metadata links, isHireable 
   assert.ok(svg.includes('Available for hire') || svg.includes('Open to Work') || svg.includes('Hireable'), 'Must render hireable badge');
   assert.ok(svg.includes('customReadmeSVG'), 'Must render top repo in footer summary');
   assert.ok(svg.includes('JavaScript'), 'Must render top language');
-  assert.ok(svg.includes('JOINED') || svg.includes('ACCOUNT AGE') || svg.includes('Joined 2020'), 'Must render tenure');
+  assert.ok(svg.includes('Joined 2020'), 'Must render tenure');
 });
 
 test('Profile hero variant renders dual-language gradient banner, large avatar, and organization badges', () => {
@@ -102,7 +102,7 @@ test('Profile split variant renders 2-column résumé with wrapped bio tspans, s
   assert.ok(svg.includes('class="bio-text"'), 'Must have bio-text class for test backwards-compatibility');
   assert.ok(svg.includes('<tspan'), 'Must wrap bio into tspans');
   assert.ok(svg.includes('Full-Stack Developer &amp; Creative'), 'Must cleanly escape & without double-escaping');
-  assert.ok(svg.includes('Shipping SVG engines') || svg.includes('ABOUT'), 'Must render current focus or about section');
+  assert.ok(svg.includes('Shipping SVG engines') && svg.includes('About'), 'Must render current focus and about section');
   assert.ok(svg.includes('polyline') || svg.includes('sparkline') || svg.includes('12-Month') || svg.includes('Activity'), 'Must render 12m activity sparkline');
 });
 
@@ -143,6 +143,6 @@ test('Profile redesign audit assertions: split legend, activity scale, classic h
   // 3. classic layout header does not duplicate name directly above name text and renders cleanly at 405px
   const classicHalfSvg = profileCard.renderSvg(mockProfileData, themes.dark, { layout: 'classic', width: 'half' });
   assertValidXml(classicHalfSvg);
-  assert.ok(classicHalfSvg.includes('// Overview') || classicHalfSvg.includes('// IDENTITY') || classicHalfSvg.includes('PROFILE'), 'Classic header should have standardized category title');
+  assert.ok(classicHalfSvg.includes('GitHub profile'), 'Classic must describe itself for assistive tech');
   assert.ok(!classicHalfSvg.includes(`${mockProfileData.name} // Identity`), 'Classic header should not repeat name directly above name element');
 });

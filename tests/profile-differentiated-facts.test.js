@@ -14,6 +14,5 @@ test('profileCard highlights account tenure and distinct facts', () => {
   }, themes.dark, { layout: 'classic' });
 
   // Should display account age or tenure
-  assert.ok(svg.includes('JOINED') || svg.includes('ACCOUNT AGE') || svg.includes('TENURE'));
-  assert.ok(svg.includes('2021'));
+  assert.ok(svg.includes('Joined 2021'));
 });

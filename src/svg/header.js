@@ -1,33 +1,42 @@
 import { escapeXml } from './escape.js';
 import { fitText, measureText } from './text.js';
 
+const UI = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
+const MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+
 /**
- * Standardized SVG header component for cards.
+ * Standardized SVG header component for cards, written as a GitHub path: `owner / title`.
  * @param {object} params
  * @param {string} params.title - Card title text
- * @param {string} [params.badgeText] - Optional badge / pill text on the right
+ * @param {string} [params.owner] - Optional account name shown before the title
+ * @param {string} [params.badgeText] - Optional short fact aligned to the right
  * @param {number} [params.width=495] - Total width of the card
  * @param {object} params.theme - Card theme palette
- * @returns {string} SVG <g> element containing header title and optional pill badge
+ * @returns {string} SVG <g> element containing the header
  */
-export function renderCardHeader({ title, badgeText, width = 495, theme = {} }) {
+export function renderCardHeader({ title, owner, badgeText, width = 495, theme = {} }) {
+  const pad = width <= 440 ? 16 : 24;
+  const innerWidth = width - pad * 2;
   const rawBadge = badgeText ? String(badgeText) : null;
-  const badge = !rawBadge ? null : escapeXml(rawBadge);
-  const badgeW = rawBadge ? Math.max(88, Math.ceil(measureText(rawBadge, 11) + 26)) : 0;
-  const innerWidth = width - 48;
-  const badgeX = innerWidth - badgeW;
-  const maxTitleWidth = rawBadge ? Math.max(120, badgeX - 24) : innerWidth - 14;
-  const titleText = escapeXml(fitText(String(title || ''), 18, maxTitleWidth));
-  const accent = theme.accent || theme.title || '#58a6ff';
-  const pillBg = (theme.badgeBg && !String(theme.badgeBg).startsWith('rgba')) ? theme.badgeBg : (theme.cardBg || '#161b22');
+  const badgeW = rawBadge ? Math.ceil(rawBadge.length * 11 * 0.61) : 0;
+  const accent = theme.accent || theme.title || '#3fb950';
+
+  const available = innerWidth - 16 - (rawBadge ? badgeW + 16 : 0);
+  const rawTitle = String(title || '');
+  const titleW = Math.ceil(measureText(rawTitle, 13.5) * 1.08);
+  const ownerRoom = Math.max(0, available - titleW - 18);
+  const fittedOwner = owner ? fitText(String(owner), 13.5, ownerRoom) : '';
+  const showOwner = fittedOwner && ownerRoom >= 48;
+  const fittedTitle = fitText(rawTitle, 13.5, showOwner ? titleW : available / 1.08);
+
+  const ownerSpan = showOwner
+    ? `<tspan fill="${theme.secondaryText}" font-weight="400">${escapeXml(fittedOwner)} / </tspan>`
+    : '';
 
   return `
-    <g transform="translate(24, 24)">
-      <line x1="1.5" y1="-12" x2="1.5" y2="3" stroke="${accent}" stroke-width="3" stroke-linecap="round" />
-      <text x="10" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.02em" fill="${theme.title}">${titleText}</text>
-      ${badge ? `
-        <rect x="${badgeX}" y="-14" width="${badgeW}" height="20" rx="10" fill="${pillBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-        <text x="${badgeX + badgeW / 2}" y="-0.5" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" font-weight="700" font-size="9.5" fill="${theme.title}">${badge}</text>
-      ` : ''}
+    <g transform="translate(${pad}, 28)">
+      <rect x="0" y="-9" width="9" height="9" rx="2" fill="${accent}" />
+      <text x="16" y="0" class="card-header-title" font-family="${UI}" font-weight="600" font-size="13.5" fill="${theme.text}">${ownerSpan}${escapeXml(fittedTitle)}</text>
+      ${rawBadge ? `<text x="${innerWidth}" y="0" text-anchor="end" font-family="${MONO}" font-size="11" fill="${theme.secondaryText}">${escapeXml(rawBadge)}</text>` : ''}
     </g>`;
 }

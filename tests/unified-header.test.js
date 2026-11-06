@@ -25,6 +25,6 @@ test('renderCardHeader renders without badge when badgeText is omitted', () => {
 
   assert.ok(headerSvg.includes('class="card-header-title"'));
   assert.ok(headerSvg.includes('Only Title'));
-  assert.ok(!headerSvg.includes('<rect'), 'Should not render badge rect');
+  assert.ok(!headerSvg.includes('text-anchor="end"'), 'Should not render a badge');
 });
 

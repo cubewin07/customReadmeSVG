@@ -295,7 +295,7 @@ export function metaRow({ x = 0, y = 0, items = [], maxWidth = 300, gap = 12, en
       : item.icon
         ? `<g transform="translate(${left.toFixed(1)}, ${y - 10}) scale(0.82)">${item.icon}</g>`
         : '';
-    return `${lead}${text((left + item.lead).toFixed(1), y, item.value, `${item.mono ? 'mono ' : ''}${item.cls || 'mut'}`, `font-size="${px}"`)}`;
+    return `${lead}${text(Math.round(left + item.lead), y, item.value, `${item.mono ? 'mono ' : ''}${item.cls || 'mut'}`, `font-size="${px}"`)}`;
   }).join('');
 }
 

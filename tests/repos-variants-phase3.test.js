@@ -239,7 +239,7 @@ test('Repos redesign audit assertions: responsive geometry across all 5 layouts'
   // Timeline at 830px: metadata should scale past x=500
   const timeline830 = reposCard.renderSvg(mockRepoData, themes.dark, { layout: 'timeline', width: 830 });
   assert.ok(timeline830.includes('width="830"'));
-  assert.ok(/transform="translate\([5-7][0-9]{2}/.test(timeline830) || /x="[5-7][0-9]{2}"/.test(timeline830), 'Timeline metadata must right-align past x=500 on 830px width');
+  assert.ok(/transform="translate\([5-7][0-9]{2}/.test(timeline830) || /x="[5-8][0-9]{2}"/.test(timeline830), 'Timeline metadata must right-align past x=500 on 830px width');
 
   // Spotlight at 405px: right column should be >= 140px width
   const spotlight405 = reposCard.renderSvg(mockRepoData, themes.dark, { layout: 'spotlight', width: 405 });

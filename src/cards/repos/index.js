@@ -4,20 +4,22 @@ import { normalizeRepos } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { icons } from '../../svg/icons.js';
 import { renderCardHeader } from '../../svg/header.js';
-import { fitText, wrapText, measureText } from '../../svg/text.js';
+import { wrapText } from '../../svg/text.js';
 import { resolveTheme } from '../../svg/theme.js';
 import { resolveCardWidth } from '../../svg/layout.js';
 import {
-  renderCardDefs,
-  renderCardStyles,
-  renderCardFrame,
-  renderBentoTile,
-  renderRankBadge,
-  renderTopicChips,
-  renderLanguageBar,
-  renderCommitSparkline,
-  renderReleaseTag,
-} from '../../svg/primitives.js';
+  card,
+  cellMeter,
+  cellsThatFit,
+  fitUi,
+  hairline,
+  metaRow,
+  monoWidth,
+  padX,
+  shareStrip,
+  text,
+  uiWidth,
+} from '../../svg/kit.js';
 
 export const reposCard = {
   id: 'repos',
@@ -73,6 +75,60 @@ function formatCount(num) {
   return num.toString();
 }
 
+function repoFacts(repo, theme, { language = true, watchers = false, time = true } = {}) {
+  const lang = repo.primaryLanguage;
+  const watching = repo.watchers ?? repo.watchersCount;
+  return [
+    language && lang ? { text: fitUi(lang.name, 11, 88), swatch: lang.color || theme.secondaryText } : null,
+    { text: formatCount(repo.stargazerCount), icon: icons.star(theme.secondaryText), mono: true },
+    { text: formatCount(repo.forkCount), icon: icons.fork(theme.secondaryText), mono: true },
+    watchers && watching ? { text: formatCount(watching), icon: icons.eye(theme.secondaryText), mono: true } : null,
+    time && (repo.pushedAt || repo.updatedAt) ? { text: formatRelativeTime(repo.pushedAt || repo.updatedAt) } : null,
+  ].filter(Boolean);
+}
+
+function repoName(x, y, name, maxWidth, size = 13) {
+  return text(x, y, fitUi(name, size, maxWidth, 600), 'lnk', `font-size="${size}" font-weight="600"`);
+}
+
+function descriptionLines(x, y, description, maxWidth, maxLines, size = 11.5, lineHeight = 15.5) {
+  if (!description) return '';
+  return wrapText(description, size, maxWidth - 6, maxLines)
+    .map((line, i) => text(x, y + i * lineHeight, line, 'mut', `font-size="${size}"`))
+    .join('');
+}
+
+/** Eight weeks of commits as thin bars, so the shape reads without a chart frame. */
+function weeklyBars({ x, y, width, height, bins = [], theme }) {
+  const values = bins.length ? bins.slice(-8) : new Array(8).fill(0);
+  const max = Math.max(1, ...values);
+  const gap = 2;
+  const barW = (width - gap * (values.length - 1)) / values.length;
+  const bars = values.map((v, i) => {
+    const h = v > 0 ? Math.max(2, (v / max) * height) : 1.5;
+    return `<rect x="${(x + i * (barW + gap)).toFixed(1)}" y="${(y + height - h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="1" fill="${v > 0 ? theme.accent : theme.barBg}" fill-opacity="${i === values.length - 1 && v > 0 ? 1 : v > 0 ? 0.55 : 1}" />`;
+  }).join('');
+  return `<g class="sparkline">${bars}</g>`;
+}
+
+function repoLanguageShares(repo) {
+  if (Array.isArray(repo.languages) && repo.languages.length) return repo.languages;
+  return repo.primaryLanguage ? [{ ...repo.primaryLanguage, percentage: 100 }] : [];
+}
+
+function reposCardShell({ width, height, options, theme, title, badgeText, body }) {
+  const owner = options.username || '';
+  return card({
+    width,
+    height,
+    title: `Repositories${owner ? ` by ${owner}` : ''}`,
+    theme,
+    body: `${renderCardHeader({ title, owner, badgeText, width, theme })}${body}`,
+  });
+}
+
+const NO_REPOS = 'No public repositories to show yet.';
+
 function renderV1Svg(data, rawTheme, options = {}) {
   const theme = resolveTheme(rawTheme, options);
   const layout = (options.layout || 'grid').toLowerCase();
@@ -93,789 +149,247 @@ function renderV1Svg(data, rawTheme, options = {}) {
 }
 
 /**
- * 1. GRID VARIANT (Glassmorphic Bento Grid with Collision-Free Footer)
+ * 1. GRID: an unboxed table of repositories, ruled between rows and columns.
  */
 function renderV1GridSvg(data, theme, options = {}) {
-  const username = escapeXml(options.username || 'User');
   const width = resolveCardWidth(options.width);
-  const idPrefix = 'repos-grid';
-  const reposList = (data.repos || []).slice(0, 6);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const repos = (data.repos || []).slice(0, 6);
+  const cols = width < 450 ? 1 : width >= 800 ? 3 : 2;
+  const gutter = 28;
+  const colW = (inner - gutter * (cols - 1)) / cols;
+  const rowH = 88;
+  const rows = Math.max(1, Math.ceil(repos.length / cols));
+  const startY = 44;
+  const height = repos.length ? startY + rows * rowH + 4 : 96;
 
-  const isSingleCol = width < 450;
-  const cols = isSingleCol ? 1 : width >= 800 ? 3 : 2;
-  const rowsCount = Math.ceil(reposList.length / cols) || 1;
-  const colGap = 12;
-  const colWidth = Math.floor((width - 48 - (cols - 1) * colGap) / cols);
-  const itemHeight = 86;
-  const rowGap = itemHeight + 10;
-  const cardHeight = Math.max(160, 65 + rowsCount * rowGap);
+  const items = repos.map((repo, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = Math.round(pad + col * (colW + gutter));
+    const y = startY + row * rowH;
+    const divider = col > 0
+      ? hairline(x - gutter / 2, y + 8, x - gutter / 2, y + rowH - 8, theme)
+      : '';
+    return `
+      ${row > 0 && col === 0 ? hairline(pad, y, width - pad, y, theme) : ''}
+      ${divider}
+      ${repoName(x, y + 22, repo.name, colW)}
+      ${descriptionLines(x, y + 40, repo.description, colW, 2)}
+      ${metaRow({ x, y: y + 76, maxWidth: colW, gap: 10, items: repoFacts(repo, theme) })}`;
+  }).join('');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
-  <defs>
-    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
-  </defs>
-  <style>
-    ${renderCardStyles(theme)}
-    .repo-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 13px; fill: ${theme.title}; }
-    .repo-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: ${theme.secondaryText}; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.text}; font-variant-numeric: tabular-nums; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-  </style>
-
-  ${renderCardFrame(width, cardHeight, idPrefix, theme, 14)}
-  
-  ${renderCardHeader({
-    title: `Top Repositories (${username})`,
-    badgeText: `📦 ${reposList.length} Repositories`,
+  return reposCardShell({
     width,
+    height,
+    options,
     theme,
-  })}
-  
-  <!-- Repos Grid -->
-  <g transform="translate(24, 46)">
-    ${
-      reposList.length === 0
-        ? `
-      <text x="0" y="20" class="empty-msg">No repositories found.</text>
-    `
-        : reposList
-            .map((repo, idx) => {
-              const col = idx % cols;
-              const row = Math.floor(idx / cols);
-              const x = col * (colWidth + colGap);
-              const y = row * rowGap;
-              const langColor = repo.primaryLanguage?.color || '#858585';
-              const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-              const rawName = repo.name || 'Unnamed';
-              const name = escapeXml(fitText(rawName, 13.5, colWidth - 44));
-              const rawDesc = repo.description || 'No description provided';
-              const rawPushedTime = formatRelativeTime(repo.pushedAt || repo.updatedAt);
-              const pushedTime = colWidth >= 260 ? `pushed ${rawPushedTime}` : rawPushedTime;
-              const formattedStars = formatCount(repo.stargazerCount);
-              const formattedForks = formatCount(repo.forkCount);
-
-              let currentX = 0;
-              let langSvg = '';
-              if (langName) {
-                const maxLangPx = colWidth < 210 ? 48 : 62;
-                const fittedLang = fitText(langName, 10, maxLangPx);
-                langSvg = `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0">${escapeXml(fittedLang)}</text>`;
-                currentX = 11 + Math.ceil(measureText(fittedLang, 10.5)) + 10;
-              }
-
-              const starX = currentX;
-              const starTextX = starX + 15;
-              const starWidth = 15 + Math.ceil(formattedStars.length * 6.4);
-
-              const forkX = starX + starWidth + 8;
-              const forkTextX = forkX + 15;
-              const forkEnd = forkTextX + Math.ceil(formattedForks.length * 6.4);
-              const pushedW = pushedTime ? Math.ceil(pushedTime.length * 6.2) : 0;
-              const showPushed = Boolean(pushedTime && forkEnd + pushedW + 8 <= colWidth - 20);
-
-              const hasTopics = Boolean(repo.topics && repo.topics.length);
-              const hasLangBar = Boolean(repo.languages && repo.languages.length);
-              const descLines = (!hasTopics && !hasLangBar)
-                ? wrapText(rawDesc, 10.5, colWidth - 26, 2)
-                : [fitText(rawDesc, 10.5, colWidth - 26)];
-
-              const topicSvg = hasTopics
-                ? `<g transform="translate(0, 32)">${renderTopicChips(repo.topics, 3, colWidth - 24, theme)}</g>`
-                : hasLangBar
-                ? `<g transform="translate(0, 35)">${renderLanguageBar(repo.languages, colWidth - 28, 4.5, theme)}</g>`
-                : `<g transform="translate(0, 44)">${renderLanguageBar([{ name: langName || 'Code', color: langColor, percentage: 100 }], colWidth - 28, 3.5, theme)}</g>`;
-
-              return renderBentoTile({
-                x,
-                y,
-                width: colWidth,
-                height: itemHeight,
-                theme,
-                idPrefix,
-                rx: 7,
-                accentColor: langColor,
-                accentPosition: 'left',
-                children: `
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      ${icons.repo(theme.title)}
-                      <text x="18" y="11" class="repo-name">${name}</text>
-                    </g>
-
-                    <!-- Description -->
-                    ${descLines.map((dLine, dIdx) => `<text x="0" y="${25 + dIdx * 12.5}" class="repo-desc"><tspan>${escapeXml(dLine)}</tspan></text>`).join('')}
-
-                    <!-- Topics / Proportions -->
-                    ${topicSvg}
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      ${langSvg}
-                      <g transform="translate(${starX}, -10)">${icons.star(theme.iconColor)}</g>
-                      <text x="${starTextX}" y="0">${formattedStars}</text>
-                      <g transform="translate(${forkX}, -10)">${icons.fork(theme.secondaryText)}</g>
-                      <text x="${forkTextX}" y="0">${formattedForks}</text>
-                      ${showPushed ? `<text x="${colWidth - 24}" y="0" text-anchor="end" fill="${theme.secondaryText}">${pushedTime}</text>` : ''}
-                    </g>
-                  </g>
-                `,
-              });
-            })
-            .join('')
-    }
-  </g>
-</svg>`;
+    title: 'repositories',
+    badgeText: repos.length ? `${repos.length} shown` : null,
+    body: repos.length ? items : text(pad, 70, NO_REPOS, 'mut', 'font-size="12"'),
+  });
 }
 
 /**
- * 2. FEATURED VARIANT (Headline Hero & Secondary Bento Tiles)
+ * 2. FEATURED: the headline project at full width, runners-up beneath it.
  */
 function renderV1FeaturedSvg(data, theme, options = {}) {
-  const username = escapeXml(options.username || 'User');
   const width = resolveCardWidth(options.width);
-  const idPrefix = 'repos-feat';
-  const reposList = (data.repos || []).slice(0, 3);
-  const heroRepo = reposList[0];
-  const subRepos = reposList.slice(1, 3);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const repos = (data.repos || []).slice(0, 3);
+  const lead = repos[0];
+  const others = repos.slice(1);
 
-  const heroHeight = 110;
-  const subTileHeight = 68;
-  const cardHeight = subRepos.length > 0 ? Math.max(220, 65 + heroHeight + 14 + subTileHeight) : 182;
-  const contentWidth = width - 48;
+  if (!lead) {
+    return reposCardShell({ width, height: 96, options, theme, title: 'repositories', body: text(pad, 70, NO_REPOS, 'mut', 'font-size="12"') });
+  }
 
-  const heroLangColor = heroRepo?.primaryLanguage?.color || '#858585';
-  const heroLangName = heroRepo?.primaryLanguage?.name || 'Code';
-  const heroRawName = heroRepo ? heroRepo.name : 'No Repo';
-  const heroNameFit = fitText(heroRawName, 15.5, contentWidth - 115);
-  const heroName = escapeXml(heroNameFit);
-  const heroNameW = Math.round(measureText(heroNameFit, 15.5));
-  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 11, contentWidth - 32, 2) : [];
-  const heroRelease = heroRepo?.latestRelease || null;
-  const heroStars = heroRepo ? formatCount(heroRepo.stargazerCount) : '0';
-  const heroForks = heroRepo ? formatCount(heroRepo.forkCount) : '0';
-  const heroSparkline = heroRepo?.sparkline || [0, 0, 0, 0, 0, 0, 0, 0];
-  const heroLanguages = (heroRepo?.languages && heroRepo.languages.length > 0)
-    ? heroRepo.languages
-    : [{ name: heroLangName, color: heroLangColor, percentage: 100 }];
-  const heroTopics = (heroRepo?.topics && heroRepo.topics.length > 0)
-    ? heroRepo.topics
-    : [heroLangName.toLowerCase(), `updated ${formatRelativeTime(heroRepo?.pushedAt || heroRepo?.updatedAt) || 'recently'}`];
+  const tag = lead.latestRelease ? String(lead.latestRelease) : '';
+  const tagW = tag ? monoWidth(tag, 11) + 10 : 0;
+  const barsW = 60;
+  const leadH = 122;
+  const topicsY = 118;
+  const shares = repoLanguageShares(lead);
+  const secondaryY = 44 + leadH;
+  const colW = others.length > 1 ? (inner - 28) / 2 : inner;
+  const height = others.length ? secondaryY + 74 : secondaryY + 2;
 
-  const subColWidth = subRepos.length === 1 ? contentWidth : Math.floor((contentWidth - 12) / 2);
+  const secondary = others.map((repo, i) => {
+    const x = Math.round(pad + i * (colW + 28));
+    return `
+      ${i > 0 ? hairline(x - 14, secondaryY + 10, x - 14, secondaryY + 64, theme) : ''}
+      ${repoName(x, secondaryY + 22, repo.name, colW, 12.5)}
+      ${text(x, secondaryY + 39, fitUi(repo.description || '', 11, colW - 4), 'mut', 'font-size="11"')}
+      ${metaRow({ x, y: secondaryY + 58, maxWidth: colW, gap: 10, items: repoFacts(repo, theme) })}`;
+  }).join('');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
-  <defs>
-    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
-  </defs>
-  <style>
-    ${renderCardStyles(theme)}
-    .hero-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 15px; fill: ${theme.title}; }
-    .hero-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-    .repo-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 12.5px; fill: ${theme.title}; }
-    .repo-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: ${theme.secondaryText}; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.text}; font-variant-numeric: tabular-nums; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-  </style>
-
-  ${renderCardFrame(width, cardHeight, idPrefix, theme, 14)}
-  
-  ${renderCardHeader({
-    title: `Top Repositories (${username})`,
-    badgeText: '🌟 Headline Project',
+  return reposCardShell({
     width,
+    height,
+    options,
     theme,
-  })}
-
-  <g transform="translate(24, 46)">
-    ${
-      !heroRepo
-        ? `<text x="0" y="40" class="empty-msg">No repositories found.</text>`
-        : `
-      <!-- Featured Hero Bento Card -->
-      ${renderBentoTile({
-        x: 0,
-        y: 0,
-        width: contentWidth,
-        height: heroHeight,
-        theme,
-        idPrefix,
-        rx: 9,
-        accentColor: heroLangColor,
-        accentPosition: 'left',
-        children: `
-          <g transform="translate(14, 10)">
-            <!-- Line 1: Title & Release Tag -->
-            <g transform="translate(0, 0)">
-              ${icons.repo(theme.title)}
-              <text x="20" y="12" class="hero-name">${heroName}</text>
-              ${heroRelease ? `<g transform="translate(${Math.min(contentWidth - 90, 20 + heroNameW + 8)}, -1)">${renderReleaseTag(heroRelease, theme)}</g>` : ''}
-            </g>
-
-            <!-- Line 2: 2-line wrapped description -->
-            ${heroDescLines.map((line, lIdx) => `<text x="0" y="${29 + lIdx * 13.5}" class="hero-desc"><tspan>${escapeXml(line)}</tspan></text>`).join('')}
-
-            <!-- Line 3: Topics -->
-            <g transform="translate(0, 56)">
-              ${renderTopicChips(heroTopics, 3, contentWidth - 110, theme)}
-            </g>
-
-            <!-- Line 4: Languages bar + Stats + Sparkline -->
-            <g transform="translate(0, 88)" class="repo-meta">
-              <g transform="translate(0, -6)">${renderLanguageBar(heroLanguages, 100, 5, theme)}</g>
-              <g transform="translate(112, -10)">${icons.star(theme.iconColor)}</g>
-              <text x="128" y="0">${heroStars}</text>
-              <g transform="translate(${128 + Math.ceil(heroStars.length * 6) + 12}, -10)">${icons.fork(theme.secondaryText)}</g>
-              <text x="${128 + Math.ceil(heroStars.length * 6) + 28}" y="0">${heroForks}</text>
-
-              <!-- 8-week Commit Sparkline -->
-              <g transform="translate(${contentWidth - 96}, -12)">
-                ${renderCommitSparkline(heroSparkline, 68, 16, theme.iconColor || '#58a6ff')}
-              </g>
-            </g>
-          </g>
-        `,
-      })}
-
-      <!-- Secondary Repos Grid (2 Bento tiles side by side) -->
-      ${
-        subRepos.length > 0
-          ? `
-        <g transform="translate(0, ${heroHeight + 12})">
-          ${subRepos
-            .map((repo, idx) => {
-              const x = idx * (subColWidth + 12);
-              const langColor = repo.primaryLanguage?.color || '#858585';
-              const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-              const name = escapeXml(fitText(repo.name || '', 12.5, subColWidth - 44));
-              const desc = escapeXml(fitText(repo.description || 'No description', 10.5, subColWidth - 24));
-              const updatedTime = formatRelativeTime(repo.pushedAt || repo.updatedAt);
-              const formattedStars = formatCount(repo.stargazerCount);
-              const formattedForks = formatCount(repo.forkCount);
-
-              let currentX = 0;
-              let langSvg = '';
-              if (langName) {
-                const fittedLang = escapeXml(fitText(langName, 9.5, 48));
-                langSvg = `<circle cx="4" cy="-3.5" r="3" fill="${langColor}" /><text x="10" y="0">${fittedLang}</text>`;
-                currentX = 10 + Math.ceil(measureText(fittedLang, 9.5)) + 8;
-              }
-
-              const starX = currentX;
-              const starTextX = starX + 14;
-              const starW = 14 + Math.ceil(formattedStars.length * 6);
-              const forkX = starX + starW + 8;
-              const forkTextX = forkX + 14;
-              const forkEnd = forkTextX + Math.ceil(formattedForks.length * 6);
-              const showUpdated = Boolean(updatedTime && forkEnd + Math.ceil(updatedTime.length * 6) + 8 <= subColWidth - 20);
-
-              return renderBentoTile({
-                x,
-                y: 0,
-                width: subColWidth,
-                height: subTileHeight,
-                theme,
-                idPrefix,
-                rx: 7,
-                accentColor: langColor,
-                accentPosition: 'left',
-                children: `
-                  <g transform="translate(10, 8)">
-                    <g transform="translate(0, 0)">
-                      ${icons.repo(theme.title)}
-                      <text x="16" y="11" class="repo-name">${name}</text>
-                    </g>
-
-                    <text x="0" y="27" class="repo-desc">${desc}</text>
-
-                    <g transform="translate(0, 46)" class="repo-meta">
-                      ${langSvg}
-                      <g transform="translate(${starX}, -10)">${icons.star(theme.iconColor)}</g>
-                      <text x="${starTextX}" y="0">${formattedStars}</text>
-                      <g transform="translate(${forkX}, -10)">${icons.fork(theme.secondaryText)}</g>
-                      <text x="${forkTextX}" y="0">${formattedForks}</text>
-                      ${showUpdated ? `<text x="${subColWidth - 20}" y="0" text-anchor="end" fill="${theme.secondaryText}">${updatedTime}</text>` : ''}
-                    </g>
-                  </g>
-                `,
-              });
-            })
-            .join('')}
-        </g>
-      `
-          : ''
-      }
-    `
-    }
-  </g>
-</svg>`;
+    title: 'repositories',
+    badgeText: 'Featured',
+    body: `
+      ${repoName(pad, 70, lead.name, inner - barsW - tagW - 16, 16)}
+      ${tag ? text(pad + Math.min(uiWidth(lead.name, 16, 600), inner - barsW - tagW - 16) + 8, 70, tag, 'mono mut', 'font-size="11"') : ''}
+      ${weeklyBars({ x: width - pad - barsW, y: 54, width: barsW, height: 18, bins: lead.sparkline, theme })}
+      ${descriptionLines(pad, 90, lead.description, inner, 1, 12)}
+      ${metaRow({ x: pad, y: 108, maxWidth: inner, gap: 12, items: (lead.topics || []).slice(0, 5).map((t) => ({ text: `#${t}`, mono: true })) })}
+      ${shares.length ? shareStrip({ x: pad, y: topicsY, width: inner, items: shares, size: 6, height: 6, theme, className: 'language-bar' }) : ''}
+      ${metaRow({ x: pad, y: 150, maxWidth: inner, items: repoFacts(lead, theme, { watchers: true }) })}
+      ${others.length ? hairline(pad, secondaryY, width - pad, secondaryY, theme) : ''}
+      ${secondary}
+    `,
+  });
 }
 
 /**
- * 3. SPOTLIGHT VARIANT (Case Study & Balanced Responsive Columns)
+ * 3. SPOTLIGHT: a case study of one repo, with its latest commit, beside a short list.
  */
 function renderV1SpotlightSvg(data, theme, options = {}) {
-  const username = escapeXml(options.username || 'User');
   const width = resolveCardWidth(options.width);
-  const idPrefix = 'repos-spot';
-  const reposList = (data.repos || []).slice(0, 4);
-  const heroRepo = reposList[0];
-  const sideRepos = reposList.slice(1, 4);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const repos = (data.repos || []).slice(0, 4);
+  const lead = repos[0];
+  const others = repos.slice(1);
 
-  const cardHeight = 280;
-  const contentWidth = width - 48;
-  const leftColWidth = width >= 600 ? Math.floor(contentWidth * 0.58) : Math.floor(contentWidth * 0.55);
-  const rightColWidth = contentWidth - leftColWidth - 12;
-
-  const heroLangColor = heroRepo?.primaryLanguage?.color || '#858585';
-  const heroLangName = heroRepo?.primaryLanguage?.name ? heroRepo.primaryLanguage.name : null;
-  const heroRawName = heroRepo ? heroRepo.name : 'No Repo';
-  const heroName = escapeXml(fitText(heroRawName, 15.5, leftColWidth - 38));
-  const heroDescLines = heroRepo ? wrapText(heroRepo.description || 'No description provided', 11, leftColWidth - 30, 3) : [];
-  const heroUpdated = heroRepo ? formatRelativeTime(heroRepo.pushedAt || heroRepo.updatedAt) : '';
-  const heroStars = heroRepo ? formatCount(heroRepo.stargazerCount) : '0';
-  const heroForks = heroRepo ? formatCount(heroRepo.forkCount) : '0';
-  const heroWatchers = heroRepo ? formatCount(heroRepo.watchers ?? heroRepo.watchersCount ?? 0) : '0';
-  const heroSparkline = heroRepo?.sparkline || [0, 0, 0, 0, 0, 0, 0, 0];
-  const heroLastCommit = heroRepo?.lastCommit || {
-    sha: 'latest',
-    message: `Active development · updated ${heroUpdated || 'recently'}`,
-  };
-
-  let heroFooterX = 0;
-  let heroLangSvg = '';
-  if (heroLangName) {
-    const fittedHeroLang = fitText(heroLangName, 10, leftColWidth < 215 ? 46 : 64);
-    heroLangSvg = `<circle cx="4" cy="-3.5" r="3.5" fill="${heroLangColor}" /><text x="11" y="0">${escapeXml(fittedHeroLang)}</text>`;
-    heroFooterX = 11 + Math.ceil(measureText(fittedHeroLang, 10.5)) + 10;
+  if (!lead) {
+    return reposCardShell({ width, height: 96, options, theme, title: 'spotlight', body: text(pad, 70, NO_REPOS, 'mut', 'font-size="12"') });
   }
-  const hStarX = heroFooterX;
-  const hStarTextX = hStarX + 14;
-  const hForkX = hStarTextX + Math.ceil(heroStars.length * 6.4) + 8;
-  const hForkTextX = hForkX + 14;
-  const hEyeX = hForkTextX + Math.ceil(heroForks.length * 6.4) + 8;
-  const hEyeTextX = hEyeX + 15;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
-  <defs>
-    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
-  </defs>
-  <style>
-    ${renderCardStyles(theme)}
-    .hero-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 15px; fill: ${theme.title}; }
-    .hero-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: ${theme.secondaryText}; }
-    .commit-text { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; fill: ${theme.secondaryText}; }
-    .side-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 12px; fill: ${theme.title}; }
-    .side-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10px; fill: ${theme.secondaryText}; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.text}; font-variant-numeric: tabular-nums; }
-    .badge-text { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 9px; fill: ${theme.title}; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-  </style>
+  const hasSide = others.length > 0;
+  const leftW = hasSide ? Math.round(inner * (width <= 440 ? 0.54 : 0.58)) : inner;
+  const ruleX = pad + leftW + 14;
+  const sideX = ruleX + 14;
+  const sideW = width - pad - sideX;
+  const height = 218;
 
-  ${renderCardFrame(width, cardHeight, idPrefix, theme, 14)}
-  
-  ${renderCardHeader({
-    title: `Top Repositories (${username})`,
-    badgeText: '✨ Spotlight Case Study',
+  const commit = lead.lastCommit;
+  const factsY = 128;
+  const commitBlock = commit?.sha
+    ? `${text(pad, 150, commit.sha, 'mono ink', 'font-size="11"')}
+       ${text(pad + monoWidth(commit.sha, 11) + 8, 150, fitUi(commit.message || '', 11, leftW - monoWidth(commit.sha, 11) - 12), 'mut', 'font-size="11"')}`
+    : '';
+  const barsLabelY = commit?.sha ? 170 : 148;
+  const barsY = barsLabelY + 6;
+  const barsH = height - 16 - barsY;
+
+  const sideItems = others.map((repo, i) => {
+    const y = 44 + i * 58;
+    return `
+      ${i > 0 ? hairline(sideX, y, width - pad, y, theme) : ''}
+      ${repoName(sideX, y + 20, repo.name, sideW, 12)}
+      ${metaRow({ x: sideX, y: y + 40, maxWidth: sideW, gap: 8, items: repoFacts(repo, theme, { time: false }) })}`;
+  }).join('');
+
+  return reposCardShell({
     width,
+    height,
+    options,
     theme,
-  })}
-
-  <g transform="translate(24, 46)">
-    ${
-      !heroRepo
-        ? `<text x="0" y="20" class="empty-msg">No repositories found.</text>`
-        : `
-      <!-- Left Spotlight Hero Column -->
-      ${renderBentoTile({
-        x: 0,
-        y: 0,
-        width: leftColWidth,
-        height: 216,
-        theme,
-        idPrefix,
-        rx: 9,
-        accentColor: heroLangColor,
-        accentPosition: 'top',
-        children: `
-          <g transform="translate(14, 14)">
-            <!-- Title -->
-            <g transform="translate(0, 0)">
-              ${icons.repo(theme.title)}
-              <text x="20" y="12" class="hero-name">${heroName}</text>
-            </g>
-
-            <!-- Spotlight Badge + Updated Recency -->
-            <rect x="0" y="22" width="94" height="18" rx="9" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-            <text x="47" y="34" text-anchor="middle" class="badge-text">#1 Spotlight</text>
-            ${heroUpdated ? `<text x="${leftColWidth - 28}" y="34" text-anchor="end" class="commit-text" font-size="9">${heroUpdated}</text>` : ''}
-
-            <!-- Multi-line Description (wrapped to 3 lines with explicit y) -->
-            ${heroDescLines.map((l, idx) => `<text x="0" y="${54 + idx * 13.5}" class="hero-desc"><tspan>${escapeXml(l)}</tspan></text>`).join('')}
-            
-            <!-- Inset Telemetry Box (Commit + Sparkline) -->
-            <g transform="translate(0, 102)">
-              <rect x="0" y="0" width="54" height="16" rx="4" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-              <text x="27" y="11" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="${theme.iconColor || theme.title}">${escapeXml(heroLastCommit.sha || 'commit')}</text>
-              <text x="60" y="11" class="commit-text">${escapeXml(fitText(heroLastCommit.message, 9.5, leftColWidth - 94))}</text>
-            </g>
-
-            <!-- 8-week Activity Sparkline -->
-            <g transform="translate(0, 126)">
-              <text x="0" y="8" class="stat-lbl" font-size="8">8-WEEK VELOCITY</text>
-              <g transform="translate(0, 13)">
-                ${renderCommitSparkline(heroSparkline, leftColWidth - 28, 20, theme.iconColor || '#58a6ff')}
-              </g>
-            </g>
-
-            <!-- Hero Footer Stats (Language, Stars, Forks, Watchers) -->
-            <g transform="translate(0, 186)" class="repo-meta">
-              ${heroLangSvg}
-              <g transform="translate(${hStarX}, -10)">${icons.star(theme.iconColor)}</g>
-              <text x="${hStarTextX}" y="0">${heroStars}</text>
-              
-              <g transform="translate(${hForkX}, -10)">${icons.fork(theme.secondaryText)}</g>
-              <text x="${hForkTextX}" y="0">${heroForks}</text>
-
-              <g transform="translate(${hEyeX}, -10)">${icons.eye(theme.secondaryText)}</g>
-              <text x="${hEyeTextX}" y="0">${heroWatchers}</text>
-            </g>
-          </g>
-        `,
-      })}
-
-      <!-- Right Side Stacked Cards Column (3 Bento cards) -->
-      <g transform="translate(${leftColWidth + 12}, 0)">
-        ${sideRepos
-          .map((repo, idx) => {
-            const y = idx * 74;
-            const langColor = repo.primaryLanguage?.color || '#858585';
-            const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-            const fittedSideLang = langName ? fitText(langName, 9.5, rightColWidth < 165 ? 42 : 55) : '';
-            const displayLang = fittedSideLang ? escapeXml(fittedSideLang) : '';
-            const rawName = repo.name || '';
-            const name = escapeXml(fitText(rawName, 12.5, rightColWidth - 36));
-            const desc = escapeXml(fitText(repo.description || (repo.lastCommit?.message || 'Repository'), 10, rightColWidth - 22));
-            const formattedStars = formatCount(repo.stargazerCount);
-            const formattedForks = formatCount(repo.forkCount);
-
-            const sideLangW = fittedSideLang ? 12 + Math.ceil(measureText(fittedSideLang, 10)) + 8 : 0;
-            const sStarX = sideLangW;
-            const sStarTextX = sStarX + 14;
-            const sForkX = sStarTextX + Math.ceil(formattedStars.length * 6.4) + 8;
-            const sForkTextX = sForkX + 14;
-
-            return renderBentoTile({
-              x: 0,
-              y,
-              width: rightColWidth,
-              height: 68,
-              theme,
-              idPrefix,
-              rx: 7,
-              accentColor: langColor,
-              accentPosition: 'left',
-              children: `
-                <g transform="translate(10, 10)">
-                  <g transform="translate(0, 0)">
-                    ${icons.repo(theme.title)}
-                    <text x="16" y="11" class="side-name">${name}</text>
-                  </g>
-
-                  <text x="0" y="27" class="side-desc">${desc}</text>
-
-                  <g transform="translate(0, 44)" class="repo-meta">
-                    ${displayLang ? `<circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0">${displayLang}</text>` : ''}
-                    <g transform="translate(${sStarX}, -10)">${icons.star(theme.iconColor)}</g>
-                    <text x="${sStarTextX}" y="0">${formattedStars}</text>
-                    <g transform="translate(${sForkX}, -10)">${icons.fork(theme.secondaryText)}</g>
-                    <text x="${sForkTextX}" y="0">${formattedForks}</text>
-                  </g>
-                </g>
-              `,
-            });
-          })
-          .join('')}
-      </g>
-    `
-    }
-  </g>
-</svg>`;
+    title: 'spotlight',
+    body: `
+      ${repoName(pad, 66, lead.name, leftW, 15)}
+      ${descriptionLines(pad, 84, lead.description, leftW, 2, 11.5)}
+      ${metaRow({ x: pad, y: factsY, maxWidth: leftW, gap: 10, items: repoFacts(lead, theme, { watchers: true, time: false }) })}
+      ${commitBlock}
+      ${text(pad, barsLabelY, 'Commits, last 8 weeks', 'lbl')}
+      ${weeklyBars({ x: pad, y: barsY, width: leftW, height: barsH, bins: lead.sparkline, theme })}
+      ${hasSide ? hairline(ruleX, 44, ruleX, height - 16, theme) : ''}
+      ${sideItems}
+    `,
+  });
 }
 
 /**
- * 4. TIMELINE VARIANT (Recently Shipped Timeline with Anchored Metadata)
+ * 4. TIMELINE: repositories as a git log, newest first, on one commit rail.
  */
 function renderV1TimelineSvg(data, theme, options = {}) {
-  const username = escapeXml(options.username || 'User');
   const width = resolveCardWidth(options.width);
-  const idPrefix = 'repos-time';
-
-  const rawRepos = [...(data.repos || [])];
-  const sortedRepos = rawRepos
-    .sort((a, b) => {
-      const timeA = a.pushedAt ? new Date(a.pushedAt).getTime() : 0;
-      const timeB = b.pushedAt ? new Date(b.pushedAt).getTime() : 0;
-      return timeB - timeA;
-    })
+  const pad = padX(width);
+  const repos = [...(data.repos || [])]
+    .sort((a, b) => new Date(b.pushedAt || b.updatedAt || 0) - new Date(a.pushedAt || a.updatedAt || 0))
     .slice(0, 5);
+  const rowH = 62;
+  const startY = 50;
+  const height = repos.length ? startY + repos.length * rowH : 96;
 
-  const itemGap = 62;
-  const cardHeight = Math.max(180, 62 + sortedRepos.length * itemGap);
-  const stemHeight = Math.max(20, (sortedRepos.length - 1) * itemGap);
-  const contentWidth = width - 48;
-  const repoBoxWidth = contentWidth - 36;
+  const railX = pad + 4.5;
+  const textX = pad + 22;
+  const textW = width - pad - textX;
+  const rail = repos.length > 1
+    ? `<line x1="${railX}" y1="${startY + 10}" x2="${railX}" y2="${startY + (repos.length - 1) * rowH + 10}" stroke="${theme.border}" stroke-width="1.5" />`
+    : '';
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
-  <defs>
-    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
-  </defs>
-  <style>
-    ${renderCardStyles(theme)}
-    .repo-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 13px; fill: ${theme.title}; }
-    .commit-line { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.secondaryText}; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.text}; font-variant-numeric: tabular-nums; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-  </style>
+  const rows = repos.map((repo, i) => {
+    const y = startY + i * rowH;
+    const when = repo.pushedAt || repo.updatedAt;
+    const pushed = when ? `pushed ${formatRelativeTime(when)}` : '';
+    const pushedW = uiWidth(pushed, 11) + 6;
+    const facts = repoFacts(repo, theme, { time: false, language: width > 440 });
+    const factsW = Math.min(textW * 0.5, 210);
+    const sha = repo.lastCommit?.sha;
+    const message = sha ? repo.lastCommit.message || '' : repo.description || '';
+    const shaW = sha ? monoWidth(sha, 11) + 8 : 0;
+    return `
+      <rect x="${pad}" y="${y + 5}" width="9" height="9" rx="2" fill="${repo.primaryLanguage?.color || theme.accent}" />
+      ${repoName(textX, y + 14, repo.name, textW - pushedW - 8, 13)}
+      ${pushed ? text(width - pad, y + 14, pushed, 'mut', 'font-size="11" text-anchor="end"') : ''}
+      ${sha ? text(textX, y + 32, sha, 'mono ink', 'font-size="11"') : ''}
+      ${text(textX + shaW, y + 32, fitUi(message, 11, textW - shaW - 2), 'mut', 'font-size="11"')}
+      ${metaRow({ x: textX, y: y + 47, maxWidth: factsW + textW * 0.3, gap: 10, items: facts })}`;
+  }).join('');
 
-  ${renderCardFrame(width, cardHeight, idPrefix, theme, 14)}
-  
-  ${renderCardHeader({
-    title: `Recently Shipped (${username})`,
-    badgeText: '🌿 Git Timeline',
+  return reposCardShell({
     width,
+    height,
+    options,
     theme,
-  })}
-
-  <g transform="translate(24, 46)">
-    ${
-      sortedRepos.length === 0
-        ? `
-      <text x="0" y="20" class="empty-msg">No repositories found.</text>
-    `
-        : `
-      <!-- Vertical Timeline Stem Line -->
-      <line x1="16" y1="24" x2="16" y2="${24 + stemHeight}" stroke="${theme.subtleBorder || theme.border}" stroke-width="2" stroke-dasharray="4 2" opacity="0.8"/>
-
-      ${sortedRepos
-        .map((repo, idx) => {
-          const y = idx * itemGap;
-          const langColor = repo.primaryLanguage?.color || '#858585';
-          const langName = repo.primaryLanguage?.name ? repo.primaryLanguage.name : null;
-          const rawName = repo.name || 'Unnamed';
-          const pushedTime = formatRelativeTime(repo.pushedAt || repo.updatedAt);
-          const pushedLabel = width <= 440 ? pushedTime : (pushedTime ? `pushed ${pushedTime}` : '');
-          const formattedStars = formatCount(repo.stargazerCount);
-          const formattedForks = formatCount(repo.forkCount);
-          const commit = repo.lastCommit || null;
-          const commitSha = commit?.sha ? escapeXml(commit.sha) : '';
-          const commitMsg = commit?.message
-            ? escapeXml(fitText(commit.message, 10.5, repoBoxWidth - 96))
-            : repo.description
-            ? escapeXml(fitText(repo.description, 10.5, repoBoxWidth - 32))
-            : 'Active repository update';
-
-          // Dynamically anchor metadata right-to-left relative to repoBoxWidth
-          const pushedX = repoBoxWidth - 18;
-          const pushedW = pushedLabel ? Math.ceil(pushedLabel.length * 6.2) + 12 : 0;
-          const forkSlotW = 16 + Math.ceil(formattedForks.length * 6.5) + 10;
-          const forkX = pushedX - pushedW - forkSlotW + 6;
-          const starSlotW = 16 + Math.ceil(formattedStars.length * 6.5) + 10;
-          const starX = forkX - starSlotW;
-          const fittedLang = langName ? fitText(langName, 9.5, 56) : '';
-          const langSlotW = fittedLang ? 10 + Math.ceil(measureText(fittedLang, 10)) + 12 : 0;
-          const langX = starX - langSlotW;
-          const showLang = Boolean(width > 440 && fittedLang && langX > 180);
-          const nameMaxWidth = Math.max(85, (showLang ? langX : starX) - 24);
-          const name = escapeXml(fitText(rawName, 12.5, nameMaxWidth));
-
-          return `
-          <g transform="translate(0, ${y})">
-            <!-- Timeline Branch Node Circle -->
-            <circle cx="16" cy="26" r="6" fill="${langColor}" stroke="${theme.bg}" stroke-width="2"/>
-            <line x1="22" y1="26" x2="36" y2="26" stroke="${langColor}" stroke-width="1.5" opacity="0.7"/>
-
-            <!-- Repository Bento Card -->
-            ${renderBentoTile({
-              x: 36,
-              y: 0,
-              width: repoBoxWidth,
-              height: 52,
-              theme,
-              idPrefix,
-              rx: 7,
-              accentColor: langColor,
-              accentPosition: 'left',
-              children: `
-                <g transform="translate(12, 10)">
-                  <!-- Line 1: Title, Language, Stars, Forks, and Pushed Time -->
-                  <g transform="translate(0, 0)">
-                    ${icons.repo(theme.title)}
-                    <text x="18" y="11" class="repo-name">${name}</text>
-
-                    <g class="repo-meta">
-                      ${showLang ? `<circle cx="${langX}" cy="7.5" r="3.5" fill="${langColor}" /><text x="${langX + 8}" y="11">${escapeXml(fittedLang)}</text>` : ''}
-                      <g transform="translate(${starX}, 1)">${icons.star(theme.iconColor)}</g>
-                      <text x="${starX + 16}" y="11">${formattedStars}</text>
-                      <g transform="translate(${forkX}, 1)">${icons.fork(theme.secondaryText)}</g>
-                      <text x="${forkX + 16}" y="11">${formattedForks}</text>
-                      ${pushedLabel ? `<text x="${pushedX}" y="11" text-anchor="end" fill="${theme.secondaryText}">${pushedLabel}</text>` : ''}
-                    </g>
-                  </g>
-
-                  <!-- Line 2: Last Commit Message & SHA -->
-                  <g transform="translate(0, 28)">
-                    ${
-                      commitSha
-                        ? `
-                      <rect x="0" y="-8" width="52" height="14" rx="3" fill="${theme.badgeBg}" stroke="${theme.subtleBorder || theme.border}" stroke-width="1"/>
-                      <text x="26" y="2" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="${theme.iconColor || theme.title}">${commitSha}</text>
-                      <text x="58" y="2" class="commit-line">${commitMsg}</text>
-                    `
-                        : `
-                      <text x="0" y="2" class="commit-line">${commitMsg}</text>
-                    `
-                    }
-                  </g>
-                </g>
-              `,
-            })}
-          </g>`;
-        })
-        .join('')}
-    `
-    }
-  </g>
-</svg>`;
+    title: 'recently pushed',
+    body: repos.length ? `${rail}${rows}` : text(pad, 70, NO_REPOS, 'mut', 'font-size="12"'),
+  });
 }
 
 /**
- * 5. LEADERBOARD VARIANT (2-Tier Proportional Adoption Rows)
+ * 5. LEADERBOARD: ranked by stars, each repo metered against the leader.
  */
 function renderV1LeaderboardSvg(data, theme, options = {}) {
-  const username = escapeXml(options.username || 'User');
   const width = resolveCardWidth(options.width);
-  const idPrefix = 'repos-rank';
-  const reposList = [...(data.repos || [])]
-    .sort((a, b) => (b.stargazerCount || 0) - (a.stargazerCount || 0))
-    .slice(0, 5);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const repos = (data.repos || []).slice(0, 5);
+  const rowH = 48;
+  const startY = 50;
+  const height = repos.length ? startY + repos.length * rowH + 2 : 96;
+  const maxStars = Math.max(1, ...repos.map((r) => r.stargazerCount || 0));
+  const rankW = 26;
+  const meterW = inner - rankW;
+  const meterTotal = cellsThatFit(meterW, 6, 2);
 
-  const maxStars = Math.max(...reposList.map((r) => r.stargazerCount || 0), 1);
-  const rowHeight = 50;
-  const rowGap = 58;
-  const cardHeight = Math.max(160, 62 + reposList.length * rowGap);
-  const contentWidth = width - 48;
+  const rows = repos.map((repo, i) => {
+    const y = startY + i * rowH;
+    const facts = repoFacts(repo, theme, { time: false, watchers: true, language: width > 440 });
+    const factsW = width <= 440 ? 150 : Math.min(inner * 0.6, 300);
+    return `
+      ${i > 0 ? hairline(pad, y - 8, width - pad, y - 8, theme) : ''}
+      ${text(pad, y + 12, `#${i + 1}`, 'mono mut', 'font-size="11"')}
+      ${repoName(pad + rankW, y + 12, repo.name, inner - rankW - factsW - 10, 13)}
+      ${metaRow({ x: width - pad, y: y + 12, end: true, maxWidth: factsW, gap: 10, items: facts })}
+      ${cellMeter({ x: pad + rankW, y: y + 20, total: meterTotal, ratio: (repo.stargazerCount || 0) / maxStars, size: 6, gap: 2, color: repo.primaryLanguage?.color, theme, className: 'stars-bar', delay: i * 60 })}`;
+  }).join('');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cardHeight}" viewBox="0 0 ${width} ${cardHeight}" fill="none">
-  <defs>
-    ${renderCardDefs(idPrefix, theme, theme.title, theme.accent)}
-  </defs>
-  <style>
-    ${renderCardStyles(theme)}
-    .repo-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 13px; fill: ${theme.title}; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: ${theme.text}; font-variant-numeric: tabular-nums; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-  </style>
-
-  ${renderCardFrame(width, cardHeight, idPrefix, theme, 14)}
-  
-  ${renderCardHeader({
-    title: `Top Repositories (${username})`,
-    badgeText: '🏆 Rank Standings',
+  return reposCardShell({
     width,
+    height,
+    options,
     theme,
-  })}
-
-  <g transform="translate(24, 46)">
-    ${
-      reposList.length === 0
-        ? `
-      <text x="0" y="20" class="empty-msg">No repositories found.</text>
-    `
-        : reposList
-            .map((repo, idx) => {
-              const y = idx * rowGap;
-              const langColor = repo.primaryLanguage?.color || '#858585';
-              const langName = repo.primaryLanguage?.name || null;
-              const rawName = repo.name || 'Unnamed';
-
-              const formattedStars = formatCount(repo.stargazerCount);
-              const formattedForks = formatCount(repo.forkCount);
-              const formattedWatchers = formatCount(repo.watchers ?? repo.watchersCount ?? 0);
-
-              const rightMargin = contentWidth - 18;
-              const watchersSlotW = 16 + Math.ceil(formattedWatchers.length * 6.5) + 6;
-              const watchersX = rightMargin - watchersSlotW;
-              const forksSlotW = 16 + Math.ceil(formattedForks.length * 6.5) + 12;
-              const forksX = watchersX - forksSlotW;
-              const starsSlotW = 16 + Math.ceil(formattedStars.length * 6.5) + 12;
-              const starsX = forksX - starsSlotW;
-              const fittedLang = (width >= 480 && langName) ? fitText(langName, 9.5, 58) : '';
-              const langSlotW = fittedLang ? 10 + Math.ceil(measureText(fittedLang, 10)) + 14 : 0;
-              const langX = starsX - langSlotW;
-
-              const nameMaxWidth = Math.max(95, (fittedLang ? langX : starsX) - 66);
-              const name = escapeXml(fitText(rawName, 13, nameMaxWidth));
-
-              const barWidthMax = contentWidth - 64;
-              const barWidth = Math.max(8, Math.round(((repo.stargazerCount || 0) / maxStars) * barWidthMax));
-
-              return renderBentoTile({
-                x: 0,
-                y,
-                width: contentWidth,
-                height: rowHeight,
-                theme,
-                idPrefix,
-                rx: 7,
-                accentColor: langColor,
-                accentPosition: 'left',
-                children: `
-                  <g transform="translate(10, 8)">
-                    <!-- Rank Badge -->
-                    <g transform="translate(0, 1)">
-                      ${renderRankBadge({ x: 0, y: 0, rank: idx + 1, width: 34, height: 18, theme })}
-                    </g>
-
-                    <!-- Title -->
-                    <g transform="translate(42, 3)">
-                      ${icons.repo(theme.title)}
-                      <text x="18" y="11" class="repo-name" font-size="12.5">${name}</text>
-                    </g>
-
-                    ${fittedLang ? `<g transform="translate(${langX}, 14)" class="repo-meta"><circle cx="4" cy="-3.5" r="3.5" fill="${langColor}" /><text x="11" y="0" fill="${theme.secondaryText}">${escapeXml(fittedLang)}</text></g>` : ''}
-
-                    <!-- Stars Count -->
-                    <g transform="translate(${starsX}, 14)" class="repo-meta">
-                      <g transform="translate(0, -10)">${icons.star(theme.iconColor)}</g>
-                      <text x="15" y="0" font-weight="bold">${formattedStars}</text>
-                    </g>
-
-                    <!-- Forks Count -->
-                    <g transform="translate(${forksX}, 14)" class="repo-meta">
-                      <g transform="translate(0, -10)">${icons.fork(theme.secondaryText)}</g>
-                      <text x="15" y="0">${formattedForks}</text>
-                    </g>
-
-                    <!-- Watchers Count -->
-                    <g transform="translate(${watchersX}, 14)" class="repo-meta">
-                      <g transform="translate(0, -10)">${icons.eye(theme.secondaryText)}</g>
-                      <text x="15" y="0">${formattedWatchers}</text>
-                    </g>
-
-                    <!-- 2nd Tier: Proportional Stars Bar -->
-                    <g transform="translate(42, 28)" class="stars-bar">
-                      <rect x="0" y="0" width="${barWidthMax}" height="4" rx="2" fill="${theme.barBg || '#21262d'}" opacity="0.45" />
-                      <rect x="0" y="0" width="${barWidth}" height="4" rx="2" fill="${langColor}" />
-                    </g>
-                  </g>
-                `,
-              });
-            })
-            .join('')
-    }
-  </g>
-</svg>`;
+    title: 'top by stars',
+    body: repos.length ? rows : text(pad, 70, NO_REPOS, 'mut', 'font-size="12"'),
+  });
 }
 
 function renderV0Svg(data, theme, options = {}) {

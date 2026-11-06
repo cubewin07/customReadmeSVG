@@ -106,11 +106,11 @@ const MOCK_DATA = {
     },
     languages: {
       languages: [
-        { name: 'TypeScript', size: 450000, percentage: 45.0, color: '#3178c6', repoCount: 18 },
-        { name: 'JavaScript', size: 250000, percentage: 25.0, color: '#f1e05a', repoCount: 14 },
-        { name: 'Python', size: 150000, percentage: 15.0, color: '#3572A5', repoCount: 8 },
-        { name: 'HTML', size: 100000, percentage: 10.0, color: '#e34c26', repoCount: 11 },
-        { name: 'CSS', size: 50000, percentage: 5.0, color: '#563d7c', repoCount: 9 },
+        { name: 'TypeScript', size: 450000, percentage: 45.0, color: '#3178c6', repoCount: 18, lastUsedMonthsAgo: 1, recentShare: 58.0 },
+        { name: 'JavaScript', size: 250000, percentage: 25.0, color: '#f1e05a', repoCount: 14, lastUsedMonthsAgo: 1, recentShare: 21.0 },
+        { name: 'Python', size: 150000, percentage: 15.0, color: '#3572A5', repoCount: 8, lastUsedMonthsAgo: 4, recentShare: 14.0 },
+        { name: 'HTML', size: 100000, percentage: 10.0, color: '#e34c26', repoCount: 11, lastUsedMonthsAgo: 6, recentShare: 5.0 },
+        { name: 'CSS', size: 50000, percentage: 5.0, color: '#563d7c', repoCount: 9, lastUsedMonthsAgo: 3, recentShare: 2.0 },
       ],
       totalSize: 1000000,
     },

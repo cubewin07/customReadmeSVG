@@ -56,14 +56,14 @@ test('Languages list variant renders ranked bars (#1-#5), repo counts, and recen
 test('Languages polyglot variant renders proportional geometric mosaic treemap with embedded labels', () => {
   const svg = languagesCard.renderSvg(mockLanguagesData, themes.dark, { layout: 'polyglot' });
   assertValidXml(svg);
-  assert.ok(svg.includes('treemap-cell') || svg.includes('treemap') || svg.includes('polyglot'), 'Must render treemap structure');
+  assert.ok(svg.includes('waffle') && svg.includes('polyglot'), 'Must render waffle structure');
   assert.ok(svg.includes('TypeScript') && svg.includes('JavaScript'), 'Must embed language labels in cells');
 });
 
 test('Languages evolution variant renders comparative historical vs current language stack shares', () => {
   const svg = languagesCard.renderSvg(mockLanguagesData, themes.dark, { layout: 'evolution' });
   assertValidXml(svg);
-  assert.ok(svg.includes('Evolution') || svg.includes('Shift') || svg.includes('Then') || svg.includes('Recent'), 'Must render evolution comparison');
+  assert.ok(svg.includes('All time') && svg.includes('Last 12 months'), 'Must render evolution comparison');
   assert.ok(svg.includes('TypeScript'), 'Must render language trajectories');
 });
 
@@ -109,11 +109,10 @@ test('Languages redesign audit assertions: polyglot renders 6+ languages and enf
   // Must render all 6 languages, including CSS
   assert.ok(svg.includes('CSS'), 'Polyglot must render all requested languages including 6th item');
 
-  // Verify that treemap cells enforce minimum cell height (no cell rect with height < 38)
-  const cellRectMatches = Array.from(svg.matchAll(/class="treemap-cell"[\s\S]*?<rect[^>]*height="([0-9.]+)"/g));
-  assert.ok(cellRectMatches.length >= 3, 'Must match primary treemap cells');
-  for (const match of cellRectMatches) {
-    const h = parseFloat(match[1]);
-    assert.ok(h >= 38, `Treemap primary cell height must be >= 38 to prevent overflow, got ${h}`);
+  // One waffle cell per percent, and small languages keep a visible cell
+  const cells = svg.match(/class="waffle-cell/g) || [];
+  assert.equal(cells.length, 100, 'Waffle must render exactly 100 cells');
+  for (const color of ['#e34c26', '#563d7c']) {
+    assert.ok(svg.includes(`waffle-cell ci" x`) && svg.includes(`fill="${color}"`), `${color} must keep at least one cell`);
   }
 });

@@ -1,380 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="495" height="353" viewBox="0 0 495 353" fill="none">
-  <defs>
-    
-    <linearGradient id="repos-grid-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117" />
-      <stop offset="100%" stop-color="#161b22" />
-    </linearGradient>
-    <linearGradient id="repos-grid-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
-      <stop offset="45%" stop-color="#30363d" stop-opacity="0.65" />
-      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0.35" />
-    </linearGradient>
-    <linearGradient id="repos-grid-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#21262d" stop-opacity="0.45" />
-    </linearGradient>
-    <linearGradient id="repos-grid-brand" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#58a6ff" />
-      <stop offset="100%" stop-color="#3fb950" />
-    </linearGradient>
-    <radialGradient id="repos-grid-glow-tl" cx="0%" cy="0%" r="65%">
-      <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="repos-grid-glow-br" cx="100%" cy="100%" r="65%">
-      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.11" />
-      <stop offset="100%" stop-color="#3fb950" stop-opacity="0" />
-    </radialGradient>
-    <pattern id="repos-grid-dots" width="18" height="18" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="0.8" fill="#8b949e" fill-opacity="0.12" />
-    </pattern>
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="224" viewBox="0 0 495 224" fill="none" role="img" aria-label="Repositories by cubewin07">
+  <title>Repositories by cubewin07</title>
   
-  </defs>
   <style>
-    
-    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: #8b949e; letter-spacing: 0.08em; text-transform: uppercase; }
-    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 14px; fill: #58a6ff; font-variant-numeric: tabular-nums; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 500; fill: #8b949e; }
-    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
-    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
-    
-  
-    .repo-name { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 13px; fill: #58a6ff; }
-    .repo-desc { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; fill: #8b949e; }
-    .repo-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #c9d1d9; font-variant-numeric: tabular-nums; }
-    .empty-msg { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 12px; fill: #8b949e; }
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; }
+    .ink { fill: #c9d1d9; }
+    .mut { fill: #8b949e; }
+    .lnk { fill: #58a6ff; }
+    .lbl { font-size: 11px; fill: #8b949e; }
+    .num { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; fill: #c9d1d9; }
+    .ci { animation: cellIn .4s ease-out both; }
+    @keyframes cellIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .ci { animation: none; } }
   </style>
-
+  <rect x="0.5" y="0.5" width="494" height="223" rx="10" fill="#0d1117" stroke="#30363d" />
   
-    <rect x="0.5" y="0.5" rx="14" width="494" height="352" fill="url(#repos-grid-bg)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="352" fill="url(#repos-grid-dots)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="352" fill="url(#repos-grid-glow-tl)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="352" fill="url(#repos-grid-glow-br)" />
-    <path d="M 18,0.5 L 477,0.5" stroke="url(#repos-grid-brand)" stroke-width="2" stroke-linecap="round" opacity="0.85" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="352" fill="none" stroke="url(#repos-grid-rim)" stroke-width="1" />
-  
-  
-  
-    <g transform="translate(24, 24)">
-      <line x1="1.5" y1="-12" x2="1.5" y2="3" stroke="#3fb950" stroke-width="3" stroke-linecap="round" />
-      <text x="10" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.02em" fill="#58a6ff">Top Repositories (cubewin07)</text>
-      
-        <rect x="332" y="-14" width="115" height="20" rx="10" fill="#13233a" stroke="#21262d" stroke-width="1"/>
-        <text x="389.5" y="-0.5" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" font-weight="700" font-size="9.5" fill="#58a6ff">📦 6 Repositories</text>
-      
+    <g transform="translate(24, 28)">
+      <rect x="0" y="-9" width="9" height="9" rx="2" fill="#3fb950" />
+      <text x="16" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" font-weight="600" font-size="13.5" fill="#c9d1d9"><tspan fill="#8b949e" font-weight="400">cubewin07 / </tspan>repositories</text>
+      <text x="447" y="0" text-anchor="end" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" fill="#8b949e">4 shown</text>
     </g>
-  
-  <!-- Repos Grid -->
-  <g transform="translate(24, 46)">
-    
-    <g transform="translate(0, 0)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#f1e05a" opacity="0.9" />
       
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">skills-hub</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-xtyfww">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-xtyfww)">
-        <rect x="0" y="0" width="97" height="4.5" fill="#f1e05a" /><rect x="97" y="0" width="59" height="4.5" fill="#3572A5" /><rect x="156" y="0" width="27" height="4.5" fill="#e34c26" /><rect x="183" y="0" width="6" height="4.5" fill="#89e051" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#f1e05a" /><text x="11" y="0">JavaScript</text>
-                      <g transform="translate(73, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      
+      <text x="24" y="66" class="lnk" font-size="13" font-weight="600">customReadmeSVG</text>
+      <text x="24" y="84" class="mut" font-size="11.5">Dynamic game-inspired SVG cards</text><text x="24" y="99.5" class="mut" font-size="11.5">for GitHub READMEs</text>
+      <rect x="24.0" y="111.5" width="9" height="9" rx="2" fill="#f1e05a" /><text x="38" y="120" class="mut" font-size="11">JavaScript</text><g transform="translate(103.3, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="88" y="0">1</text>
-                      <g transform="translate(103, -10)">
+    </svg></g><text x="117" y="120" class="mono mut" font-size="11">128</text><g transform="translate(147.4, 110) scale(0.82)">
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="118" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">2mo ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-    <g transform="translate(229, 0)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#F05138" opacity="0.9" />
+    </svg></g><text x="161" y="120" class="mono mut" font-size="11">24</text><text x="185" y="120" class="mut" font-size="11">5d ago</text>
       
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">iStats</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-imzpzf">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-imzpzf)">
-        <rect x="0" y="0" width="189" height="4.5" fill="#F05138" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#F05138" /><text x="11" y="0">Swift</text>
-                      <g transform="translate(47, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <line x1="248" y1="52" x2="248" y2="124" stroke="#21262d" />
+      <text x="262" y="66" class="lnk" font-size="13" font-weight="600">reactive-portfolio</text>
+      <text x="262" y="84" class="mut" font-size="11.5">High performance GSAP-animated</text><text x="262" y="99.5" class="mut" font-size="11.5">portfolio site</text>
+      <rect x="262.0" y="111.5" width="9" height="9" rx="2" fill="#3178c6" /><text x="276" y="120" class="mut" font-size="11">TypeScript</text><g transform="translate(342.5, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="62" y="0">1</text>
-                      <g transform="translate(77, -10)">
+    </svg></g><text x="357" y="120" class="mono mut" font-size="11">94</text><g transform="translate(380.0, 110) scale(0.82)">
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="92" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">3d ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-    <g transform="translate(0, 96)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#f1e05a" opacity="0.9" />
+    </svg></g><text x="394" y="120" class="mono mut" font-size="11">12</text><text x="417" y="120" class="mut" font-size="11">20d ago</text>
+      <line x1="24" y1="132" x2="471" y2="132" stroke="#21262d" />
       
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">movie-explorer-showcase</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-cxl272">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-cxl272)">
-        <rect x="0" y="0" width="183" height="4.5" fill="#f1e05a" /><rect x="183" y="0" width="5" height="4.5" fill="#663399" /><rect x="188" y="0" width="2" height="4.5" fill="#e34c26" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#f1e05a" /><text x="11" y="0">JavaScript</text>
-                      <g transform="translate(73, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <text x="24" y="154" class="lnk" font-size="13" font-weight="600">neural-canvas</text>
+      <text x="24" y="172" class="mut" font-size="11.5">Real-time procedural voxel generation</text><text x="24" y="187.5" class="mut" font-size="11.5">in WebGL</text>
+      <rect x="24.0" y="199.5" width="9" height="9" rx="2" fill="#dea584" /><text x="38" y="208" class="mut" font-size="11">Rust</text><g transform="translate(71.7, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="88" y="0">1</text>
-                      <g transform="translate(103, -10)">
+    </svg></g><text x="86" y="208" class="mono mut" font-size="11">65</text><g transform="translate(109.1, 198) scale(0.82)">
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="118" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">4mo ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-    <g transform="translate(229, 96)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#f1e05a" opacity="0.9" />
+    </svg></g><text x="123" y="208" class="mono mut" font-size="11">8</text><text x="140" y="208" class="mut" font-size="11">1mo ago</text>
       
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">movie-explorer</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-el7bnd">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-el7bnd)">
-        <rect x="0" y="0" width="116" height="4.5" fill="#f1e05a" /><rect x="116" y="0" width="72" height="4.5" fill="#b07219" /><rect x="188" y="0" width="2" height="4.5" fill="#663399" /><rect x="190" y="0" width="2" height="4.5" fill="#89e051" /><rect x="192" y="0" width="2" height="4.5" fill="#e34c26" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#f1e05a" /><text x="11" y="0">JavaScript</text>
-                      <g transform="translate(73, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
+      <line x1="248" y1="140" x2="248" y2="212" stroke="#21262d" />
+      <text x="262" y="154" class="lnk" font-size="13" font-weight="600">cloud-task-orchestrator</text>
+      <text x="262" y="172" class="mut" font-size="11.5">Distributed workflow automation</text><text x="262" y="187.5" class="mut" font-size="11.5">runner</text>
+      <rect x="262.0" y="199.5" width="9" height="9" rx="2" fill="#00ADD8" /><text x="276" y="208" class="mut" font-size="11">Go</text><g transform="translate(300.9, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="88" y="0">1</text>
-                      <g transform="translate(103, -10)">
+    </svg></g><text x="315" y="208" class="mono mut" font-size="11">42</text><g transform="translate(338.3, 198) scale(0.82)">
     <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
       <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="118" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">2mo ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-    <g transform="translate(0, 192)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#f1e05a" opacity="0.9" />
-      
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">EcommercialWeb_clone_...</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-ncxq53">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-ncxq53)">
-        <rect x="0" y="0" width="107" height="4.5" fill="#f1e05a" /><rect x="107" y="0" width="80" height="4.5" fill="#c6538c" /><rect x="187" y="0" width="2" height="4.5" fill="#e34c26" /><rect x="189" y="0" width="2" height="4.5" fill="#663399" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#f1e05a" /><text x="11" y="0">JavaScript</text>
-                      <g transform="translate(73, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="88" y="0">1</text>
-                      <g transform="translate(103, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="118" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">4mo ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-    <g transform="translate(229, 192)">
-      <rect x="0" y="0" width="217" height="86" rx="7" fill="#161b22" fill-opacity="0.82" stroke="url(#repos-grid-tile-rim)" stroke-width="1" />
-      <line x1="9" y1="0.75" x2="208" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="7" width="3" height="72" rx="1.5" fill="#3572A5" opacity="0.9" />
-      
-                  <g transform="translate(12, 10)">
-                    <!-- Title -->
-                    <g transform="translate(0, 0)">
-                      
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75 .75 0 0 1 .75 .75v12.5a.75 .75 0 0 1 -.75 .75h-2.5a.75 .75 0 0 1 0 -1.5h1.75v-10h-8a1 1 0 0 0 -1 1v10.5a.75 .75 0 0 1 -1.5 0V2.5zM1.75 13.5a.25 .25 0 0 0 -.25 .25v.5c0 .414.336.75.75.75h9.5a.75 .75 0 0 0 .75 -.75v-.5a.25 .25 0 0 0 -.25 -.25h-10.5z"></path>
-    </svg>
-                      <text x="18" y="11" class="repo-name">3D-anime-wallpaper</text>
-                    </g>
-
-                    <!-- Description -->
-                    <text x="0" y="25" class="repo-desc"><tspan>No description provided</tspan></text>
-
-                    <!-- Topics / Proportions -->
-                    <g transform="translate(0, 35)">
-    <g class="language-bar">
-      <defs>
-        <clipPath id="lang-bar-clip-24ddzv">
-          <rect x="0" y="0" width="189" height="4.5" rx="2" />
-        </clipPath>
-      </defs>
-      <rect x="0" y="0" width="189" height="4.5" rx="2" fill="#21262d" />
-      <g clip-path="url(#lang-bar-clip-24ddzv)">
-        <rect x="0" y="0" width="189" height="4.5" fill="#3572A5" />
-      </g>
-    </g></g>
-                    
-                    <!-- Meta Footer -->
-                    <g transform="translate(0, 64)" class="repo-meta">
-                      <circle cx="4" cy="-3.5" r="3.5" fill="#3572A5" /><text x="11" y="0">Python</text>
-                      <g transform="translate(56, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#58a6ff" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
-    </svg></g>
-                      <text x="71" y="0">0</text>
-                      <g transform="translate(86, -10)">
-    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
-      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
-    </svg></g>
-                      <text x="101" y="0">0</text>
-                      <text x="193" y="0" text-anchor="end" fill="#8b949e">25d ago</text>
-                    </g>
-                  </g>
-                
-    </g>
-  
-  </g>
+    </svg></g><text x="352" y="208" class="mono mut" font-size="11">5</text><text x="369" y="208" class="mut" font-size="11">2mo ago</text>
 </svg>

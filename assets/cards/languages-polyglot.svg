@@ -1,172 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="495" height="232" viewBox="0 0 495 232" fill="none">
-  <defs>
-    
-    <linearGradient id="lang-poly-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117" />
-      <stop offset="100%" stop-color="#161b22" />
-    </linearGradient>
-    <linearGradient id="lang-poly-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
-      <stop offset="45%" stop-color="#30363d" stop-opacity="0.65" />
-      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0.35" />
-    </linearGradient>
-    <linearGradient id="lang-poly-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#21262d" stop-opacity="0.45" />
-    </linearGradient>
-    <linearGradient id="lang-poly-brand" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#58a6ff" />
-      <stop offset="100%" stop-color="#3fb950" />
-    </linearGradient>
-    <radialGradient id="lang-poly-glow-tl" cx="0%" cy="0%" r="65%">
-      <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="lang-poly-glow-br" cx="100%" cy="100%" r="65%">
-      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.11" />
-      <stop offset="100%" stop-color="#3fb950" stop-opacity="0" />
-    </radialGradient>
-    <pattern id="lang-poly-dots" width="18" height="18" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="0.8" fill="#8b949e" fill-opacity="0.12" />
-    </pattern>
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="213" viewBox="0 0 495 213" fill="none" role="img" aria-label="Polyglot footprint for cubewin07">
+  <title>Polyglot footprint for cubewin07</title>
   
-  </defs>
   <style>
-    
-    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: #8b949e; letter-spacing: 0.08em; text-transform: uppercase; }
-    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 14px; fill: #58a6ff; font-variant-numeric: tabular-nums; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 500; fill: #8b949e; }
-    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
-    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
-    
-  
-    .tile-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; fill: #c9d1d9; }
-    .tile-perc { font-family: 'JetBrains Mono', monospace; font-weight: 800; fill: #58a6ff; }
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; }
+    .ink { fill: #c9d1d9; }
+    .mut { fill: #8b949e; }
+    .lnk { fill: #58a6ff; }
+    .lbl { font-size: 11px; fill: #8b949e; }
+    .num { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; fill: #c9d1d9; }
+    .ci { animation: cellIn .4s ease-out both; }
+    @keyframes cellIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .ci { animation: none; } }
   </style>
-
+  <rect x="0.5" y="0.5" width="494" height="212" rx="10" fill="#0d1117" stroke="#30363d" />
   
-    <rect x="0.5" y="0.5" rx="14" width="494" height="231" fill="url(#lang-poly-bg)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="231" fill="url(#lang-poly-dots)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="231" fill="url(#lang-poly-glow-tl)" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="231" fill="url(#lang-poly-glow-br)" />
-    <path d="M 18,0.5 L 477,0.5" stroke="url(#lang-poly-brand)" stroke-width="2" stroke-linecap="round" opacity="0.85" />
-    <rect x="0.5" y="0.5" rx="14" width="494" height="231" fill="none" stroke="url(#lang-poly-rim)" stroke-width="1" />
-  
-
-  
-    <g transform="translate(24, 24)">
-      <line x1="1.5" y1="-12" x2="1.5" y2="3" stroke="#3fb950" stroke-width="3" stroke-linecap="round" />
-      <text x="10" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.02em" fill="#58a6ff">Polyglot Treemap (cubewin07)</text>
       
-        <rect x="291" y="-14" width="156" height="20" rx="10" fill="#13233a" stroke="#21262d" stroke-width="1"/>
-        <text x="369" y="-0.5" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" font-weight="700" font-size="9.5" fill="#58a6ff">⚡ 13 Languages Footprint</text>
-      
+    <g transform="translate(24, 28)">
+      <rect x="0" y="-9" width="9" height="9" rx="2" fill="#3fb950" />
+      <text x="16" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" font-weight="600" font-size="13.5" fill="#c9d1d9"><tspan fill="#8b949e" font-weight="400">cubewin07 / </tspan>polyglot</text>
+      <text x="447" y="0" text-anchor="end" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" fill="#8b949e">5 languages</text>
     </g>
-
-  <g transform="translate(24, 46)">
-    <!-- Treemap Mosaic Container -->
-    <g transform="translate(0, 0)">
+      <g class="waffle" transform="translate(24, 50)"><rect class="waffle-cell ci" x="0" y="0" width="12" height="12" rx="2" fill="#3178c6" /><rect class="waffle-cell ci" x="0" y="14" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:7ms" /><rect class="waffle-cell ci" x="0" y="28" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:14ms" /><rect class="waffle-cell ci" x="0" y="42" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:21ms" /><rect class="waffle-cell ci" x="0" y="56" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:28ms" /><rect class="waffle-cell ci" x="0" y="70" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:35ms" /><rect class="waffle-cell ci" x="0" y="84" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:42ms" /><rect class="waffle-cell ci" x="0" y="98" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:49ms" /><rect class="waffle-cell ci" x="0" y="112" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:56ms" /><rect class="waffle-cell ci" x="0" y="126" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:63ms" /><rect class="waffle-cell ci" x="14" y="0" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:70ms" /><rect class="waffle-cell ci" x="14" y="14" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:77ms" /><rect class="waffle-cell ci" x="14" y="28" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:84ms" /><rect class="waffle-cell ci" x="14" y="42" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:91ms" /><rect class="waffle-cell ci" x="14" y="56" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:98ms" /><rect class="waffle-cell ci" x="14" y="70" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:105ms" /><rect class="waffle-cell ci" x="14" y="84" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:112ms" /><rect class="waffle-cell ci" x="14" y="98" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:119ms" /><rect class="waffle-cell ci" x="14" y="112" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:126ms" /><rect class="waffle-cell ci" x="14" y="126" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:133ms" /><rect class="waffle-cell ci" x="28" y="0" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:140ms" /><rect class="waffle-cell ci" x="28" y="14" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:147ms" /><rect class="waffle-cell ci" x="28" y="28" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:154ms" /><rect class="waffle-cell ci" x="28" y="42" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:161ms" /><rect class="waffle-cell ci" x="28" y="56" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:168ms" /><rect class="waffle-cell ci" x="28" y="70" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:175ms" /><rect class="waffle-cell ci" x="28" y="84" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:182ms" /><rect class="waffle-cell ci" x="28" y="98" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:189ms" /><rect class="waffle-cell ci" x="28" y="112" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:196ms" /><rect class="waffle-cell ci" x="28" y="126" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:203ms" /><rect class="waffle-cell ci" x="42" y="0" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:210ms" /><rect class="waffle-cell ci" x="42" y="14" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:217ms" /><rect class="waffle-cell ci" x="42" y="28" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:224ms" /><rect class="waffle-cell ci" x="42" y="42" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:231ms" /><rect class="waffle-cell ci" x="42" y="56" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:238ms" /><rect class="waffle-cell ci" x="42" y="70" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:245ms" /><rect class="waffle-cell ci" x="42" y="84" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:252ms" /><rect class="waffle-cell ci" x="42" y="98" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:259ms" /><rect class="waffle-cell ci" x="42" y="112" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:266ms" /><rect class="waffle-cell ci" x="42" y="126" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:273ms" /><rect class="waffle-cell ci" x="56" y="0" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:280ms" /><rect class="waffle-cell ci" x="56" y="14" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:287ms" /><rect class="waffle-cell ci" x="56" y="28" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:294ms" /><rect class="waffle-cell ci" x="56" y="42" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:301ms" /><rect class="waffle-cell ci" x="56" y="56" width="12" height="12" rx="2" fill="#3178c6" style="animation-delay:308ms" /><rect class="waffle-cell ci" x="56" y="70" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:315ms" /><rect class="waffle-cell ci" x="56" y="84" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:322ms" /><rect class="waffle-cell ci" x="56" y="98" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:329ms" /><rect class="waffle-cell ci" x="56" y="112" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:336ms" /><rect class="waffle-cell ci" x="56" y="126" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:343ms" /><rect class="waffle-cell ci" x="70" y="0" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:350ms" /><rect class="waffle-cell ci" x="70" y="14" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:357ms" /><rect class="waffle-cell ci" x="70" y="28" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:364ms" /><rect class="waffle-cell ci" x="70" y="42" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:371ms" /><rect class="waffle-cell ci" x="70" y="56" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:378ms" /><rect class="waffle-cell ci" x="70" y="70" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:385ms" /><rect class="waffle-cell ci" x="70" y="84" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:392ms" /><rect class="waffle-cell ci" x="70" y="98" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:399ms" /><rect class="waffle-cell ci" x="70" y="112" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:406ms" /><rect class="waffle-cell ci" x="70" y="126" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:413ms" /><rect class="waffle-cell ci" x="84" y="0" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:420ms" /><rect class="waffle-cell ci" x="84" y="14" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:427ms" /><rect class="waffle-cell ci" x="84" y="28" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:434ms" /><rect class="waffle-cell ci" x="84" y="42" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:441ms" /><rect class="waffle-cell ci" x="84" y="56" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:448ms" /><rect class="waffle-cell ci" x="84" y="70" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:455ms" /><rect class="waffle-cell ci" x="84" y="84" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:462ms" /><rect class="waffle-cell ci" x="84" y="98" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:469ms" /><rect class="waffle-cell ci" x="84" y="112" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:476ms" /><rect class="waffle-cell ci" x="84" y="126" width="12" height="12" rx="2" fill="#f1e05a" style="animation-delay:483ms" /><rect class="waffle-cell ci" x="98" y="0" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:490ms" /><rect class="waffle-cell ci" x="98" y="14" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:497ms" /><rect class="waffle-cell ci" x="98" y="28" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:504ms" /><rect class="waffle-cell ci" x="98" y="42" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:511ms" /><rect class="waffle-cell ci" x="98" y="56" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:518ms" /><rect class="waffle-cell ci" x="98" y="70" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:525ms" /><rect class="waffle-cell ci" x="98" y="84" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:532ms" /><rect class="waffle-cell ci" x="98" y="98" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:539ms" /><rect class="waffle-cell ci" x="98" y="112" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:546ms" /><rect class="waffle-cell ci" x="98" y="126" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:553ms" /><rect class="waffle-cell ci" x="112" y="0" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:560ms" /><rect class="waffle-cell ci" x="112" y="14" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:567ms" /><rect class="waffle-cell ci" x="112" y="28" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:574ms" /><rect class="waffle-cell ci" x="112" y="42" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:581ms" /><rect class="waffle-cell ci" x="112" y="56" width="12" height="12" rx="2" fill="#3572A5" style="animation-delay:588ms" /><rect class="waffle-cell ci" x="112" y="70" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:595ms" /><rect class="waffle-cell ci" x="112" y="84" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:602ms" /><rect class="waffle-cell ci" x="112" y="98" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:609ms" /><rect class="waffle-cell ci" x="112" y="112" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:616ms" /><rect class="waffle-cell ci" x="112" y="126" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:623ms" /><rect class="waffle-cell ci" x="126" y="0" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:630ms" /><rect class="waffle-cell ci" x="126" y="14" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:637ms" /><rect class="waffle-cell ci" x="126" y="28" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:644ms" /><rect class="waffle-cell ci" x="126" y="42" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:651ms" /><rect class="waffle-cell ci" x="126" y="56" width="12" height="12" rx="2" fill="#e34c26" style="animation-delay:658ms" /><rect class="waffle-cell ci" x="126" y="70" width="12" height="12" rx="2" fill="#563d7c" style="animation-delay:665ms" /><rect class="waffle-cell ci" x="126" y="84" width="12" height="12" rx="2" fill="#563d7c" style="animation-delay:672ms" /><rect class="waffle-cell ci" x="126" y="98" width="12" height="12" rx="2" fill="#563d7c" style="animation-delay:679ms" /><rect class="waffle-cell ci" x="126" y="112" width="12" height="12" rx="2" fill="#563d7c" style="animation-delay:686ms" /><rect class="waffle-cell ci" x="126" y="126" width="12" height="12" rx="2" fill="#563d7c" style="animation-delay:693ms" /></g>
       
-      <g transform="translate(0, 0)" class="treemap-cell">
-        <rect width="255" height="88" rx="8" fill="#161b22" stroke="#f1e05a" stroke-opacity="0.55" stroke-width="1.1" />
-        <rect width="255" height="88" rx="8" fill="#f1e05a" fill-opacity="0.11" />
-        <circle cx="14" cy="15" r="4" fill="#f1e05a" />
-        <text x="23" y="18.5" class="tile-title" font-size="11.5">JavaScript</text>
-        <text x="14" y="41" class="tile-perc" font-size="14">30.71%</text>
-        <rect x="14" y="79" width="227" height="3" rx="1.5" fill="#21262d" opacity="0.5" />
-        <rect x="14" y="79" width="70" height="3" rx="1.5" fill="#f1e05a" />
-      </g>
+        <text x="188" y="61" class="lbl">TypeScript</text>
+        <text x="188" y="84" class="num" font-size="24">45%</text>
       
-      <g transform="translate(0, 94)" class="treemap-cell">
-        <rect width="255" height="44" rx="8" fill="#161b22" stroke="#F05138" stroke-opacity="0.55" stroke-width="1.1" />
-        <rect width="255" height="44" rx="8" fill="#F05138" fill-opacity="0.11" />
-        <circle cx="14" cy="15" r="4" fill="#F05138" />
-        <text x="23" y="18.5" class="tile-title" font-size="11.5">Swift</text>
-        <text x="241" y="19" text-anchor="end" class="tile-perc" font-size="13">11.27%</text>
-        <rect x="14" y="35" width="227" height="3" rx="1.5" fill="#21262d" opacity="0.5" />
-        <rect x="14" y="35" width="26" height="3" rx="1.5" fill="#F05138" />
-      </g>
-      
-      <g transform="translate(263, 0)" class="treemap-cell">
-        <rect width="184" height="72" rx="8" fill="#161b22" stroke="#e34c26" stroke-opacity="0.55" stroke-width="1.1" />
-        <rect width="184" height="72" rx="8" fill="#e34c26" fill-opacity="0.11" />
-        <circle cx="14" cy="15" r="4" fill="#e34c26" />
-        <text x="23" y="18.5" class="tile-title" font-size="11.5">HTML</text>
-        <text x="14" y="41" class="tile-perc" font-size="14">12.38%</text>
-        <rect x="14" y="63" width="156" height="3" rx="1.5" fill="#21262d" opacity="0.5" />
-        <rect x="14" y="63" width="19" height="3" rx="1.5" fill="#e34c26" />
-      </g>
-      
-      <g transform="translate(263, 78)" class="treemap-cell">
-        <rect width="98" height="60" rx="8" fill="#161b22" stroke="#663399" stroke-opacity="0.55" stroke-width="1.1" />
-        <rect width="98" height="60" rx="8" fill="#663399" fill-opacity="0.11" />
-        <circle cx="11" cy="15" r="3.5" fill="#663399" />
-        <text x="20" y="18.5" class="tile-title" font-size="10.5">CSS</text>
-        <text x="11" y="36" class="tile-perc" font-size="12">9.92%</text>
-        <rect x="11" y="51" width="76" height="3" rx="1.5" fill="#21262d" opacity="0.5" />
-        <rect x="11" y="51" width="8" height="3" rx="1.5" fill="#663399" />
-      </g>
-      
-      <g transform="translate(367, 78)" class="treemap-cell">
-        <rect width="80" height="60" rx="8" fill="#161b22" stroke="#c6538c" stroke-opacity="0.55" stroke-width="1.1" />
-        <rect width="80" height="60" rx="8" fill="#c6538c" fill-opacity="0.11" />
-        <circle cx="11" cy="15" r="3.5" fill="#c6538c" />
-        <text x="20" y="18.5" class="tile-title" font-size="10.5">SCSS</text>
-        <text x="11" y="36" class="tile-perc" font-size="12">8.84%</text>
-        <rect x="11" y="51" width="58" height="3" rx="1.5" fill="#21262d" opacity="0.5" />
-        <rect x="11" y="51" width="6" height="3" rx="1.5" fill="#c6538c" />
-      </g>
-    </g>
-
-    <!-- Secondary Polyglot Chip Strip (Languages #6..#12) -->
+      <rect x="188" y="99.5" width="9" height="9" rx="2" fill="#3178c6" />
+      <text x="201" y="108" class="ink" font-size="11.5">TypeScript</text>
+      <text x="471" y="108" class="mono mut" font-size="11" text-anchor="end">45%</text>
+      <rect x="188" y="118.5" width="9" height="9" rx="2" fill="#f1e05a" />
+      <text x="201" y="127" class="ink" font-size="11.5">JavaScript</text>
+      <text x="471" y="127" class="mono mut" font-size="11" text-anchor="end">25%</text>
+      <rect x="188" y="137.5" width="9" height="9" rx="2" fill="#3572A5" />
+      <text x="201" y="146" class="ink" font-size="11.5">Python</text>
+      <text x="471" y="146" class="mono mut" font-size="11" text-anchor="end">15%</text>
+      <rect x="188" y="156.5" width="9" height="9" rx="2" fill="#e34c26" />
+      <text x="201" y="165" class="ink" font-size="11.5">HTML</text>
+      <text x="471" y="165" class="mono mut" font-size="11" text-anchor="end">10%</text>
+      <rect x="188" y="175.5" width="9" height="9" rx="2" fill="#563d7c" />
+      <text x="201" y="184" class="ink" font-size="11.5">CSS</text>
+      <text x="471" y="184" class="mono mut" font-size="11" text-anchor="end">5%</text>
     
-      <g transform="translate(0, 146)">
-        
-            <g transform="translate(0, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#b07219" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#b07219" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Java</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">8.8%</text>
-            </g>
-            <g transform="translate(76, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#1d365d" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#1d365d" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Less</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">7.89%</text>
-            </g>
-            <g transform="translate(152, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#3178c6" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#3178c6" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Typ...</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">4.98%</text>
-            </g>
-            <g transform="translate(228, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#3572A5" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#3572A5" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Pyt...</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">2.51%</text>
-            </g>
-            <g transform="translate(304, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#7355dd" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#7355dd" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">C#</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">2.43%</text>
-            </g>
-            <g transform="translate(380, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#89e051" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#89e051" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Shell</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">0.22%</text>
-            </g>
-            <g transform="translate(456, 0)">
-              <rect width="68" height="22" rx="6" fill="#161b22" stroke="#384d54" stroke-opacity="0.45" stroke-width="1" />
-              <circle cx="10" cy="11" r="3" fill="#384d54" />
-              <text x="18" y="14.5" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#58a6ff">Doc...</text>
-              <text x="60" y="14.5" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#8b949e">0.02%</text>
-            </g>
-      </g>
-    
-  </g>
 </svg>

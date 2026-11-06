@@ -22,7 +22,7 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 
 ## 🎨 Live Card Showcase
 
-Real SVG outputs generated directly by `customReadmeSVG`:
+SVG outputs generated directly by `customReadmeSVG`, rendered here with sample data:
 
 ### 1. Developer Showcase (Flagship Animated Cyber World)
 > 36s synchronized multi-act animation featuring hologram workstation telemetry, platformer contribution runner, and isometric voxel city.
@@ -42,8 +42,8 @@ Real SVG outputs generated directly by `customReadmeSVG`:
   <img src="assets/cards/stats-ring.svg" alt="GitHub Stats Ring Gauge" width="100%" />
 </p>
 
-### 3. Top Languages (Polyglot Treemap) & Top Repositories
-> Proportional mosaic distribution across 12+ languages alongside 2-column repository telemetry with sparklines and release tags.
+### 3. Top Languages (Polyglot Waffle) & Top Repositories
+> A hundred-cell waffle with one cell per percent of code, alongside a ruled repository table with stars, forks, and last push.
 
 <p align="center">
   <img src="assets/cards/languages-polyglot.svg" alt="Top Languages Polyglot" width="100%" />
@@ -54,7 +54,7 @@ Real SVG outputs generated directly by `customReadmeSVG`:
 </p>
 
 ### 4. Profile Overview
-> Glassmorphic executive résumé highlighting tenure, flagship repository, status indicator, and top language.
+> Identity under a banner built from the account's real contribution calendar, with language share and core counts.
 
 <p align="center">
   <img src="assets/cards/profile-overview.svg" alt="Profile Overview" width="100%" />

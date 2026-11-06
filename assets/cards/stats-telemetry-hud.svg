@@ -1,176 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="495" height="215" viewBox="0 0 495 215" fill="none">
-  <defs>
-    <linearGradient id="cyber-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117" />
-      <stop offset="100%" stop-color="#161b22" />
-    </linearGradient>
-    <linearGradient id="cyber-top-bar" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00f2fe" />
-      <stop offset="50%" stop-color="#3fb950" />
-      <stop offset="100%" stop-color="#a855f7" />
-    </linearGradient>
-    
-    <linearGradient id="stats-hud-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117" />
-      <stop offset="100%" stop-color="#161b22" />
-    </linearGradient>
-    <linearGradient id="stats-hud-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
-      <stop offset="45%" stop-color="#30363d" stop-opacity="0.65" />
-      <stop offset="100%" stop-color="#3fb950" stop-opacity="0.35" />
-    </linearGradient>
-    <linearGradient id="stats-hud-tile-rim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#21262d" stop-opacity="0.45" />
-    </linearGradient>
-    <linearGradient id="stats-hud-brand" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#3fb950" />
-      <stop offset="100%" stop-color="#a855f7" />
-    </linearGradient>
-    <radialGradient id="stats-hud-glow-tl" cx="0%" cy="0%" r="65%">
-      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="#3fb950" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="stats-hud-glow-br" cx="100%" cy="100%" r="65%">
-      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.11" />
-      <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
-    </radialGradient>
-    <pattern id="stats-hud-dots" width="18" height="18" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="0.8" fill="#8b949e" fill-opacity="0.12" />
-    </pattern>
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="232" viewBox="0 0 495 232" fill="none" role="img" aria-label="Le Tan Thang, GitHub stats">
+  <title>Le Tan Thang, GitHub stats</title>
   
-  </defs>
-
   <style>
-    
-    .font-ui { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 700; font-size: 9px; fill: #8b949e; letter-spacing: 0.08em; text-transform: uppercase; }
-    .stat-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 14px; fill: #58a6ff; font-variant-numeric: tabular-nums; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 500; fill: #8b949e; }
-    @keyframes statusPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
-    .pulse-dot { animation: statusPulse 2.2s ease-in-out infinite; }
-    
-  
-    .hud-title { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 16px; fill: #58a6ff; }
-    .hud-mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; }
-    .hud-val { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; font-weight: 800; font-size: 17px; fill: #58a6ff; font-variant-numeric: tabular-nums; }
-    .hud-grade { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; font-weight: 900; font-size: 30px; fill: #58a6ff; }
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; }
+    .ink { fill: #c9d1d9; }
+    .mut { fill: #8b949e; }
+    .lnk { fill: #58a6ff; }
+    .lbl { font-size: 11px; fill: #8b949e; }
+    .num { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; fill: #c9d1d9; }
+    .ci { animation: cellIn .4s ease-out both; }
+    @keyframes cellIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .ci { animation: none; } }
   </style>
-
-  <rect x="0.5" y="0.5" rx="14" width="494" height="214" fill="url(#cyber-bg)" stroke="#30363d"/>
-  <path d="M 14,0.5 L 481,0.5" stroke="url(#cyber-top-bar)" stroke-width="3" stroke-linecap="round"/>
-
-  <!-- Tactical Brackets -->
-  <path d="M 12,5 L 5,5 L 5,12" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.65"/>
-  <path d="M 483,5 L 490,5 L 490,12" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.65"/>
-  <path d="M 5,203 L 5,210 L 12,210" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.65"/>
-  <path d="M 490,203 L 490,210 L 483,210" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.65"/>
-
-  <!-- Header -->
-  <g transform="translate(24, 0)">
-    <text class="hud-mono" x="0" y="22" font-size="9" font-weight="700" letter-spacing="1.2" fill="#3fb950">SYS.DEV // TELEMETRY HUD</text>
-    <text class="hud-title" x="0" y="42">Tan Thang Le <tspan fill="#8b949e" font-size="12.5" font-weight="500">(@cubewin07)</tspan></text>
-  </g>
-
-  <!-- Live Status Beacon Capsule -->
-  <g transform="translate(337, 18)">
-    <rect x="0" y="0" width="134" height="24" rx="12" fill="#0c1624" stroke="#30363d" stroke-width="1.2"/>
-    <circle cx="14" cy="12" r="3.5" fill="#22c55e"/>
-    <circle cx="14" cy="12" r="3.5" fill="none" stroke="#22c55e" stroke-width="1.2" opacity="0.6">
-      <animate attributeName="r" values="3.5;9" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.6;0" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    <text class="hud-mono" x="25" y="15.5" font-size="9.5" font-weight="800" letter-spacing="0.5" fill="#3fb950">⚡ 1,533 IMPACT</text>
-  </g>
-
-  <line x1="24" y1="54" x2="471" y2="54" stroke="#21262d" stroke-width="1" opacity="0.6"/>
-
-  <!-- Zone A: Proportional Tactical Bento Modules -->
-  <g transform="translate(24, 66)">
-    <!-- Module 1: Contributions -->
-    
-    <g transform="translate(0, 0)">
-      <rect x="0" y="0" width="137" height="58" rx="6" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-hud-tile-rim)" stroke-width="1" />
-      <line x1="8" y1="0.75" x2="129" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="6" width="3" height="46" rx="1.5" fill="#3fb950" opacity="0.9" />
-      
-        <g transform="translate(10, 8)">
-          <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="#8b949e">CONTRIBUTIONS</text>
-          <text class="hud-val" x="0" y="33">1,533</text>
-        </g>
-      
-    </g>
+  <rect x="0.5" y="0.5" width="494" height="231" rx="6" fill="#0d1117" stroke="#30363d" />
   
-
-    <!-- Module 2: Commits -->
+      <path d="M 17 7 H 7 V 17" stroke="#3fb950" stroke-width="1.5" /><path d="M 478 7 H 488 V 17" stroke="#3fb950" stroke-width="1.5" /><path d="M 17 225 H 7 V 215" stroke="#3fb950" stroke-width="1.5" /><path d="M 478 225 H 488 V 215" stroke="#3fb950" stroke-width="1.5" />
+      <text x="24" y="28" class="mono" font-size="10" letter-spacing="1" fill="#3fb950">SYS.DEV // TELEMETRY HUD</text>
+      <text x="24" y="47" class="ink" font-size="15" font-weight="600">Le Tan Thang</text>
+      <text x="134.2" y="47" class="mono mut" font-size="11">(@cubewin07)</text>
+      <text x="471" y="47" class="mono ink" font-size="11" text-anchor="end">⚡ 2,150 IMPACT</text>
+      
+      <text x="24" y="72" class="mono mut" font-size="10" letter-spacing="0.5">CONTRIBUTIONS</text>
+      <text x="24" y="96" class="num" font-size="20">2,150</text>
+      
+      <g class="cell-meter" transform="translate(24, 105)"><rect x="0" width="5" height="5" rx="2" fill="#3fb950" class="ci" /><rect x="7" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:22ms" /><rect x="14" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:44ms" /><rect x="21" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:66ms" /><rect x="28" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:88ms" /><rect x="35" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:110ms" /><rect x="42" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:132ms" /><rect x="49" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:154ms" /><rect x="56" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:176ms" /><rect x="63" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:198ms" /><rect x="70" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:220ms" /><rect x="77" width="5" height="5" rx="2" fill="#21262d" /><rect x="84" width="5" height="5" rx="2" fill="#21262d" /><rect x="91" width="5" height="5" rx="2" fill="#21262d" /><rect x="98" width="5" height="5" rx="2" fill="#21262d" /><rect x="105" width="5" height="5" rx="2" fill="#21262d" /><rect x="112" width="5" height="5" rx="2" fill="#21262d" /><rect x="119" width="5" height="5" rx="2" fill="#21262d" /><rect x="126" width="5" height="5" rx="2" fill="#21262d" /></g>
+      <text x="182" y="72" class="mono mut" font-size="10" letter-spacing="0.5">COMMITS PUSHED</text>
+      <text x="182" y="96" class="num" font-size="20">1,840</text>
+      
+      <g class="cell-meter" transform="translate(182, 105)"><rect x="0" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:90ms" /><rect x="7" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:112ms" /><rect x="14" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:134ms" /><rect x="21" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:156ms" /><rect x="28" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:178ms" /><rect x="35" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:200ms" /><rect x="42" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:222ms" /><rect x="49" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:244ms" /><rect x="56" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:266ms" /><rect x="63" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:288ms" /><rect x="70" width="5" height="5" rx="2" fill="#21262d" /><rect x="77" width="5" height="5" rx="2" fill="#21262d" /><rect x="84" width="5" height="5" rx="2" fill="#21262d" /><rect x="91" width="5" height="5" rx="2" fill="#21262d" /><rect x="98" width="5" height="5" rx="2" fill="#21262d" /><rect x="105" width="5" height="5" rx="2" fill="#21262d" /><rect x="112" width="5" height="5" rx="2" fill="#21262d" /><rect x="119" width="5" height="5" rx="2" fill="#21262d" /><rect x="126" width="5" height="5" rx="2" fill="#21262d" /></g>
+      <text x="24" y="136" class="mono mut" font-size="10" letter-spacing="0.5">PULL REQUESTS</text>
+      <text x="24" y="160" class="num" font-size="20">86</text>
+      <text x="163.5" y="160" class="mono mut" font-size="10" text-anchor="end">+42 Reviews</text>
+      <g class="cell-meter" transform="translate(24, 169)"><rect x="0" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:180ms" /><rect x="7" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:202ms" /><rect x="14" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:224ms" /><rect x="21" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:246ms" /><rect x="28" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:268ms" /><rect x="35" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:290ms" /><rect x="42" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:312ms" /><rect x="49" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:334ms" /><rect x="56" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:356ms" /><rect x="63" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:378ms" /><rect x="70" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:400ms" /><rect x="77" width="5" height="5" rx="2" fill="#21262d" /><rect x="84" width="5" height="5" rx="2" fill="#21262d" /><rect x="91" width="5" height="5" rx="2" fill="#21262d" /><rect x="98" width="5" height="5" rx="2" fill="#21262d" /><rect x="105" width="5" height="5" rx="2" fill="#21262d" /><rect x="112" width="5" height="5" rx="2" fill="#21262d" /><rect x="119" width="5" height="5" rx="2" fill="#21262d" /><rect x="126" width="5" height="5" rx="2" fill="#21262d" /></g>
+      <text x="182" y="136" class="mono mut" font-size="10" letter-spacing="0.5">ACTIVE STREAK</text>
+      <text x="182" y="160" class="num" font-size="20">16d</text>
+      <text x="321.5" y="160" class="mono mut" font-size="10" text-anchor="end">Peak: 42d</text>
+      <g class="cell-meter" transform="translate(182, 169)"><rect x="0" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:270ms" /><rect x="7" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:292ms" /><rect x="14" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:314ms" /><rect x="21" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:336ms" /><rect x="28" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:358ms" /><rect x="35" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:380ms" /><rect x="42" width="5" height="5" rx="2" fill="#3fb950" class="ci" style="animation-delay:402ms" /><rect x="49" width="5" height="5" rx="2" fill="#21262d" /><rect x="56" width="5" height="5" rx="2" fill="#21262d" /><rect x="63" width="5" height="5" rx="2" fill="#21262d" /><rect x="70" width="5" height="5" rx="2" fill="#21262d" /><rect x="77" width="5" height="5" rx="2" fill="#21262d" /><rect x="84" width="5" height="5" rx="2" fill="#21262d" /><rect x="91" width="5" height="5" rx="2" fill="#21262d" /><rect x="98" width="5" height="5" rx="2" fill="#21262d" /><rect x="105" width="5" height="5" rx="2" fill="#21262d" /><rect x="112" width="5" height="5" rx="2" fill="#21262d" /><rect x="119" width="5" height="5" rx="2" fill="#21262d" /><rect x="126" width="5" height="5" rx="2" fill="#21262d" /></g>
+      <line x1="339" y1="64" x2="339" y2="190" stroke="#21262d" />
+      <g class="progress-ring"><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(0.00 406 118)" class="ci" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(9.00 406 118)" class="ci" style="animation-delay:16ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(18.00 406 118)" class="ci" style="animation-delay:32ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(27.00 406 118)" class="ci" style="animation-delay:48ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(36.00 406 118)" class="ci" style="animation-delay:64ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(45.00 406 118)" class="ci" style="animation-delay:80ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(54.00 406 118)" class="ci" style="animation-delay:96ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(63.00 406 118)" class="ci" style="animation-delay:112ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(72.00 406 118)" class="ci" style="animation-delay:128ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(81.00 406 118)" class="ci" style="animation-delay:144ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(90.00 406 118)" class="ci" style="animation-delay:160ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(99.00 406 118)" class="ci" style="animation-delay:176ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(108.00 406 118)" class="ci" style="animation-delay:192ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(117.00 406 118)" class="ci" style="animation-delay:208ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(126.00 406 118)" class="ci" style="animation-delay:224ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(135.00 406 118)" class="ci" style="animation-delay:240ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(144.00 406 118)" class="ci" style="animation-delay:256ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(153.00 406 118)" class="ci" style="animation-delay:272ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(162.00 406 118)" class="ci" style="animation-delay:288ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(171.00 406 118)" class="ci" style="animation-delay:304ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(180.00 406 118)" class="ci" style="animation-delay:320ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(189.00 406 118)" class="ci" style="animation-delay:336ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(198.00 406 118)" class="ci" style="animation-delay:352ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(207.00 406 118)" class="ci" style="animation-delay:368ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(216.00 406 118)" class="ci" style="animation-delay:384ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(225.00 406 118)" class="ci" style="animation-delay:400ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(234.00 406 118)" class="ci" style="animation-delay:416ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#3fb950" transform="rotate(243.00 406 118)" class="ci" style="animation-delay:432ms" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(252.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(261.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(270.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(279.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(288.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(297.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(306.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(315.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(324.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(333.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(342.00 406 118)" /><rect x="404.50" y="74.00" width="3" height="8" rx="1" fill="#21262d" transform="rotate(351.00 406 118)" /></g>
+      <text x="406" y="128" class="num" font-size="28" text-anchor="middle">A</text>
+      <text x="406" y="178" class="mono mut" font-size="9.5" letter-spacing="0.5" text-anchor="middle">OVERALL RANK</text>
+      <text x="406" y="192" class="mono ink" font-size="9.5" text-anchor="middle">SCORE 71.2/100</text>
+      <g class="weekly-strip"><rect x="24.00" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="41.27" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="58.54" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="75.81" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="93.08" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="110.35" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="127.62" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="144.88" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="162.15" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="179.42" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="196.69" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="213.96" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="231.23" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="248.50" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="265.77" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="283.04" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="300.31" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="317.58" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="334.85" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="352.12" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="369.38" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="386.65" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="403.92" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="421.19" y="202" width="15.27" height="8" rx="2" fill="#26a641" /><rect x="438.46" y="202" width="15.27" height="8" rx="2" fill="#39d353" /><rect x="455.73" y="202" width="15.27" height="8" rx="2" fill="#39d353" /></g>
+      <text x="24" y="224" class="mono mut" font-size="9.5" letter-spacing="0.5">26 WEEKS</text>
     
-    <g transform="translate(147, 0)">
-      <rect x="0" y="0" width="137" height="58" rx="6" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-hud-tile-rim)" stroke-width="1" />
-      <line x1="8" y1="0.75" x2="129" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="6" width="3" height="46" rx="1.5" fill="#00f2fe" opacity="0.9" />
-      
-        <g transform="translate(10, 8)">
-          <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="#8b949e">COMMITS PUSHED</text>
-          <text class="hud-val" x="0" y="33">1,246</text>
-        </g>
-      
-    </g>
-  
-
-    <!-- Module 3: Pull Requests -->
-    
-    <g transform="translate(0, 68)">
-      <rect x="0" y="0" width="137" height="58" rx="6" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-hud-tile-rim)" stroke-width="1" />
-      <line x1="8" y1="0.75" x2="129" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="6" width="3" height="46" rx="1.5" fill="#a855f7" opacity="0.9" />
-      
-        <g transform="translate(10, 8)">
-          <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="#8b949e">PULL REQUESTS</text>
-          <text class="hud-val" x="0" y="33">42</text>
-          <text class="hud-mono" x="117" y="33" text-anchor="end" fill="#8b949e" font-size="10" font-weight="600">+1 Reviews</text>
-        </g>
-      
-    </g>
-  
-
-    <!-- Module 4: Streak -->
-    
-    <g transform="translate(147, 68)">
-      <rect x="0" y="0" width="137" height="58" rx="6" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-hud-tile-rim)" stroke-width="1" />
-      <line x1="8" y1="0.75" x2="129" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      <rect x="0.5" y="6" width="3" height="46" rx="1.5" fill="#f59e0b" opacity="0.9" />
-      
-        <g transform="translate(10, 8)">
-          <text class="hud-mono" x="0" y="10" font-size="8.5" font-weight="700" letter-spacing="0.5" fill="#8b949e">ACTIVE STREAK</text>
-          <text class="hud-val" x="0" y="33">0d</text>
-          <text class="hud-mono" x="117" y="33" text-anchor="end" fill="#8b949e" font-size="10" font-weight="600">Peak: 18d</text>
-        </g>
-      
-    </g>
-  
-  </g>
-
-  <!-- Zone B: Radial Gauge Bento Pod -->
-  <g transform="translate(323, 66)">
-    
-    <g transform="translate(0, 0)">
-      <rect x="0" y="0" width="148" height="126" rx="8" fill="#161b22" fill-opacity="0.82" stroke="url(#stats-hud-tile-rim)" stroke-width="1" />
-      <line x1="10" y1="0.75" x2="138" y2="0.75" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.75" />
-      
-      
-        <g transform="translate(74, 46)">
-          <circle cx="0" cy="0" r="36" fill="none" stroke="#21262d" stroke-width="6.5"/>
-          <circle cx="0" cy="0" r="36" fill="none" stroke="#3fb950" stroke-width="6.5"
-                  stroke-dasharray="226.2" stroke-dashoffset="190.0"
-                  stroke-linecap="round" transform="rotate(-90)" />
-          
-          <text class="hud-grade" x="0" y="10" text-anchor="middle">C</text>
-        </g>
-        <text class="hud-mono" x="74" y="101" text-anchor="middle" font-size="8.5" font-weight="700" fill="#8b949e">OVERALL RANK</text>
-        <text class="hud-mono" x="74" y="115" text-anchor="middle" font-size="8" font-weight="700" fill="#3fb950">SCORE 16.1/100 • TOP 84%</text>
-      
-    </g>
-  
-  </g>
 </svg>

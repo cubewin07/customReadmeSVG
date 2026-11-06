@@ -176,6 +176,8 @@ const MOCK_DATA = {
       totalRepos: 38,
       followers: 142,
       weeks: STANDARD_WEEKS.slice(-26),
+      monthlyContributions: [96, 142, 118, 171, 188, 246, 201, 214, 163, 192, 248, 171],
+      monthLabels: ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
     },
     developer: {
       name: 'Le Tan Thang',

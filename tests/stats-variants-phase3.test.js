@@ -43,12 +43,12 @@ test('Stats ring variant renders composite progress ring and 5 labelled metrics 
   const svg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'ring' });
   assertValidXml(svg);
   assert.ok(svg.includes('progress-ring'), 'Must include circular progress ring');
-  assert.ok(svg.includes('delta-chip') || svg.includes('▲'), 'Must include YoY delta chips');
-  assert.ok(svg.includes('COMMITS'), 'Must include labelled Commits metric');
-  assert.ok(svg.includes('PULL REQUESTS'), 'Must include labelled PRs metric');
-  assert.ok(svg.includes('REVIEWS'), 'Must include labelled Reviews metric');
-  assert.ok(svg.includes('ISSUES'), 'Must include labelled Issues metric');
-  assert.ok(svg.includes('STARS'), 'Must include labelled Stars metric');
+  assert.ok(!svg.includes('delta-chip'), 'Must not invent per-metric deltas that the data cannot support');
+  assert.ok(svg.includes('Commits'), 'Must include labelled Commits metric');
+  assert.ok(svg.includes('Pull requests'), 'Must include labelled PRs metric');
+  assert.ok(svg.includes('Reviews'), 'Must include labelled Reviews metric');
+  assert.ok(svg.includes('Issues'), 'Must include labelled Issues metric');
+  assert.ok(svg.includes('Stars'), 'Must include labelled Stars metric');
 });
 
 test('Stats mix (bars) variant renders real percentage shares of effort and stacked bar', () => {
@@ -57,8 +57,8 @@ test('Stats mix (bars) variant renders real percentage shares of effort and stac
   assert.ok(svg.includes('stacked-bar'), 'Must include proportional stacked bar');
   // Commits should be ~90.9% of action contributions (1420 / (1420+84+22+36) = 1420 / 1562 = ~90.9%)
   assert.ok(svg.includes('%'), 'Must show real percentage shares');
-  assert.ok(svg.includes('COMMITS'));
-  assert.ok(svg.includes('PULL REQUESTS'));
+  assert.ok(svg.includes('Commits'));
+  assert.ok(svg.includes('Pull requests'));
   assert.ok(svg.includes('1,850') || svg.includes('1850'), 'Must show milestone total contributions');
 });
 
@@ -66,11 +66,11 @@ test('Stats crest (hero) variant renders 5-axis radar chart with vertices and ra
   const svg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'crest' });
   assertValidXml(svg);
   assert.ok(svg.includes('radar-chart') || svg.includes('polygon'), 'Must include 5-axis radar polygon');
-  assert.ok(svg.includes('COMMITS'));
-  assert.ok(svg.includes('PRS'));
-  assert.ok(svg.includes('REVIEWS'));
-  assert.ok(svg.includes('STARS'));
-  assert.ok(svg.includes('FOLLOWERS'));
+  assert.ok(svg.includes('Commits'));
+  assert.ok(svg.includes('PRs'));
+  assert.ok(svg.includes('Reviews'));
+  assert.ok(svg.includes('Stars'));
+  assert.ok(svg.includes('Followers'));
   assert.ok(svg.includes('Score') || svg.includes('SCORE'), 'Must include composite score');
 });
 
@@ -78,7 +78,7 @@ test('Stats year (dashboard) variant renders 12 monthly contribution bars across
   const svg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'year' });
   assertValidXml(svg);
   assert.ok(svg.includes('monthly-bars') || svg.includes('trajectory-bar'), 'Must include monthly bars');
-  assert.ok(svg.includes('Peak') || svg.includes('Best Month'), 'Must include peak month callout');
+  assert.ok(svg.includes('Best month'), 'Must include peak month callout');
   assert.ok(svg.includes('42'), 'Must include longest streak');
   assert.ok(svg.includes('1,850') || svg.includes('1850'), 'Must include total contributions');
 });
@@ -87,9 +87,9 @@ test('Stats ticker (compact) variant renders single-row ~72px banner with grade 
   const svg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'ticker' });
   assertValidXml(svg);
   assert.ok(svg.includes('height="72"') || svg.includes('height="70"'), 'Must have compact ~72px height');
-  assert.ok(svg.includes('metric-tile') || svg.includes('COMMITS'), 'Must include labelled tiles');
+  assert.ok(svg.includes('Commits'), 'Must include labelled metrics');
   assert.ok(svg.includes('1,420') || svg.includes('1420'), 'Must include hero commits number');
-  assert.ok(svg.includes('STARS'));
+  assert.ok(svg.includes('Stars'));
 });
 
 test('Stats streak variant renders current streak flame, longest streak, and 26-week heatmap', () => {
@@ -124,7 +124,7 @@ test('Stats redesign audit assertions: streak 405px bounds, dynamic crest tier &
   const crestSvg = statsCard.renderSvg(mockStatsData, themes.dark, { layout: 'crest' });
   assertValidXml(crestSvg);
   assert.ok(!crestSvg.includes('LEVEL 4 CREST'), 'Should not hardcode LEVEL 4 CREST');
-  assert.ok(crestSvg.includes('TIER') || crestSvg.includes('STANDING'), 'Should render dynamic tier or standing');
+  assert.ok(crestSvg.includes('Overall tier'), 'Should render dynamic tier');
   assert.ok(crestSvg.includes('<circle'), 'Must render radar vertex circles');
 
   // 3. hud layout scales modules proportionally at width: 'full' (830px)

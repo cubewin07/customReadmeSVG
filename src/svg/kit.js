@@ -142,7 +142,7 @@ export function shareStrip({ x = 0, y = 0, width, items = [], size = 8, gap = 2,
   let cells = '';
   items.forEach((item, i) => {
     for (let c = 0; c < counts[i]; c++) {
-      cells += `<rect x="${(index * pitch).toFixed(2)}" width="${w.toFixed(2)}" height="${height || size}" rx="2" fill="${item.color}" class="ci"${delayAttr(index * 8)} />`;
+      cells += `<rect x="${(index * pitch).toFixed(2)}" width="${w.toFixed(2)}" height="${height || size}" rx="2" fill="${item.color}"${item.opacity !== undefined ? ` fill-opacity="${item.opacity}"` : ''} class="ci"${delayAttr(index * 8)} />`;
       index += 1;
     }
   });

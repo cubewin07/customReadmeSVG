@@ -43,7 +43,7 @@ test('statsCard renders flagship Cyberpunk Telemetry HUD by default', () => {
   // Zone B: Radial Velocity Gauge
   assert.ok(svg.includes('OVERALL RANK'), 'Must include rank tier title');
   assert.ok(svg.includes('SCORE'), 'Must include velocity score');
-  assert.ok(svg.includes('TOP'), 'Must include velocity percentile callout');
+  assert.ok(!svg.includes('TOP '), 'Must not claim a population percentile the score cannot support');
 
   // Elimination of dead zero metrics
   assert.ok(!svg.includes('Total Forks:'), 'Dead 0 forks should not be a primary metric');

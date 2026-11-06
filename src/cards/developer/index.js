@@ -3,7 +3,7 @@ import { DEVELOPER_QUERY } from '../../core/github/queries.js';
 import { normalizeDeveloperData } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
 import { DEFAULT_DEVELOPER_PROFILE } from './data/defaultProfile.js';
-import { tr, W, H, SX, SY, ACT, withShift } from './utils/timeline.js';
+import { W, H, SX, SY, ACT, withShift } from './utils/timeline.js';
 import { renderSharedDefs } from './components/sharedDefs.js';
 import { renderInfoPanel } from './components/infoPanel.js';
 import { renderSkyAtmosphere } from './components/skyAtmosphere.js';
@@ -133,17 +133,9 @@ export const developerCard = {
     <!-- Main Card Body Background -->
     <rect width="${cardW}" height="${cardH}" fill="${cardBg}"/>
 
-    <!-- Top Glow Accent Bar -->
-    <rect width="${cardW}" height="4" fill="url(#barGrad)"/>
-
-    <!-- Light Shimmer Beam Across Top Bar -->
-    <rect y="0" width="200" height="4" fill="url(#shimGrad)">
-      ${tr([[0, -200, 0], [0.4, -200, 0], [2.6, cardW, 0]])}
-    </rect>
-
     <!-- Left Column: Identity, Status, Focus, Arsenal, and Mechanical Rolling Stats -->
     <g class="dev-panel" transform="translate(0,0)">
-      ${renderInfoPanel(profile, theme, sceneAccent)}
+      ${renderInfoPanel(profile, theme)}
     </g>
 
     <!-- Right/Bottom Column: 36s Master Timeline Cyber World -->

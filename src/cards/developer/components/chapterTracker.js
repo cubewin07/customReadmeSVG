@@ -3,7 +3,7 @@ import { anim, pulse, sl, sla } from '../utils/timeline.js';
 /**
  * Renders the unified 5-act Chapter Tracker HUD at the top of the scene (36s timeline).
  * 5 pips + progress bar + one clear fact per act in large, crisp typography:
- * - ACT 01 // SHIP • LATEST COMMIT & PINNED REPOS (0s - 12s)
+ * - ACT 01 // SHIP • LATEST COMMIT & REPOS (0s - 12s)
  * - ACT 02 // RUN • STREAK & CONTRIBUTION PLATFORMER (12s - 18s)
  * - ACT 03 // BUILD • 7-WEEK VOXEL CITY (18s - 24s)
  * - ACT 04 // ORBIT • LANGUAGE UNIVERSE (24s - 29.4s)
@@ -73,7 +73,7 @@ export function renderChapterTracker(profile, theme = {}) {
     <g opacity="1">
       ${anim('opacity', [[0, 1], [11.8, 1], [12.2, 0], [24, 0]])}
       <text class="m" x="92" y="18" font-size="10.5" font-weight="800" letter-spacing="0.6" fill="#e6edf3">
-        <tspan fill="${accent}">ACT 01 // SHIP</tspan> • LATEST COMMIT &amp; PINNED REPOS
+        <tspan fill="${accent}">ACT 01 // SHIP</tspan> • LATEST COMMIT &amp; REPOS
       </text>
     </g>
 

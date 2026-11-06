@@ -27,8 +27,6 @@ export const BRAND_COLORS = {
  */
 export function renderSharedDefs(theme, sceneAccent = null) {
   const accent = sceneAccent || theme.accent || '#58a6ff';
-  const titleColor = theme.title || '#6ea8fe';
-  const successColor = theme.success || '#3fb950';
 
   let cubeDefs = '';
   for (const [level, col] of Object.entries(CUBE_COLORS)) {
@@ -69,26 +67,9 @@ export function renderSharedDefs(theme, sceneAccent = null) {
     <clipPath id="card"><rect width="${W}" height="${H}" rx="18"/></clipPath>
     <clipPath id="scene"><rect width="${SW}" height="${SH}" rx="14"/></clipPath>
 
-    <!-- Left Name Gradient -->
-    <linearGradient id="nameGrad" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="${titleColor}"/>
-      <stop offset="55%" stop-color="${accent}"/>
-      <stop offset="100%" stop-color="${successColor}"/>
-    </linearGradient>
 
-    <!-- Top Accent Bar Gradient -->
-    <linearGradient id="barGrad" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="${titleColor}"/>
-      <stop offset="50%" stop-color="${accent}"/>
-      <stop offset="100%" stop-color="${successColor}"/>
-    </linearGradient>
 
     <!-- Moving Card Shimmer Gradient -->
-    <linearGradient id="shimGrad" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#fff" stop-opacity="0.65"/>
-      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>
 
     <!-- Character Glow Aura -->
     <radialGradient id="glowGrad">
@@ -175,11 +156,6 @@ export function renderSharedDefs(theme, sceneAccent = null) {
     </linearGradient>
 
     <!-- Left Panel Rank Badge Gradient -->
-    <linearGradient id="rankBadgeGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
-      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.2"/>
-    </linearGradient>
 
     <!-- 3D Voxel Cubes for City Act -->
     ${cubeDefs}

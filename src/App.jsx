@@ -4,6 +4,7 @@ import './App.css';
 const THEMES = [
   { id: 'dark', name: 'Dark' },
   { id: 'light', name: 'Light' },
+  { id: 'cobalt', name: 'Cobalt' },
   { id: 'obsidian', name: 'Obsidian' },
   { id: 'radical', name: 'Radical' },
   { id: 'nord', name: 'Nord' },
@@ -15,6 +16,9 @@ const THEMES = [
 ];
 
 const CARDS = [
+  { id: 'signature', name: 'Signature Plate', route: '/:user/signature' },
+  { id: 'stack', name: 'Stack Flame Graph', route: '/:user/stack' },
+  { id: 'trace', name: 'Shipping Trace', route: '/:user/trace' },
   { id: 'profile', name: 'Profile Overview', route: '/:user' },
   { id: 'developer', name: 'Developer Showcase', route: '/:user/developer' },
   { id: 'languages', name: 'Top Languages', route: '/:user/languages' },

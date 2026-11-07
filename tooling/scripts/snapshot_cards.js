@@ -7,6 +7,9 @@ import { languagesCard } from '../../src/cards/languages/index.js';
 import { reposCard } from '../../src/cards/repos/index.js';
 import { statsCard } from '../../src/cards/stats/index.js';
 import { developerCard } from '../../src/cards/developer/index.js';
+import { signatureCard } from '../../src/cards/plates/signature.js';
+import { stackCard } from '../../src/cards/plates/stack.js';
+import { traceCard } from '../../src/cards/plates/trace.js';
 import { themes } from '../../src/svg/theme.js';
 
 let _hasXmllint = null;
@@ -325,6 +328,51 @@ const MOCK_DATA = {
   },
 };
 
+const daysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString();
+const sampleCommits = (count, oldest, newest) =>
+  Array.from({ length: count }, (_, i) => daysAgo(oldest - ((oldest - newest) * i) / Math.max(1, count - 1)));
+
+MOCK_DATA.standard.signature = { ...MOCK_DATA.standard.stats, weeks: STANDARD_WEEKS };
+MOCK_DATA.long.signature = { ...MOCK_DATA.long.stats, weeks: STANDARD_WEEKS };
+MOCK_DATA.empty.signature = MOCK_DATA.empty.stats;
+
+const withRepoBreakdown = (languages) => languages.map((lang, i) => ({
+  ...lang,
+  repos: [
+    { name: 'customReadmeSVG', size: lang.size * 0.5, isPrivate: false },
+    { name: `${lang.name.toLowerCase()}-service-with-a-very-long-repository-name`, size: lang.size * 0.3, isPrivate: false },
+    { name: `hidden-private-${i}`, size: lang.size * 0.2, isPrivate: true },
+  ],
+}));
+MOCK_DATA.standard.stack = {
+  ...MOCK_DATA.standard.languages,
+  totalRepos: 38,
+  languages: withRepoBreakdown(MOCK_DATA.standard.languages.languages),
+};
+MOCK_DATA.long.stack = {
+  ...MOCK_DATA.long.languages,
+  totalRepos: 5420,
+  languages: withRepoBreakdown(MOCK_DATA.long.languages.languages),
+};
+MOCK_DATA.empty.stack = MOCK_DATA.empty.languages;
+
+MOCK_DATA.standard.trace = {
+  login: 'cubewin07',
+  name: 'Le Tan Thang',
+  repos: [
+    { name: 'customReadmeSVG', language: { name: 'JavaScript', color: '#f1e05a' }, commitCount: 240, commitDates: sampleCommits(240, 200, 2) },
+    { name: 'reactive-portfolio', language: { name: 'TypeScript', color: '#3178c6' }, commitCount: 96, commitDates: sampleCommits(96, 320, 120) },
+    { name: 'neural-canvas', language: { name: 'Rust', color: '#dea584' }, commitCount: 41, commitDates: sampleCommits(41, 150, 60) },
+  ],
+};
+MOCK_DATA.long.trace = {
+  login: 'hyper-polyglot',
+  name: 'Alexander Bartholomew Montgomery-Fitzgerald III',
+  repos: MOCK_DATA.long.repos.repos.concat(MOCK_DATA.long.repos.repos, MOCK_DATA.long.repos.repos, MOCK_DATA.long.repos.repos, MOCK_DATA.long.repos.repos)
+    .map((repo, i) => ({ name: `${repo.name}-${i}`, language: repo.primaryLanguage, commitCount: 8493 - i * 500, commitDates: sampleCommits(60, 360, 1) })),
+};
+MOCK_DATA.empty.trace = { login: 'ghost', name: 'ghost', repos: [] };
+
 const CARDS_CONFIG = [
   {
     id: 'profile',
@@ -351,6 +399,9 @@ const CARDS_CONFIG = [
     card: developerCard,
     layouts: ['default'],
   },
+  { id: 'signature', card: signatureCard, layouts: ['default'] },
+  { id: 'stack', card: stackCard, layouts: ['default'] },
+  { id: 'trace', card: traceCard, layouts: ['default'] },
 ];
 
 /**

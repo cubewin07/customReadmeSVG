@@ -31,9 +31,59 @@ export const PROFILE_QUERY = `
       location
       websiteUrl
       company
+      isHireable
       status {
         emoji
         message
+      }
+      organizations(first: 4) {
+        nodes {
+          name
+          avatarUrl
+          login
+        }
+      }
+      topRepo: repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 1
+      ) {
+        nodes {
+          name
+          stargazerCount
+          primaryLanguage {
+            name
+            color
+          }
+        }
+      }
+      topLanguages: repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: STARGAZERS, direction: DESC }
+        first: 10
+      ) {
+        nodes {
+          primaryLanguage {
+            name
+            color
+          }
+        }
+      }
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+              weekday
+            }
+          }
+        }
       }
     }
     rateLimit {
@@ -66,6 +116,8 @@ export const LANGUAGES_QUERY = `
         }
         nodes {
           name
+          isPrivate
+          pushedAt
           languages(first: 20, orderBy: { field: SIZE, direction: DESC }) {
             edges {
               size
@@ -89,10 +141,11 @@ export const LANGUAGES_QUERY = `
 
 /**
  * REPOS_QUERY
- * Fetches top 6 public, non-fork repositories owned by the user, ordered by stargazers count descending.
+ * Fetches top public, non-fork repositories owned by the user with topics, releases,
+ * watchers, languages, and commit history for rich variant displays.
  */
 export const REPOS_QUERY = `
-  query GetUserTopRepos($login: String!, $first: Int = 6) {
+  query GetUserTopRepos($login: String!, $first: Int = 10) {
     user(login: $login) {
       repositories(
         ownerAffiliations: [OWNER]
@@ -107,11 +160,50 @@ export const REPOS_QUERY = `
           url
           stargazerCount
           forkCount
+          pushedAt
+          updatedAt
           primaryLanguage {
             name
             color
           }
-          updatedAt
+          repositoryTopics(first: 3) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          licenseInfo {
+            spdxId
+          }
+          latestRelease {
+            tagName
+          }
+          watchers {
+            totalCount
+          }
+          languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 8) {
+                  nodes {
+                    message
+                    committedDate
+                    abbreviatedOid
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -137,6 +229,12 @@ export const STATS_QUERY = `
       followers {
         totalCount
       }
+      pullRequests(states: [OPEN, CLOSED, MERGED]) {
+        totalCount
+      }
+      issues(states: [OPEN, CLOSED]) {
+        totalCount
+      }
       repositories(ownerAffiliations: [OWNER], privacy: PUBLIC, first: 100) {
         totalCount
         nodes {
@@ -146,7 +244,20 @@ export const STATS_QUERY = `
       }
       contributionsCollection(from: $from, to: $to) {
         totalCommitContributions
+        totalIssueContributions
+        totalPullRequestContributions
+        totalPullRequestReviewContributions
         restrictedContributionsCount
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+              weekday
+            }
+          }
+        }
       }
     }
     rateLimit {
@@ -169,6 +280,7 @@ export const DEVELOPER_QUERY = `
     user(login: $login) {
       name
       login
+      createdAt
       bio
       location
       company
@@ -184,6 +296,20 @@ export const DEVELOPER_QUERY = `
         nodes {
           stargazerCount
           forkCount
+          isFork
+          primaryLanguage {
+            name
+            color
+          }
+          languages(first: 4, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
         }
       }
       pinnedItems(first: 6, types: [REPOSITORY]) {
@@ -196,6 +322,15 @@ export const DEVELOPER_QUERY = `
               name
               color
             }
+            languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
             defaultBranchRef {
               target {
                 ... on Commit {
@@ -203,6 +338,7 @@ export const DEVELOPER_QUERY = `
                     nodes {
                       message
                       committedDate
+                      abbreviatedOid
                     }
                   }
                 }
@@ -226,6 +362,15 @@ export const DEVELOPER_QUERY = `
             name
             color
           }
+          languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
           defaultBranchRef {
             target {
               ... on Commit {
@@ -233,6 +378,7 @@ export const DEVELOPER_QUERY = `
                   nodes {
                     message
                     committedDate
+                    abbreviatedOid
                   }
                 }
               }
@@ -241,6 +387,7 @@ export const DEVELOPER_QUERY = `
         }
       }
       contributionsCollection {
+        totalCommitContributions
         contributionCalendar {
           totalContributions
           weeks {
@@ -262,3 +409,80 @@ export const DEVELOPER_QUERY = `
   }
 `;
 
+/**
+ * TRACE_QUERY
+ * Fetches recently pushed public, non-fork repositories with their commit timestamps for the
+ * last year. Private repositories are excluded because their names appear on the card.
+ */
+export const TRACE_QUERY = `
+  query GetUserTrace($login: String!, $since: GitTimestamp!, $first: Int = 20) {
+    user(login: $login) {
+      login
+      name
+      repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: PUSHED_AT, direction: DESC }
+        first: $first
+      ) {
+        nodes {
+          name
+          pushedAt
+          primaryLanguage {
+            name
+            color
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 100, since: $since) {
+                  totalCount
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+                  nodes {
+                    committedDate
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      limit
+      cost
+      remaining
+      resetAt
+    }
+  }
+`;
+
+/**
+ * TRACE_HISTORY_QUERY
+ * Pages through one repository's commit timestamps for repositories with over 100 commits.
+ */
+export const TRACE_HISTORY_QUERY = `
+  query GetRepoCommitDates($owner: String!, $name: String!, $since: GitTimestamp!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            history(first: 100, since: $since, after: $after) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
+                committedDate
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

@@ -3,7 +3,24 @@ import { graphql } from '../../core/github/client.js';
 import { PROFILE_QUERY } from '../../core/github/queries.js';
 import { normalizeProfile } from '../../core/github/normalize.js';
 import { escapeXml } from '../../svg/escape.js';
-import { icons } from '../../svg/icons.js';
+import { resolveTheme } from '../../svg/theme.js';
+import { resolveCardWidth } from '../../svg/layout.js';
+import { wrapText } from '../../svg/text.js';
+import {
+  card,
+  contributionGrid,
+  fitMono,
+  fitUi,
+  formatCount,
+  formatPercent,
+  hairline,
+  heatLegend,
+  metaRow,
+  metricRow,
+  padX,
+  shareStrip,
+  text,
+} from '../../svg/kit.js';
 
 async function fetchAvatarBase64(url) {
   if (!url) return null;
@@ -21,7 +38,12 @@ async function fetchAvatarBase64(url) {
     for (let i = 0; i < bytes.byteLength; i++) {
       binary += String.fromCharCode(bytes[i]);
     }
-    const base64 = typeof btoa === 'function' ? btoa(binary) : (typeof globalThis.Buffer !== 'undefined' ? globalThis.Buffer.from(res.data).toString('base64') : '');
+    const base64 =
+      typeof btoa === 'function'
+        ? btoa(binary)
+        : typeof globalThis.Buffer !== 'undefined'
+        ? globalThis.Buffer.from(res.data).toString('base64')
+        : '';
     return base64 ? `data:${contentType};base64,${base64}` : null;
   } catch {
     return null;
@@ -32,14 +54,18 @@ export const profileCard = {
   id: 'profile',
   title: 'Profile Overview',
   aliases: ['overview', 'default'],
-  cacheTtlMs: 3600000, // 1 hour
+  cacheTtlMs: 3600000,
 
   async fetchData(username, options = {}) {
-    const data = await graphql(PROFILE_QUERY, { login: username }, {
-      ...options,
-      cacheKey: options.cacheKey || `gh:profile:${username}`,
-      ttlMs: options.ttlMs || this.cacheTtlMs,
-    });
+    const data = await graphql(
+      PROFILE_QUERY,
+      { login: username },
+      {
+        ...options,
+        cacheKey: options.cacheKey || `gh:profile:${username}`,
+        ttlMs: options.ttlMs || this.cacheTtlMs,
+      }
+    );
 
     const normalized = normalizeProfile(data);
     if (!normalized) {
@@ -58,7 +84,6 @@ export const profileCard = {
 
   renderSvg(data, theme, options = {}) {
     const isV0 = options.version === 'v0';
-
     if (isV0) {
       return renderV0Svg(data, theme, options);
     }
@@ -66,31 +91,84 @@ export const profileCard = {
   },
 };
 
-function extractProfileFields(data, options = {}) {
-  const name = escapeXml(data?.name || data?.login || options.username || 'User');
-  const login = escapeXml(data?.login || options.username || '');
-  const handle = escapeXml(`@${login}`);
-  const rawBio = data?.bio || 'No bio provided.';
-  const hideBio = options.hide_bio === 'true' || options.show_bio === 'false';
-  const hideMeta = options.hide_meta === 'true' || options.show_meta === 'false';
-  const bio = hideBio ? null : escapeXml(rawBio.length > 95 ? rawBio.slice(0, 92) + '...' : rawBio);
+function deriveBusiestWeekday(days) {
+  const totals = new Array(7).fill(0);
+  days.forEach((day, idx) => {
+    totals[day.weekday ?? idx % 7] += day.contributionCount || 0;
+  });
+  const peak = Math.max(...totals);
+  if (peak <= 0) return '–';
+  return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][totals.indexOf(peak)];
+}
 
-  const avatarDataUri = data?.avatarBase64 && data.avatarBase64.startsWith('data:') ? escapeXml(data.avatarBase64) : null;
-  const followers = data?.followers ?? 0;
-  const following = data?.following ?? 0;
-  const repos = data?.repositories ?? 0;
-  const stars = data?.totalStars ?? 0;
+function extractProfileFields(data = {}, options = {}) {
+  const login = data.login || 'developer';
+  const name = data.name || login;
+  const handle = `@${login}`;
+  const rawBio = (data.bio || '').trim();
+  const hideBio = options.hide_bio === 'true' || options.hide_bio === true || !rawBio;
+  const hideMeta = options.hide_meta === 'true' || options.hide_meta === true;
+  const bio = hideBio ? '' : rawBio;
+  const avatarDataUri = data.avatarBase64 || data.avatarUrl || null;
 
-  const company = (!hideMeta && data?.company) ? escapeXml(data.company) : null;
-  const location = (!hideMeta && data?.location) ? escapeXml(data.location) : null;
-  const website = (!hideMeta && data?.websiteUrl) ? escapeXml(data.websiteUrl.replace(/^https?:\/\//, '')) : null;
-  const createdAtYear = data?.createdAt ? new Date(data.createdAt).getFullYear() : null;
+  const followers = data.followers || 0;
+  const following = data.following || 0;
+  const repos = data.repositories || 0;
+  const stars = data.totalStars || 0;
+
+  const company = hideMeta ? '' : (data.company || '').trim();
+  const location = hideMeta ? '' : (data.location || '').trim();
+  const website = hideMeta ? '' : (data.websiteUrl || '').trim();
+
+  let createdAtYear = null;
+  let accountAgeYears = null;
+  if (data.createdAt) {
+    const createdDate = new Date(data.createdAt);
+    if (!Number.isNaN(createdDate.getTime())) {
+      createdAtYear = createdDate.getFullYear();
+      const now = new Date();
+      accountAgeYears = Math.max(1, now.getFullYear() - createdAtYear);
+    }
+  }
+  const tenureText = createdAtYear
+    ? `Joined ${createdAtYear} · ${accountAgeYears}y active`
+    : null;
+
+  const isHireable = Boolean(data.isHireable);
+  const status = data.status || null;
+  const organizations = Array.isArray(data.organizations) ? data.organizations : [];
+  const topRepo = data.topRepo || null;
+  const topLanguages = Array.isArray(data.topLanguages) ? data.topLanguages : [];
+  const rawWeeks = Array.isArray(data.calendar?.weeks)
+    ? data.calendar.weeks
+    : Array.isArray(data.weeks)
+    ? data.weeks
+    : [];
+  const derivedDays = rawWeeks.flatMap((w) => w.contributionDays || []);
+  const derivedLast30 = derivedDays.slice(-30).reduce((s, d) => s + (d.contributionCount || 0), 0);
+  const calendar = {
+    totalContributions: data.calendar?.totalContributions ?? data.totalContributions ?? 0,
+    currentStreak: data.calendar?.currentStreak ?? data.currentStreak ?? 0,
+    longestStreak: data.calendar?.longestStreak ?? data.maxStreak ?? data.longestStreak ?? 0,
+    busiestWeekday: data.calendar?.busiestWeekday || data.busiestWeekday || deriveBusiestWeekday(derivedDays),
+    last30DaysCount: data.calendar?.last30DaysCount ?? data.last30DaysCount ?? derivedLast30,
+    weeks: rawWeeks,
+  };
+  const monthlyContributions = Array.isArray(data.monthlyContributions)
+    ? data.monthlyContributions
+    : rawWeeks.length >= 8
+    ? Array.from({ length: 8 }, (_, idx) => {
+        const slice = rawWeeks.slice(Math.max(0, rawWeeks.length - (8 - idx) * 4), rawWeeks.length - (7 - idx) * 4);
+        return slice.reduce((acc, w) => acc + (w.contributionDays || []).reduce((s, d) => s + (d.contributionCount || 0), 0), 0);
+      })
+    : [];
 
   return {
     name,
     login,
     handle,
     bio,
+    rawBio,
     hideBio,
     hideMeta,
     avatarDataUri,
@@ -102,10 +180,66 @@ function extractProfileFields(data, options = {}) {
     location,
     website,
     createdAtYear,
+    accountAgeYears,
+    tenureText,
+    isHireable,
+    status,
+    organizations,
+    topRepo,
+    topLanguages,
+    monthlyContributions,
+    calendar,
   };
 }
 
-function renderV1Svg(data, theme, options = {}) {
+function renderAvatar({ cx, cy, r, clipId, uri, name, theme, ring = false }) {
+  const initial = escapeXml(String(name || '?').charAt(0).toUpperCase());
+  const halo = ring && theme.bg !== 'transparent'
+    ? `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="${theme.bg}" />`
+    : '';
+  const face = uri
+    ? `<clipPath id="${clipId}"><circle cx="${cx}" cy="${cy}" r="${r}" /></clipPath>
+       <image href="${uri}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2}" clip-path="url(#${clipId})" />`
+    : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${theme.barBg}" />
+       <text x="${cx}" y="${cy + r * 0.36}" text-anchor="middle" class="ink" font-weight="600" font-size="${Math.round(r)}">${initial}</text>`;
+  return `${halo}${face}<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${theme.border}" />`;
+}
+
+function renderBioLines({ x, y, lines, theme, lineHeight = 17, size = 12.5 }) {
+  if (!lines.length) return '';
+  const spans = lines
+    .map((line, i) => `<tspan x="${x}" y="${y + i * lineHeight}">${escapeXml(line)}</tspan>`)
+    .join('');
+  return `<text class="bio-text" fill="${theme.text}" font-size="${size}">${spans}</text>`;
+}
+
+function languageLegend({ x, y, width, languages }) {
+  return metaRow({
+    x,
+    y,
+    maxWidth: width,
+    items: languages.map((l) => ({ text: `${l.name} ${formatPercent(l.percentage)}`, swatch: l.color })),
+  });
+}
+
+function monthlyBars({ x, y, width, height, values, theme }) {
+  const list = values.length ? values : [];
+  const max = Math.max(1, ...list);
+  const peak = list.indexOf(Math.max(...list));
+  const gap = 3;
+  const slotW = (width - gap * (list.length - 1)) / Math.max(1, list.length);
+  const barW = Math.min(slotW, 12);
+  const bars = list.map((v, i) => {
+    const h = v > 0 ? Math.max(2, (v / max) * height) : 0;
+    return h
+      ? `<rect class="ci" x="${(x + i * (slotW + gap) + (slotW - barW) / 2).toFixed(1)}" y="${(y + height - h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${theme.accent}" fill-opacity="${i === peak ? 1 : 0.45}" />`
+      : '';
+  }).join('');
+  return `<g class="activity-bars">${bars}${hairline(x, y + height + 0.5, x + width, y + height + 0.5, theme)}</g>`;
+}
+
+function renderV1Svg(data, rawTheme, options = {}) {
+  const theme = resolveTheme(rawTheme, options);
   const layout = (options.layout || 'classic').toLowerCase();
 
   if (layout === 'hero' || layout === 'banner') {
@@ -117,510 +251,275 @@ function renderV1Svg(data, theme, options = {}) {
   if (layout === 'split' || layout === 'sidebar') {
     return renderV1SplitSvg(data, theme, options);
   }
-  if (layout === 'dashboard' || layout === 'grid') {
-    return renderV1DashboardSvg(data, theme, options);
+  if (layout === 'activity' || layout === 'dashboard' || layout === 'grid') {
+    return renderV1ActivitySvg(data, theme, options);
   }
   return renderV1ClassicSvg(data, theme, options);
 }
 
-function renderV1ClassicSvg(data, theme, options = {}) {
+/**
+ * 1. CLASSIC: identity block over a four-fact ledger.
+ */
+export function renderV1ClassicSvg(data, theme, options = {}) {
   const p = extractProfileFields(data, options);
-  const width = 495;
-  const height = 195;
+  const width = resolveCardWidth(options.width, 495);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const textX = pad + 66;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <clipPath id="avatar-clip-classic">
-      <circle cx="54" cy="50" r="30" />
-    </clipPath>
-    <linearGradient id="profile-classic-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="avatar-fallback-classic" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.title}" />
-      <stop offset="100%" stop-color="${theme.accent || theme.title}" />
-    </linearGradient>
-  </defs>
-  <style>
-    .name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 18px; fill: ${theme.title}; }
-    .handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; fill: ${theme.secondaryText}; }
-    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.text}; opacity: 0.9; }
-    .stat-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 15px; fill: ${theme.title}; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.secondaryText}; letter-spacing: 0.5px; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-    .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.title}; }
-  </style>
+  const hire = p.isHireable
+    ? metaRow({ x: width - pad, y: 38, end: true, maxWidth: 130, items: [{ text: 'Available for hire', swatch: theme.accent, cls: 'ink' }] })
+    : '';
+  const nameRoom = inner - 66 - (p.isHireable ? 138 : 0);
+  const bioLines = p.bio ? wrapText(p.bio, 12.5, inner - 72, 2) : [];
+  const bioY = 76;
+  const metaY = Math.max(92, bioY + bioLines.length * 17 + 6);
+  const ruleY = metaY + 14;
 
-  <!-- Card Outer Frame -->
-  <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-classic-bg)" stroke="${theme.border}"/>
-  
-  <g transform="translate(0, 0)">
-    <!-- Avatar -->
-    <g transform="translate(0, 0)">
-      <circle cx="54" cy="50" r="32" fill="none" stroke="${theme.title}" stroke-width="2" opacity="0.8"/>
-      ${p.avatarDataUri ? `
-        <image href="${p.avatarDataUri}" x="24" y="20" width="60" height="60" clip-path="url(#avatar-clip-classic)"/>
-      ` : `
-        <circle cx="54" cy="50" r="30" fill="url(#avatar-fallback-classic)"/>
-        <text x="54" y="57" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="bold" font-size="22" fill="#ffffff">${p.name.charAt(0).toUpperCase()}</text>
-      `}
-    </g>
+  const topLang = p.topLanguages[0];
+  const facts = [
+    { label: 'Top language', value: topLang?.name || '–', font: 'ui', swatch: topLang?.color, flex: 1.15 },
+    { label: 'Top repo', value: p.topRepo?.name || '–', font: 'ui', flex: 1.8 },
+    { label: 'Followers', value: formatCount(p.followers), flex: 0.7 },
+    { label: 'Stars', value: formatCount(p.stars), flex: 0.7 },
+  ];
+  const height = ruleY + 58;
 
-    <!-- User Details -->
-    <g transform="translate(100, 20)">
-      <text x="0" y="16" class="name">${p.name}</text>
-      <text x="0" y="34" class="handle">${p.handle}</text>
-      
-      ${p.createdAtYear ? `
-        <rect x="300" y="0" width="70" height="20" rx="10" fill="${theme.badgeBg}"/>
-        <text x="335" y="13" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
-      ` : ''}
+  return card({
+    width,
+    height,
+    title: `${p.name}, GitHub profile`,
+    theme,
+    body: `
+      ${renderAvatar({ cx: pad + 26, cy: 48, r: 26, clipId: 'prof-classic-av', uri: p.avatarDataUri, name: p.name, theme })}
+      ${text(textX, 38, fitUi(p.name, 19, nameRoom, 600), 'ink', 'font-size="19" font-weight="600"')}
+      ${text(textX, 56, fitMono(p.handle, 12, inner - 66), 'mono mut', 'font-size="12"')}
+      ${hire}
+      ${renderBioLines({ x: textX, y: bioY, lines: bioLines, theme })}
+      ${metaRow({ x: pad, y: metaY, maxWidth: inner, items: [
+        { text: p.company },
+        { text: p.location },
+        { text: p.website.replace(/^https?:\/\//, '') },
+        { text: p.createdAtYear ? `Joined ${p.createdAtYear}` : '' },
+      ] })}
+      ${hairline(pad, ruleY, width - pad, ruleY, theme)}
+      ${metricRow({ x: pad, y: ruleY + 10, width: inner, items: facts, size: 14 })}
+    `,
+  });
+}
 
-      ${p.bio ? `<text x="0" y="55" class="bio">${p.bio}</text>` : ''}
-    </g>
+/**
+ * 2. HERO: the banner is the account's own contribution calendar.
+ */
+export function renderV1HeroSvg(data, theme, options = {}) {
+  const p = extractProfileFields(data, options);
+  const width = resolveCardWidth(options.width, 495);
+  const pad = padX(width);
+  const inner = width - pad * 2;
 
-    <!-- Meta Info Row -->
-    <g transform="translate(24, 104)" class="meta-text">
-      ${p.company ? `<g transform="translate(0,0)">${icons.company(theme.iconColor)} <text x="17" y="10">${p.company}</text></g>` : ''}
-      ${p.location ? `<g transform="translate(${p.company ? 150 : 0},0)">${icons.location(theme.iconColor)} <text x="17" y="10">${p.location}</text></g>` : ''}
-      ${p.website ? `<g transform="translate(${p.company && p.location ? 290 : p.company || p.location ? 150 : 0},0)">${icons.link(theme.iconColor)} <text x="17" y="10">${p.website.length > 18 ? p.website.slice(0, 16) + '...' : p.website}</text></g>` : ''}
-    </g>
+  const grid = contributionGrid({ x: 1, y: 1, weeks: p.calendar.weeks, weeksShown: 53, width: width - 2, gap: 2, theme });
+  const bannerH = Math.round(grid.height);
+  const faded = theme.bg !== 'transparent';
 
-    <!-- Bottom Stats Container Grid -->
-    <g transform="translate(24, 130)">
-      <rect x="0" y="0" width="447" height="48" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}"/>
-      
-      <g transform="translate(0, 14)">
-        <g transform="translate(20, 0)">
-          <text x="0" y="0" class="stat-lbl">REPOSITORIES</text>
-          <text x="0" y="18" class="stat-val">${p.repos.toLocaleString()}</text>
-        </g>
-        <g transform="translate(130, 0)">
-          <text x="0" y="0" class="stat-lbl">STARS</text>
-          <text x="0" y="18" class="stat-val">${p.stars.toLocaleString()}</text>
-        </g>
-        <g transform="translate(240, 0)">
-          <text x="0" y="0" class="stat-lbl">FOLLOWERS</text>
-          <text x="0" y="18" class="stat-val">${p.followers.toLocaleString()}</text>
-        </g>
-        <g transform="translate(350, 0)">
-          <text x="0" y="0" class="stat-lbl">FOLLOWING</text>
-          <text x="0" y="18" class="stat-val">${p.following.toLocaleString()}</text>
-        </g>
+  const avatarR = 30;
+  const avatarCy = bannerH + 8;
+  const textX = pad + avatarR * 2 + 16;
+  const bioLines = p.bio ? wrapText(p.bio, 12.5, inner - 6, 2) : [];
+  const bioY = avatarCy + avatarR + 20;
+  const metaY = bioY + bioLines.length * 17 + (bioLines.length ? 2 : -6);
+  const orgs = p.organizations.map((o) => o.name || o.login).filter(Boolean).slice(0, 2);
+  const stripY = metaY + 14;
+  const langs = p.topLanguages.slice(0, 5);
+  const legendY = stripY + 24;
+  const ruleY = (langs.length ? legendY : stripY) + 12;
+  const height = ruleY + 62;
+
+  return card({
+    width,
+    height,
+    title: `${p.name}, GitHub profile`,
+    theme,
+    defs: `
+      <clipPath id="hero-banner-clip"><rect x="1" y="1" width="${width - 2}" height="${bannerH + 6}" rx="9" /></clipPath>
+      ${faded ? `<linearGradient id="hero-banner-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0.35" stop-color="${theme.bg}" stop-opacity="0" />
+        <stop offset="1" stop-color="${theme.bg}" stop-opacity="0.92" />
+      </linearGradient>` : ''}`,
+    body: `
+      <g clip-path="url(#hero-banner-clip)">
+        ${grid.svg}
+        ${faded ? `<rect x="1" y="1" width="${width - 2}" height="${bannerH + 2}" fill="url(#hero-banner-grad)" />` : ''}
       </g>
-    </g>
-  </g>
-</svg>`;
+      ${renderAvatar({ cx: pad + avatarR, cy: avatarCy, r: avatarR, clipId: 'prof-hero-av', uri: p.avatarDataUri, name: p.name, theme, ring: true })}
+      ${text(textX, avatarCy + 20, fitUi(p.name, 20, width - pad - textX, 600), 'ink', 'font-size="20" font-weight="600"')}
+      ${text(textX, avatarCy + 37, fitMono(p.handle, 12, width - pad - textX), 'mono mut', 'font-size="12"')}
+      ${renderBioLines({ x: pad, y: bioY, lines: bioLines, theme })}
+      ${metaRow({ x: pad, y: metaY, maxWidth: inner, items: [
+        { text: p.company },
+        ...orgs.map((o) => ({ text: o })),
+        { text: p.location },
+      ] })}
+      ${langs.length ? shareStrip({ x: pad, y: stripY, width: inner, items: langs, theme, className: 'language-strip' }) : ''}
+      ${langs.length ? languageLegend({ x: pad, y: legendY, width: inner, languages: langs }) : ''}
+      ${hairline(pad, ruleY, width - pad, ruleY, theme)}
+      ${metricRow({ x: pad, y: ruleY + 10, width: inner, size: 17, items: [
+        { label: 'Repositories', value: formatCount(p.repos) },
+        { label: 'Stars', value: formatCount(p.stars) },
+        { label: 'Followers', value: formatCount(p.followers) },
+        { label: 'Following', value: formatCount(p.following) },
+      ] })}
+    `,
+  });
 }
 
-function renderV1HeroSvg(data, theme, options = {}) {
+/**
+ * 3. COMPACT: one line of identity, three numbers.
+ */
+export function renderV1CompactSvg(data, theme, options = {}) {
   const p = extractProfileFields(data, options);
-  const width = 495;
-  const height = 235;
+  const width = resolveCardWidth(options.width, 495);
+  const pad = padX(width) - 2;
+  const height = 72;
 
-  const stats = [
-    { label: 'Repos', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
-    { label: 'Stars', value: p.stars.toLocaleString(), icon: icons.star(theme.iconColor) },
-    { label: 'Followers', value: p.followers.toLocaleString(), icon: icons.followers(theme.iconColor) },
-    { label: 'Following', value: p.following.toLocaleString(), icon: icons.followers(theme.iconColor) },
-  ];
+  const metricsW = width <= 440 ? 172 : 186;
+  const metricsX = width - pad - metricsW;
+  const textX = pad + 52;
+  const room = metricsX - textX - 14;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <clipPath id="avatar-clip-hero">
-      <circle cx="247.5" cy="48" r="28" />
-    </clipPath>
-    <linearGradient id="profile-hero-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="hero-banner-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="${theme.title}" stop-opacity="0.15" />
-      <stop offset="50%" stop-color="${theme.accent || theme.title}" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="${theme.title}" stop-opacity="0.15" />
-    </linearGradient>
-    <linearGradient id="avatar-fallback-hero" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.title}" />
-      <stop offset="100%" stop-color="${theme.accent || theme.title}" />
-    </linearGradient>
-  </defs>
-  <style>
-    .hero-name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 19px; fill: ${theme.title}; }
-    .hero-handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; fill: ${theme.secondaryText}; }
-    .hero-bio { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.text}; }
-    .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.title}; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-    .tile-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 14px; fill: ${theme.title}; }
-    .tile-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.secondaryText}; letter-spacing: 0.5px; }
-  </style>
-
-  <!-- Background -->
-  <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-hero-bg)" stroke="${theme.border}"/>
-  
-  <!-- Header Accent Banner -->
-  <rect x="1" y="1" width="${width - 2}" height="55" rx="11" fill="url(#hero-banner-grad)"/>
-
-  <!-- Centered Avatar -->
-  <g transform="translate(0, 0)">
-    <circle cx="247.5" cy="48" r="30" fill="${theme.bg}" stroke="${theme.title}" stroke-width="2"/>
-    ${p.avatarDataUri ? `
-      <image href="${p.avatarDataUri}" x="219.5" y="20" width="56" height="56" clip-path="url(#avatar-clip-hero)"/>
-    ` : `
-      <circle cx="247.5" cy="48" r="28" fill="url(#avatar-fallback-hero)"/>
-      <text x="247.5" y="55" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="bold" font-size="20" fill="#ffffff">${p.name.charAt(0).toUpperCase()}</text>
-    `}
-  </g>
-
-  <!-- Centered User Info -->
-  <g transform="translate(247.5, 96)">
-    <text x="0" y="0" text-anchor="middle" class="hero-name">${p.name}</text>
-    <text x="0" y="18" text-anchor="middle" class="hero-handle">${p.handle}</text>
-
-    ${p.createdAtYear ? `
-      <g transform="translate(-40, 24)">
-        <rect x="0" y="0" width="80" height="18" rx="9" fill="${theme.badgeBg}"/>
-        <text x="40" y="12" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
-      </g>
-    ` : ''}
-
-    ${p.bio ? `<text x="0" y="${p.createdAtYear ? 58 : 38}" text-anchor="middle" class="hero-bio">${p.bio}</text>` : ''}
-  </g>
-
-  <!-- Bottom Stats Row (4 tiles) -->
-  <g transform="translate(24, 172)">
-    ${stats.map((st, idx) => {
-      const x = idx * 114;
-      return `
-      <g transform="translate(${x}, 0)">
-        <rect x="0" y="0" width="104" height="48" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-        <g transform="translate(10, 14)">
-          <g transform="translate(0, -9)">${st.icon}</g>
-          <text x="18" y="0" class="tile-lbl">${st.label.toUpperCase()}</text>
-          <text x="0" y="20" class="tile-val">${st.value}</text>
-        </g>
-      </g>`;
-    }).join('')}
-  </g>
-</svg>`;
+  return card({
+    width,
+    height,
+    title: `${p.name}, GitHub profile`,
+    theme,
+    body: `
+      ${renderAvatar({ cx: pad + 20, cy: 36, r: 20, clipId: 'prof-compact-av', uri: p.avatarDataUri, name: p.name, theme })}
+      ${text(textX, 33, fitUi(p.name, 15, room, 600), 'ink', 'font-size="15" font-weight="600"')}
+      ${text(textX, 50, fitMono(p.handle, 11.5, room), 'mono mut', 'font-size="11.5"')}
+      ${metricRow({ x: metricsX, y: 17, width: metricsW, gap: 8, size: 15, items: [
+        { label: 'Repos', value: formatCount(p.repos), flex: 0.8 },
+        { label: 'Followers', value: formatCount(p.followers), flex: 1.2 },
+        { label: 'Active', value: p.accountAgeYears ? `${p.accountAgeYears}y` : '–', flex: 0.8 },
+      ] })}
+    `,
+  });
 }
 
-function renderV1CompactSvg(data, theme, options = {}) {
+/**
+ * 4. SPLIT: identity sidebar beside about, languages and a year of activity.
+ */
+export function renderV1SplitSvg(data, theme, options = {}) {
   const p = extractProfileFields(data, options);
-  const width = 495;
-  const height = 125;
+  const width = resolveCardWidth(options.width, 495);
+  const pad = padX(width);
+  const sideW = width <= 440 ? 118 : width >= 700 ? 200 : 142;
+  const ruleX = pad + sideW + 12;
+  const mainX = ruleX + 16;
+  const mainW = width - pad - mainX;
 
-  const stats = [
-    { label: 'Repos', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
-    { label: 'Stars', value: p.stars.toLocaleString(), icon: icons.star(theme.iconColor) },
-    { label: 'Followers', value: p.followers.toLocaleString(), icon: icons.followers(theme.iconColor) },
-    { label: 'Following', value: p.following.toLocaleString(), icon: icons.followers(theme.iconColor) },
-  ];
+  const nameLines = wrapText(p.name, 15, sideW, 2);
+  const nameEndY = 92 + (nameLines.length - 1) * 19;
+  const sideFacts = [
+    p.createdAtYear ? `Since ${p.createdAtYear}` : '',
+    p.company,
+    p.location,
+    p.website.replace(/^https?:\/\//, ''),
+  ].filter(Boolean);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <clipPath id="avatar-clip-compact">
-      <circle cx="45" cy="62.5" r="26" />
-    </clipPath>
-    <linearGradient id="profile-compact-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="avatar-fallback-compact" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.title}" />
-      <stop offset="100%" stop-color="${theme.accent || theme.title}" />
-    </linearGradient>
-  </defs>
-  <style>
-    .name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 16px; fill: ${theme.title}; }
-    .handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-    .meta-inline { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-    .chip-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 12px; fill: ${theme.title}; }
-    .chip-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 10px; fill: ${theme.secondaryText}; }
-  </style>
+  const bioLines = p.bio ? wrapText(p.bio, 12.5, mainW - 6, 3) : [];
+  const statusMsg = p.status?.message ? fitUi(p.status.message, 11.5, mainW) : '';
+  let y = 34;
+  const aboutLabel = p.bio ? text(mainX, y, 'About', 'lbl') : '';
+  const bioSvg = renderBioLines({ x: mainX, y: y + 18, lines: bioLines, theme });
+  if (p.bio) y += 18 + bioLines.length * 17;
+  const statusSvg = statusMsg ? text(mainX, y, statusMsg, 'mut', 'font-size="11.5"') : '';
+  if (statusMsg) y += 18;
 
-  <!-- Background -->
-  <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-compact-bg)" stroke="${theme.border}"/>
-  
-  <g transform="translate(0, 0)">
-    <!-- Avatar -->
-    <circle cx="45" cy="62.5" r="28" fill="none" stroke="${theme.title}" stroke-width="2" opacity="0.8"/>
-    ${p.avatarDataUri ? `
-      <image href="${p.avatarDataUri}" x="19" y="36.5" width="52" height="52" clip-path="url(#avatar-clip-compact)"/>
-    ` : `
-      <circle cx="45" cy="62.5" r="26" fill="url(#avatar-fallback-compact)"/>
-      <text x="45" y="69" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="bold" font-size="18" fill="#ffffff">${p.name.charAt(0).toUpperCase()}</text>
-    `}
+  const langs = p.topLanguages.slice(0, 4);
+  let langSvg = '';
+  if (langs.length) {
+    y += 4;
+    langSvg = `${text(mainX, y, 'Languages', 'lbl')}
+      ${shareStrip({ x: mainX, y: y + 7, width: mainW, items: langs, theme, className: 'language-strip' })}
+      ${languageLegend({ x: mainX, y: y + 31, width: mainW, languages: langs })}`;
+    y += 54;
+  }
 
-    <!-- User Info -->
-    <g transform="translate(85, 28)">
-      <text x="0" y="14" class="name">${p.name}</text>
-      <text x="0" y="32" class="handle">${p.handle}</text>
-      <text x="0" y="52" class="meta-inline">
-        ${p.location ? `📍 ${p.location}` : p.company ? `🏢 ${p.company}` : p.createdAtYear ? `Joined ${p.createdAtYear}` : ''}
-      </text>
-    </g>
+  const hasActivity = p.monthlyContributions.some((v) => v > 0);
+  const total = p.calendar.totalContributions;
+  y += 2;
+  const activitySvg = `${text(mainX, y, 'Activity', 'lbl')}
+    ${text(width - pad, y, total ? `${formatCount(total)} this year` : 'No contributions yet', 'mono mut', 'font-size="11" text-anchor="end"')}
+    ${hasActivity ? monthlyBars({ x: mainX, y: y + 8, width: mainW, height: 34, values: p.monthlyContributions, theme }) : ''}`;
+  y += hasActivity ? 42 : 0;
 
-    <!-- 2x2 Metric Chips Grid -->
-    <g transform="translate(265, 24)">
-      ${stats.map((st, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const x = col * 105;
-        const y = row * 38;
+  const sideY = nameEndY + 38;
+  const sideEnd = sideY + sideFacts.length * 18;
+  const height = Math.max(y + 20, sideEnd + 8, 180);
 
-        return `
-        <g transform="translate(${x}, ${y})">
-          <rect x="0" y="0" width="98" height="32" rx="6" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-          <g transform="translate(8, 11)">
-            <g transform="translate(0, -9)">${st.icon}</g>
-            <text x="16" y="0" class="chip-val">${st.value}</text>
-            <text x="16" y="12" class="chip-lbl">${st.label}</text>
-          </g>
-        </g>`;
-      }).join('')}
-    </g>
-  </g>
-</svg>`;
+  return card({
+    width,
+    height,
+    title: `${p.name}, GitHub profile`,
+    theme,
+    body: `
+      ${renderAvatar({ cx: pad + 26, cy: 46, r: 26, clipId: 'prof-split-av', uri: p.avatarDataUri, name: p.name, theme })}
+      ${nameLines.map((line, i) => text(pad, 92 + i * 19, line, 'ink', 'font-size="15" font-weight="600"')).join('')}
+      ${text(pad, nameEndY + 17, fitMono(p.handle, 11.5, sideW), 'mono mut', 'font-size="11.5"')}
+      ${sideFacts.map((fact, i) => text(pad, sideY + i * 18, fitUi(fact, 11.5, sideW), 'mut', 'font-size="11.5"')).join('')}
+      ${hairline(ruleX, 18, ruleX, height - 18, theme)}
+      ${aboutLabel}
+      ${bioSvg}
+      ${statusSvg}
+      ${langSvg}
+      ${activitySvg}
+    `,
+  });
 }
 
-function renderV1SplitSvg(data, theme, options = {}) {
+/**
+ * 5. ACTIVITY: a full year of contributions under a small identity line.
+ */
+export function renderV1ActivitySvg(data, theme, options = {}) {
   const p = extractProfileFields(data, options);
-  const width = 495;
-  const height = 215;
+  const width = resolveCardWidth(options.width, 495);
+  const pad = padX(width);
+  const inner = width - pad * 2;
+  const textX = pad + 50;
 
-  const stats = [
-    { label: 'Repositories', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
-    { label: 'Total Stars', value: p.stars.toLocaleString(), icon: icons.star(theme.iconColor) },
-    { label: 'Followers', value: p.followers.toLocaleString(), icon: icons.followers(theme.iconColor) },
-    { label: 'Following', value: p.following.toLocaleString(), icon: icons.followers(theme.iconColor) },
-  ];
+  const bioLine = p.bio ? fitUi(p.bio, 12.5, inner) : '';
+  const gridY = bioLine ? 92 : 70;
+  const grid = contributionGrid({ x: pad, y: gridY, weeks: p.calendar.weeks, weeksShown: 53, width: inner, gap: width <= 440 ? 1.5 : 2, theme, rx: 1.5 });
+  const legendY = gridY + grid.height + 18;
+  const ruleY = legendY + 10;
+  const total = p.calendar.totalContributions;
+  const subline = [p.handle, p.createdAtYear ? `joined ${p.createdAtYear}` : ''].filter(Boolean).join(' · ');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <clipPath id="avatar-clip-split">
-      <circle cx="75" cy="52" r="28" />
-    </clipPath>
-    <linearGradient id="profile-split-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="avatar-fallback-split" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.title}" />
-      <stop offset="100%" stop-color="${theme.accent || theme.title}" />
-    </linearGradient>
-  </defs>
-  <style>
-    .name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 15px; fill: ${theme.title}; }
-    .handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-    .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 9.5px; fill: ${theme.title}; }
-    .meta-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 10.5px; fill: ${theme.secondaryText}; }
-    .bio-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 11px; fill: ${theme.secondaryText}; letter-spacing: 0.5px; }
-    .bio-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.text}; }
-    .tile-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 15px; fill: ${theme.title}; }
-    .tile-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-  </style>
-
-  <!-- Background -->
-  <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-split-bg)" stroke="${theme.border}"/>
-  
-  <!-- Left Sidebar Panel -->
-  <rect x="1" y="1" width="150" height="${height - 2}" rx="11" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}"/>
-
-  <!-- Sidebar Content (Left Column) -->
-  <g transform="translate(0, 0)">
-    <!-- Avatar -->
-    <circle cx="75" cy="52" r="30" fill="none" stroke="${theme.title}" stroke-width="2" opacity="0.8"/>
-    ${p.avatarDataUri ? `
-      <image href="${p.avatarDataUri}" x="47" y="24" width="56" height="56" clip-path="url(#avatar-clip-split)"/>
-    ` : `
-      <circle cx="75" cy="52" r="28" fill="url(#avatar-fallback-split)"/>
-      <text x="75" y="59" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="bold" font-size="20" fill="#ffffff">${p.name.charAt(0).toUpperCase()}</text>
-    `}
-
-    <g transform="translate(75, 94)">
-      <text x="0" y="0" text-anchor="middle" class="name">${p.name.length > 14 ? p.name.slice(0, 12) + '..' : p.name}</text>
-      <text x="0" y="16" text-anchor="middle" class="handle">${p.handle}</text>
-
-      ${p.createdAtYear ? `
-        <g transform="translate(-35, 22)">
-          <rect x="0" y="0" width="70" height="18" rx="9" fill="${theme.badgeBg}"/>
-          <text x="35" y="12" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
-        </g>
-      ` : ''}
-    </g>
-
-    <!-- Sidebar Meta Links -->
-    <g transform="translate(15, 156)" class="meta-text">
-      ${p.company ? `<g transform="translate(0, 0)">${icons.company(theme.iconColor)} <text x="16" y="9">${p.company.length > 13 ? p.company.slice(0, 11) + '..' : p.company}</text></g>` : ''}
-      ${p.location ? `<g transform="translate(0, ${p.company ? 18 : 0})">${icons.location(theme.iconColor)} <text x="16" y="9">${p.location.length > 13 ? p.location.slice(0, 11) + '..' : p.location}</text></g>` : ''}
-      ${p.website ? `<g transform="translate(0, ${p.company && p.location ? 36 : p.company || p.location ? 18 : 0})">${icons.link(theme.iconColor)} <text x="16" y="9">${p.website.length > 13 ? p.website.slice(0, 11) + '..' : p.website}</text></g>` : ''}
-    </g>
-  </g>
-
-  <!-- Right Main Panel Content -->
-  <g transform="translate(166, 18)">
-    <!-- Bio Container Box -->
-    <g transform="translate(0, 0)">
-      <rect x="0" y="0" width="310" height="54" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-      <text x="12" y="18" class="bio-title">ABOUT</text>
-      <text x="12" y="36" class="bio-text">${p.bio || 'GitHub developer profile.'}</text>
-    </g>
-
-    <!-- 2x2 Metric Grid Cards -->
-    <g transform="translate(0, 68)">
-      ${stats.map((st, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const x = col * 158;
-        const y = row * 54;
-
-        return `
-        <g transform="translate(${x}, ${y})">
-          <rect x="0" y="0" width="152" height="48" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-          <g transform="translate(12, 16)">
-            <g transform="translate(0, -10)">${st.icon}</g>
-            <text x="20" y="0" class="tile-lbl">${st.label}</text>
-            <text x="0" y="20" class="tile-val">${st.value}</text>
-          </g>
-        </g>`;
-      }).join('')}
-    </g>
-  </g>
-</svg>`;
+  return card({
+    width,
+    height: Math.round(ruleY + 58),
+    title: `${p.name}, contribution activity`,
+    theme,
+    body: `
+      ${renderAvatar({ cx: pad + 19, cy: 38, r: 19, clipId: 'prof-activity-av', uri: p.avatarDataUri, name: p.name, theme })}
+      ${text(textX, 34, fitUi(p.name, 15, inner - 50, 600), 'ink', 'font-size="15" font-weight="600"')}
+      ${text(textX, 51, fitMono(subline, 11.5, inner - 50), 'mono mut', 'font-size="11.5"')}
+      ${renderBioLines({ x: pad, y: 76, lines: bioLine ? [bioLine] : [], theme })}
+      ${grid.svg}
+      ${text(pad, legendY, `${formatCount(total)} contributions this year`, 'lbl')}
+      ${heatLegend({ right: width - pad, y: legendY, theme })}
+      ${hairline(pad, ruleY, width - pad, ruleY, theme)}
+      ${metricRow({ x: pad, y: ruleY + 10, width: inner, size: 14, items: [
+        { label: 'Current streak', value: `${p.calendar.currentStreak}d` },
+        { label: 'Longest streak', value: `${p.calendar.longestStreak}d` },
+        { label: 'Busiest day', value: p.calendar.busiestWeekday, font: 'ui' },
+        { label: 'Last 30 days', value: formatCount(p.calendar.last30DaysCount) },
+      ] })}
+    `,
+  });
 }
-
-function renderV1DashboardSvg(data, theme, options = {}) {
-  const p = extractProfileFields(data, options);
-  const width = 495;
-  const height = 220;
-
-  const stats = [
-    { label: 'Public Repositories', value: p.repos.toLocaleString(), icon: icons.repo(theme.iconColor) },
-    { label: 'Stars Earned', value: p.stars.toLocaleString(), icon: icons.star(theme.iconColor) },
-    { label: 'Followers Count', value: p.followers.toLocaleString(), icon: icons.followers(theme.iconColor) },
-    { label: 'Following Count', value: p.following.toLocaleString(), icon: icons.followers(theme.iconColor) },
-  ];
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-  <defs>
-    <clipPath id="avatar-clip-dash">
-      <circle cx="28" cy="24" r="22" />
-    </clipPath>
-    <linearGradient id="profile-dash-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.bg}" />
-      <stop offset="100%" stop-color="${theme.cardBg}" />
-    </linearGradient>
-    <linearGradient id="avatar-fallback-dash" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${theme.title}" />
-      <stop offset="100%" stop-color="${theme.accent || theme.title}" />
-    </linearGradient>
-  </defs>
-  <style>
-    .header-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 16px; fill: ${theme.title}; }
-    .header-handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-    .bio-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11.5px; fill: ${theme.text}; }
-    .tile-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 16px; fill: ${theme.title}; }
-    .tile-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.secondaryText}; letter-spacing: 0.5px; }
-    .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: ${theme.title}; }
-  </style>
-
-  <!-- Background -->
-  <rect x="0.5" y="0.5" rx="12" width="${width - 1}" height="${height - 1}" fill="url(#profile-dash-bg)" stroke="${theme.border}"/>
-  
-  <g transform="translate(24, 20)">
-    <!-- Top Header Summary Card -->
-    <g transform="translate(0, 0)">
-      <!-- Avatar -->
-      <circle cx="28" cy="24" r="24" fill="none" stroke="${theme.title}" stroke-width="2" opacity="0.8"/>
-      ${p.avatarDataUri ? `
-        <image href="${p.avatarDataUri}" x="6" y="2" width="44" height="44" clip-path="url(#avatar-clip-dash)"/>
-      ` : `
-        <circle cx="28" cy="24" r="22" fill="url(#avatar-fallback-dash)"/>
-        <text x="28" y="30" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="bold" font-size="16" fill="#ffffff">${p.name.charAt(0).toUpperCase()}</text>
-      `}
-
-      <!-- User Title & Handle -->
-      <text x="62" y="18" class="header-title">${p.name}</text>
-      <text x="62" y="34" class="header-handle">${p.handle}</text>
-
-      ${p.createdAtYear ? `
-        <rect x="367" y="4" width="80" height="20" rx="10" fill="${theme.badgeBg}"/>
-        <text x="407" y="17" text-anchor="middle" class="badge-text">Joined ${p.createdAtYear}</text>
-      ` : ''}
-
-      ${p.bio ? `<text x="0" y="62" class="bio-text">${p.bio}</text>` : ''}
-    </g>
-
-    <!-- 2x2 Dashboard Tile Cards -->
-    <g transform="translate(0, 78)">
-      ${stats.map((st, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const x = col * 228;
-        const y = row * 56;
-
-        return `
-        <g transform="translate(${x}, ${y})">
-          <rect x="0" y="0" width="218" height="48" rx="8" fill="${theme.cardBg}" stroke="${theme.subtleBorder || theme.border}" />
-          <g transform="translate(14, 16)">
-            <g transform="translate(0, -9)">${st.icon}</g>
-            <text x="22" y="0" class="tile-lbl">${st.label.toUpperCase()}</text>
-            <text x="0" y="20" class="tile-val">${st.value}</text>
-          </g>
-        </g>`;
-      }).join('')}
-    </g>
-  </g>
-</svg>`;
-}
-
 
 function renderV0Svg(data, theme, options = {}) {
-  const name = escapeXml(data?.name || data?.login || options.username || 'User');
-  const handle = escapeXml(`@${data?.login || options.username || ''}`);
-  const bio = escapeXml(data?.bio || 'No bio provided.');
-  const followers = data?.followers ?? 0;
-  const following = data?.following ?? 0;
-  const repos = data?.repositories ?? 0;
-  const company = data?.company ? escapeXml(data.company) : null;
-  const location = data?.location ? escapeXml(data.location) : null;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="465" height="190" viewBox="0 0 465 190" fill="none">
-  <style>
-    .name { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-weight: 700; font-size: 18px; fill: ${theme.title}; }
-    .handle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-size: 13px; fill: ${theme.secondaryText}; }
-    .bio { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-size: 12px; fill: ${theme.text}; }
-    .stat-val { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-weight: 600; font-size: 15px; fill: ${theme.title}; }
-    .stat-lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-size: 12px; fill: ${theme.secondaryText}; }
-    .meta { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, sans-serif; font-size: 11px; fill: ${theme.secondaryText}; }
-  </style>
-  <rect x="0.5" y="0.5" rx="6" width="464" height="189" fill="${theme.bg}" stroke="${theme.border}"/>
-  <g transform="translate(25, 28)">
-    <text x="0" y="0" class="name">${name}</text>
-    <text x="0" y="18" class="handle">${handle}</text>
-    <text x="0" y="42" class="bio">${bio.length > 60 ? bio.slice(0, 57) + '...' : bio}</text>
-    
-    <g transform="translate(0, 68)">
-      <rect x="0" y="0" width="415" height="42" rx="4" fill="${theme.cardBg || theme.barBg}" />
-      <g transform="translate(20, 16)">
-        <text x="0" y="0" class="stat-lbl">Repositories</text>
-        <text x="0" y="16" class="stat-val">${repos}</text>
-        
-        <text x="130" y="0" class="stat-lbl">Followers</text>
-        <text x="130" y="16" class="stat-val">${followers}</text>
-        
-        <text x="260" y="0" class="stat-lbl">Following</text>
-        <text x="260" y="16" class="stat-val">${following}</text>
-      </g>
-    </g>
-
-    <g transform="translate(0, 140)" class="meta">
-      ${company ? `<text x="0" y="0">🏢 ${company}</text>` : ''}
-      ${location ? `<text x="${company ? 200 : 0}" y="0">📍 ${location}</text>` : ''}
-    </g>
-  </g>
-</svg>`;
+  return renderV1ClassicSvg(data, resolveTheme(theme, options), options);
 }
 
 export default profileCard;

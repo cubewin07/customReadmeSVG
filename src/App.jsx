@@ -4,6 +4,8 @@ import './App.css';
 const THEMES = [
   { id: 'dark', name: 'Dark' },
   { id: 'light', name: 'Light' },
+  { id: 'cobalt', name: 'Cobalt' },
+  { id: 'obsidian', name: 'Obsidian' },
   { id: 'radical', name: 'Radical' },
   { id: 'nord', name: 'Nord' },
   { id: 'gruvbox', name: 'Gruvbox' },
@@ -14,6 +16,9 @@ const THEMES = [
 ];
 
 const CARDS = [
+  { id: 'signature', name: 'Signature Plate', route: '/:user/signature' },
+  { id: 'stack', name: 'Stack Flame Graph', route: '/:user/stack' },
+  { id: 'trace', name: 'Shipping Trace', route: '/:user/trace' },
   { id: 'profile', name: 'Profile Overview', route: '/:user' },
   { id: 'developer', name: 'Developer Showcase', route: '/:user/developer' },
   { id: 'languages', name: 'Top Languages', route: '/:user/languages' },
@@ -329,6 +334,12 @@ function App() {
                     >
                       Full Stacked Bars
                     </button>
+                    <button
+                      className={`card-type-btn ${langLayout === 'evolution' ? 'active' : ''}`}
+                      onClick={() => setLangLayout('evolution')}
+                    >
+                      🚀 Stack Evolution
+                    </button>
                   </div>
                 </div>
 
@@ -422,6 +433,18 @@ function App() {
                     onClick={() => setStatsLayout('compact')}
                   >
                     📱 Compact Banner
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'hud' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('hud')}
+                  >
+                    🛡️ Cyber Telemetry HUD
+                  </button>
+                  <button
+                    className={`card-type-btn ${statsLayout === 'streak' ? 'active' : ''}`}
+                    onClick={() => setStatsLayout('streak')}
+                  >
+                    🔥 Streak Consistency
                   </button>
                 </div>
               </div>

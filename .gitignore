@@ -24,6 +24,10 @@ dist-ssr
 *.sw?
 
 # Skills
-tooling/
+tooling/*
+!tooling/scripts/
+
+# Snapshots output
+work/snapshots/
 
 .env

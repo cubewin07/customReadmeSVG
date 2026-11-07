@@ -20,12 +20,90 @@ Dynamic, extensible SVG card generator for GitHub profile READMEs, powered by th
 
 ---
 
+## 🖼 Plates
+
+Three wide flagship cards, each built from a form engineers already read, drawn from live GitHub data with embedded fonts. They default to the `cobalt` theme and accept any other `theme`.
+
+### Signature: `/:user/signature`
+> Your name set huge, with a year of contributions rising in front of it as ridgelines. Each ridge is four weeks, oldest at the back. Set `name` and `role` to control the wording.
+
+<p align="center">
+  <img src="assets/cards/plate-signature.svg" alt="Signature plate" width="100%" />
+</p>
+
+### Stack: `/:user/stack`
+> A flame graph of your code: all code, then family, language, and repository, with width as bytes. Private repositories count toward the totals but are never named. Use `hide=Less,SCSS` to leave out languages.
+
+<p align="center">
+  <img src="assets/cards/plate-stack.svg" alt="Stack flame graph" width="100%" />
+</p>
+
+### Trace: `/:user/trace`
+> A distributed-trace waterfall of the last 12 months: one lane per public repository, with weekly commits as bars.
+
+<p align="center">
+  <img src="assets/cards/plate-trace.svg" alt="Shipping trace" width="100%" />
+</p>
+
+```markdown
+![Signature](https://your-deployment.netlify.app/USERNAME/signature?name=Your%20Name&role=Backend%20/%20Systems)
+![Stack](https://your-deployment.netlify.app/USERNAME/stack)
+![Trace](https://your-deployment.netlify.app/USERNAME/trace)
+```
+
+---
+
+## 🎨 Live Card Showcase
+
+SVG outputs generated directly by `customReadmeSVG`, rendered here with sample data:
+
+### 1. Developer Showcase (Flagship Animated Cyber World)
+> 36s synchronized multi-act animation featuring hologram workstation telemetry, platformer contribution runner, and isometric voxel city.
+
+<p align="center">
+  <img src="assets/cards/developer-showcase.svg" alt="Developer Showcase" width="100%" />
+</p>
+
+### 2. GitHub Stats (Telemetry HUD & Ring Gauge)
+> Powered by the enhanced rank scoring engine with impact gating (peer-reviewed PRs, star density, code reviews, and community traction).
+
+<p align="center">
+  <img src="assets/cards/stats-telemetry-hud.svg" alt="GitHub Stats Cyberpunk HUD" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/cards/stats-ring.svg" alt="GitHub Stats Ring Gauge" width="100%" />
+</p>
+
+### 3. Top Languages (Polyglot Waffle) & Top Repositories
+> A hundred-cell waffle with one cell per percent of code, alongside a ruled repository table with stars, forks, and last push.
+
+<p align="center">
+  <img src="assets/cards/languages-polyglot.svg" alt="Top Languages Polyglot" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/cards/repos-grid.svg" alt="Top Repositories Grid" width="100%" />
+</p>
+
+### 4. Profile Overview
+> Identity under a banner built from the account's real contribution calendar, with language share and core counts.
+
+<p align="center">
+  <img src="assets/cards/profile-overview.svg" alt="Profile Overview" width="100%" />
+</p>
+
+---
+
 ## 📌 Available SVG Routes & Embed Examples
 
 ### Routes
 
 | Route | Card Plugin | Default TTL | Description |
 |---|---|---|---|
+| `/:user/signature` | Signature Plate | 1 Hour | Your name set huge, with a year of contributions rising in front of it as ridgelines |
+| `/:user/stack` | Stack Flame Graph | 6 Hours | Flame graph of code by family, language, and repository, with private repositories unnamed |
+| `/:user/trace` | Shipping Trace | 2 Hours | Waterfall of the last 12 months with one lane per public repository and weekly commits as bars |
 | `/:user` or `/:user/profile` | Profile Overview | 1 Hour | Name, bio, repository count, follower/following counts, location, & company |
 | `/:user/developer` | Developer Showcase | 1 Hour | 24s 3-act animated cyber world: Workstation Desk & Pinned Repos Hologram, Contribution Graph Platformer Runner, and 3D Isometric Voxel City |
 | `/:user/languages` | Top Languages | 6 Hours | Top 5–8 programming languages aggregated by byte size with color dots & percentages |

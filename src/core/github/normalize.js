@@ -1,6 +1,7 @@
 /**
  * Data Normalization Helpers for GitHub GraphQL API Responses
  */
+import { wrapText } from '../../svg/text.js';
 
 /**
  * Normalizes user profile response.
@@ -13,6 +14,115 @@ export function normalizeProfile(rawData) {
   const repos = user.repositories?.nodes || [];
   const totalStars = repos.reduce((acc, r) => acc + (r.stargazerCount || 0), 0);
 
+  const createdAtYear = user.createdAt ? new Date(user.createdAt).getFullYear() : null;
+  const currentYear = new Date().getFullYear();
+  const accountAgeYears = createdAtYear ? Math.max(1, currentYear - createdAtYear) : null;
+  const tenureText = createdAtYear ? `Joined ${createdAtYear} · ${accountAgeYears}y active` : null;
+
+  // Top Repo
+  const topRepoNode = user.topRepo?.nodes?.[0];
+  const topRepo = topRepoNode ? {
+    name: topRepoNode.name,
+    stars: topRepoNode.stargazerCount || 0,
+    language: topRepoNode.primaryLanguage?.name || 'Code',
+    languageColor: topRepoNode.primaryLanguage?.color || '#58a6ff',
+  } : null;
+
+  // Top Languages
+  const langMap = new Map();
+  const topLangRepos = user.topLanguages?.nodes || repos;
+  for (const r of topLangRepos) {
+    if (r.primaryLanguage?.name) {
+      const name = r.primaryLanguage.name;
+      const color = r.primaryLanguage.color || '#58a6ff';
+      const prev = langMap.get(name) || { name, color, count: 0 };
+      prev.count += 1;
+      langMap.set(name, prev);
+    }
+  }
+  const topLangList = Array.from(langMap.values()).sort((a, b) => b.count - a.count).slice(0, 3);
+  const totalLangCount = topLangList.reduce((acc, l) => acc + l.count, 0) || 1;
+  const topLanguages = topLangList.map(l => ({
+    ...l,
+    percentage: Math.round((l.count / totalLangCount) * 100),
+  }));
+
+  // Organizations
+  const organizations = (user.organizations?.nodes || []).map(org => ({
+    name: org.name || org.login,
+    login: org.login,
+    avatarUrl: org.avatarUrl,
+  })).slice(0, 4);
+
+  // Contributions Calendar
+  const contribCollection = user.contributionsCollection || {};
+  const calendar = contribCollection.contributionCalendar || {};
+  const weeks = calendar.weeks || [];
+  const totalContributions = calendar.totalContributions || 0;
+
+  const allDays = [];
+  const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
+  for (const w of weeks) {
+    for (const d of (w.contributionDays || [])) {
+      const count = d.contributionCount || 0;
+      allDays.push({ date: d.date, count, weekday: d.weekday });
+      if (typeof d.weekday === 'number' && d.weekday >= 0 && d.weekday <= 6) {
+        weekdayTotals[d.weekday] += count;
+      }
+    }
+  }
+
+  // Streaks
+  let currentStreak = 0;
+  if (allDays.length > 0) {
+    let i = allDays.length - 1;
+    if (allDays[i].count === 0 && i > 0 && allDays[i - 1].count > 0) {
+      i--;
+    }
+    while (i >= 0 && allDays[i].count > 0) {
+      currentStreak++;
+      i--;
+    }
+  }
+
+  let longestStreak = 0;
+  let tempStreak = 0;
+  for (const day of allDays) {
+    if (day.count > 0) {
+      tempStreak++;
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  let maxWeekdayCount = -1;
+  let busiestWeekdayIndex = 2; // Default Tuesday if equal or empty
+  weekdayTotals.forEach((total, idx) => {
+    if (total > maxWeekdayCount && total > 0) {
+      maxWeekdayCount = total;
+      busiestWeekdayIndex = idx;
+    }
+  });
+  const busiestWeekday = weekdayNames[busiestWeekdayIndex];
+  const last30DaysCount = allDays.slice(-30).reduce((sum, d) => sum + d.count, 0);
+
+  // 12 monthly contributions
+  const monthlyContributions = Array(12).fill(0);
+  if (allDays.length > 0) {
+    const now = new Date();
+    for (const d of allDays) {
+      if (!d.date) continue;
+      const dayDate = new Date(d.date);
+      const diffMonths = (now.getFullYear() - dayDate.getFullYear()) * 12 + (now.getMonth() - dayDate.getMonth());
+      if (diffMonths >= 0 && diffMonths < 12) {
+        const binIndex = 11 - diffMonths;
+        monthlyContributions[binIndex] += d.count;
+      }
+    }
+  }
+
   return {
     login: user.login || '',
     name: user.name || user.login || '',
@@ -24,10 +134,26 @@ export function normalizeProfile(rawData) {
     repositories: user.repositories?.totalCount || 0,
     totalStars,
     createdAt: user.createdAt || '',
+    createdAtYear,
+    accountAgeYears,
+    tenureText,
     location: user.location || null,
     websiteUrl: user.websiteUrl || null,
     company: user.company || null,
+    isHireable: Boolean(user.isHireable),
     status: user.status ? { emoji: user.status.emoji, message: user.status.message } : null,
+    organizations,
+    topRepo,
+    topLanguages,
+    monthlyContributions,
+    calendar: {
+      totalContributions,
+      currentStreak,
+      longestStreak,
+      busiestWeekday,
+      last30DaysCount,
+      weeks,
+    },
   };
 }
 
@@ -37,27 +163,47 @@ export function normalizeProfile(rawData) {
  * @returns {object}
  */
 export function normalizeLanguages(rawData) {
-  if (!rawData || !rawData.user) return { languages: [], totalSize: 0 };
+  if (!rawData || !rawData.user) return { languages: [], totalSize: 0, totalRepos: 0, totalLanguages: 0 };
   const repos = rawData.user.repositories?.nodes || [];
 
   const langMap = new Map();
   let totalSize = 0;
+  let totalRecentSize = 0;
+  const now = Date.now();
+  const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
   for (const repo of repos) {
+    const pushedTime = repo.pushedAt ? new Date(repo.pushedAt).getTime() : 0;
+    const monthsAgo = pushedTime ? Math.max(0, Math.floor((now - pushedTime) / (30 * 24 * 60 * 60 * 1000))) : 12;
+    const isRecent = pushedTime && (now - pushedTime <= ONE_YEAR_MS);
+
     const edges = repo.languages?.edges || [];
     for (const { size, node } of edges) {
       if (!node || !node.name) continue;
       const { name, color } = node;
       totalSize += size;
+      if (isRecent) totalRecentSize += size;
 
       if (langMap.has(name)) {
         const existing = langMap.get(name);
         existing.size += size;
+        existing.repoCount += 1;
+        existing.repos.push({ name: repo.name, size, isPrivate: Boolean(repo.isPrivate) });
+        if (monthsAgo < existing.lastUsedMonthsAgo) {
+          existing.lastUsedMonthsAgo = monthsAgo;
+        }
+        if (isRecent) {
+          existing.recentSize += size;
+        }
       } else {
         langMap.set(name, {
           name,
           color: color || '#858585',
           size,
+          recentSize: isRecent ? size : 0,
+          repoCount: 1,
+          repos: [{ name: repo.name, size, isPrivate: Boolean(repo.isPrivate) }],
+          lastUsedMonthsAgo: monthsAgo,
         });
       }
     }
@@ -67,35 +213,141 @@ export function normalizeLanguages(rawData) {
     .map(lang => ({
       ...lang,
       percentage: totalSize > 0 ? parseFloat(((lang.size / totalSize) * 100).toFixed(2)) : 0,
+      recentShare: totalRecentSize > 0
+        ? parseFloat(((lang.recentSize / totalRecentSize) * 100).toFixed(2))
+        : (totalSize > 0 ? parseFloat(((lang.size / totalSize) * 100).toFixed(2)) : 0),
     }))
     .sort((a, b) => b.size - a.size);
 
   return {
     languages,
     totalSize,
+    totalRepos: repos.length,
     totalLanguages: languages.length,
   };
 }
 
 /**
- * Normalizes top repositories list.
+ * Normalizes TRACE_QUERY into repositories with commit timestamps, busiest first.
+ * @param {object} rawData
+ * @returns {{ login: string, name: string, repos: Array }}
+ */
+export function normalizeTrace(rawData) {
+  if (!rawData || !rawData.user) return { login: '', name: '', repos: [] };
+  const repos = (rawData.user.repositories?.nodes || [])
+    .map((repo) => {
+      const history = repo.defaultBranchRef?.target?.history;
+      return {
+        name: repo.name,
+        pushedAt: repo.pushedAt || null,
+        language: repo.primaryLanguage || null,
+        commitCount: history?.totalCount || 0,
+        commitDates: (history?.nodes || []).map((node) => node.committedDate).filter(Boolean),
+        nextCursor: history?.pageInfo?.hasNextPage ? history.pageInfo.endCursor : null,
+      };
+    })
+    .filter((repo) => repo.commitCount > 0)
+    .sort((a, b) => b.commitCount - a.commitCount);
+  return { login: rawData.user.login, name: rawData.user.name || rawData.user.login, repos };
+}
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Computes an 8-bucket weekly commit sparkline from commit history nodes.
+ * @param {Array} historyNodes
+ * @param {number} [now=Date.now()]
+ * @returns {number[]} 8-element array of counts
+ */
+function computeWeeklyCommitBins(historyNodes = [], now = Date.now()) {
+  const weeklyCounts = [0, 0, 0, 0, 0, 0, 0, 0];
+  for (const node of historyNodes) {
+    if (node && node.committedDate) {
+      const time = new Date(node.committedDate).getTime();
+      const diffMs = now - time;
+      if (diffMs >= 0) {
+        const weekIdx = Math.floor(diffMs / WEEK_MS);
+        if (weekIdx >= 0 && weekIdx < 8) {
+          weeklyCounts[7 - weekIdx]++;
+        }
+      }
+    }
+  }
+  return weeklyCounts;
+}
+
+/**
+ * Normalizes top repositories list with rich metadata for card variants.
  * @param {object} rawData - Data payload returned by REPOS_QUERY
+ * @param {object} [options={}]
  * @returns {object}
  */
-export function normalizeRepos(rawData) {
+export function normalizeRepos(rawData, options = {}) {
   if (!rawData || !rawData.user) return { repos: [] };
   const repos = rawData.user.repositories?.nodes || [];
+  const now = options.now || Date.now();
 
   return {
-    repos: repos.map(r => ({
-      name: r.name,
-      description: r.description || '',
-      url: r.url,
-      stargazerCount: r.stargazerCount || 0,
-      forkCount: r.forkCount || 0,
-      primaryLanguage: r.primaryLanguage ? { name: r.primaryLanguage.name, color: r.primaryLanguage.color } : null,
-      updatedAt: r.updatedAt,
-    })),
+    repos: repos.map(r => {
+      const topics = (r.repositoryTopics?.nodes || [])
+        .map(t => t?.topic?.name)
+        .filter(Boolean);
+
+      const rawLangs = r.languages?.edges || [];
+      let totalLangSize = 0;
+      const languages = rawLangs.map(edge => {
+        const size = edge.size || 0;
+        totalLangSize += size;
+        return {
+          name: edge.node?.name || 'Code',
+          color: edge.node?.color || '#858585',
+          size,
+        };
+      });
+
+      const normalizedLangs = languages.map(l => ({
+        ...l,
+        percentage: totalLangSize > 0 ? parseFloat(((l.size / totalLangSize) * 100).toFixed(1)) : 0,
+      }));
+
+      if (!normalizedLangs.length && r.primaryLanguage) {
+        normalizedLangs.push({
+          name: r.primaryLanguage.name,
+          color: r.primaryLanguage.color || '#858585',
+          size: 1,
+          percentage: 100,
+        });
+      }
+
+      const historyNodes = r.defaultBranchRef?.target?.history?.nodes || [];
+      const firstCommit = historyNodes[0] || null;
+      const lastCommit = firstCommit ? {
+        message: firstCommit.message ? firstCommit.message.split('\n')[0].trim() : '',
+        sha: firstCommit.abbreviatedOid || '',
+        date: firstCommit.committedDate || null,
+      } : (r.lastCommit || null);
+
+      const sparkline = r.sparkline && Array.isArray(r.sparkline)
+        ? r.sparkline
+        : computeWeeklyCommitBins(historyNodes, now);
+
+      return {
+        name: r.name,
+        description: r.description || '',
+        url: r.url,
+        stargazerCount: r.stargazerCount || 0,
+        forkCount: r.forkCount || 0,
+        watchers: r.watchers?.totalCount !== undefined ? r.watchers.totalCount : (r.watchers || 0),
+        primaryLanguage: r.primaryLanguage ? { name: r.primaryLanguage.name, color: r.primaryLanguage.color } : null,
+        topics: topics.length ? topics : (r.topics || []),
+        latestRelease: r.latestRelease?.tagName || (typeof r.latestRelease === 'string' ? r.latestRelease : null),
+        pushedAt: r.pushedAt || r.updatedAt || null,
+        updatedAt: r.updatedAt,
+        languages: normalizedLangs,
+        lastCommit,
+        sparkline,
+      };
+    }),
   };
 }
 
@@ -113,6 +365,84 @@ export function normalizeStats(rawData) {
   const totalForks = repos.reduce((acc, r) => acc + (r.forkCount || 0), 0);
 
   const contribs = user.contributionsCollection || {};
+  const totalCommits = contribs.totalCommitContributions || 0;
+  const pullRequests = user.pullRequests?.totalCount || contribs.totalPullRequestContributions || 0;
+  const issues = user.issues?.totalCount || contribs.totalIssueContributions || 0;
+  const reviews = contribs.totalPullRequestReviewContributions || 0;
+  const totalContributions = contribs.contributionCalendar?.totalContributions || (totalCommits + pullRequests + issues + reviews);
+
+  const calendarWeeks = contribs.contributionCalendar?.weeks || [];
+  const allDays = [];
+  for (const w of calendarWeeks) {
+    for (const d of (w.contributionDays || [])) {
+      allDays.push(d);
+    }
+  }
+
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let tempStreak = 0;
+  for (const d of allDays) {
+    if (d.contributionCount > 0) {
+      tempStreak++;
+      if (tempStreak > maxStreak) maxStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  if (allDays.length > 0) {
+    let idx = allDays.length - 1;
+    if (allDays[idx].contributionCount === 0 && idx > 0 && allDays[idx - 1].contributionCount > 0) {
+      idx--;
+    }
+    while (idx >= 0 && allDays[idx].contributionCount > 0) {
+      currentStreak++;
+      idx--;
+    }
+  }
+
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const monthlyContributions = new Array(12).fill(0);
+  const monthLabels = new Array(12).fill('');
+
+  for (let m = 0; m < 12; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - (11 - m), 1);
+    monthLabels[m] = MONTH_NAMES[d.getMonth()];
+  }
+
+  for (const d of allDays) {
+    if (d.date && d.contributionCount > 0) {
+      const dayDate = new Date(d.date);
+      const diffMonths = (now.getFullYear() - dayDate.getFullYear()) * 12 + (now.getMonth() - dayDate.getMonth());
+      if (diffMonths >= 0 && diffMonths < 12) {
+        monthlyContributions[11 - diffMonths] += d.contributionCount;
+      }
+    }
+  }
+
+  let peakMonthIdx = 0;
+  let peakMonthVal = 0;
+  for (let i = 0; i < 12; i++) {
+    if (monthlyContributions[i] > peakMonthVal) {
+      peakMonthVal = monthlyContributions[i];
+      peakMonthIdx = i;
+    }
+  }
+
+  const bestMonth = {
+    name: monthLabels[peakMonthIdx] || 'Peak',
+    count: peakMonthVal,
+  };
+
+  const actionTotal = totalCommits + pullRequests + issues + reviews;
+  const effortShares = {
+    commitsPct: actionTotal > 0 ? parseFloat(((totalCommits / actionTotal) * 100).toFixed(1)) : 0,
+    prsPct: actionTotal > 0 ? parseFloat(((pullRequests / actionTotal) * 100).toFixed(1)) : 0,
+    reviewsPct: actionTotal > 0 ? parseFloat(((reviews / actionTotal) * 100).toFixed(1)) : 0,
+    issuesPct: actionTotal > 0 ? parseFloat(((issues / actionTotal) * 100).toFixed(1)) : 0,
+  };
 
   return {
     login: user.login,
@@ -121,8 +451,20 @@ export function normalizeStats(rawData) {
     totalRepos: user.repositories?.totalCount || 0,
     totalStars,
     totalForks,
-    totalCommits: contribs.totalCommitContributions || 0,
+    totalCommits,
+    pullRequests,
+    issues,
+    reviews,
+    totalContributions: totalContributions > 0 ? totalContributions : totalCommits,
+    currentStreak,
+    maxStreak,
+    memberYear: user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear(),
     restrictedContributions: contribs.restrictedContributionsCount || 0,
+    weeks: calendarWeeks,
+    monthlyContributions,
+    monthLabels,
+    bestMonth,
+    effortShares,
   };
 }
 
@@ -133,7 +475,7 @@ export function normalizeStats(rawData) {
  * @param {object} rawData - GraphQL response payload
  * @returns {object|null}
  */
-export function normalizeDeveloperData(rawData) {
+export function normalizeDeveloperData(rawData, options = {}) {
   if (!rawData || !rawData.user) return null;
   const user = rawData.user;
 
@@ -147,16 +489,36 @@ export function normalizeDeveloperData(rawData) {
   const topNodes = (user.topRepos?.nodes || []).filter(Boolean);
   const rawRepos = (pinnedNodes.length > 0 ? pinnedNodes : topNodes).slice(0, 3);
 
+  const now = options.now || Date.now();
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
   const normalizedRepos = rawRepos.map(r => {
-    // Generate an 8-point sparkline from commit history or sensible defaults
+    // Generate an 8-point sparkline by bucketing real commit dates into weekly bins
     const historyNodes = r.defaultBranchRef?.target?.history?.nodes || [];
-    let sparkline = [2, 4, 3, 5, 4, 7, 6, 8];
-    if (historyNodes.length >= 4) {
-      const counts = [1, 2, 2, 3, 2, 4, 3, 5];
-      for (let i = 0; i < Math.min(historyNodes.length, 8); i++) {
-        counts[i] = Math.max(1, Math.min(9, Math.round(1 + (r.stargazerCount % 5) + (i % 3))));
+    const weeklyCounts = [0, 0, 0, 0, 0, 0, 0, 0];
+
+    for (const node of historyNodes) {
+      if (node.committedDate) {
+        const time = new Date(node.committedDate).getTime();
+        const diffMs = now - time;
+        if (diffMs >= 0) {
+          const weekIdx = Math.floor(diffMs / WEEK_MS);
+          if (weekIdx >= 0 && weekIdx < 8) {
+            weeklyCounts[7 - weekIdx]++;
+          }
+        }
       }
-      sparkline = counts;
+    }
+
+    const maxCount = Math.max(...weeklyCounts);
+    let sparkline;
+    if (maxCount === 0) {
+      sparkline = [1, 1, 1, 1, 1, 1, 1, 1];
+    } else {
+      sparkline = weeklyCounts.map(count => {
+        if (count === 0) return 1;
+        return Math.max(1, Math.min(9, Math.round(1 + (count / maxCount) * 8)));
+      });
     }
 
     return {
@@ -169,21 +531,74 @@ export function normalizeDeveloperData(rawData) {
     };
   });
 
-  // 2. Latest Commit Message
-  let latestCommit = 'feat: update developer card engine';
+  // 2. Latest Commit Message & Real Commit SHA
+  let latestCommit = '';
+  let commitSha = '';
   for (const r of [...rawRepos, ...topNodes]) {
     const history = r.defaultBranchRef?.target?.history?.nodes || [];
-    if (history.length > 0 && history[0].message) {
-      latestCommit = history[0].message.split('\n')[0].trim();
-      if (latestCommit.length > 36) {
-        latestCommit = latestCommit.slice(0, 33) + '...';
+    if (history.length > 0) {
+      if (history[0].abbreviatedOid) {
+        commitSha = history[0].abbreviatedOid;
+      }
+      if (history[0].message) {
+        latestCommit = history[0].message.split('\n')[0].trim();
+        if (latestCommit.length > 36) {
+          latestCommit = latestCommit.slice(0, 33) + '...';
+        }
       }
       break;
     }
   }
 
-  // 3. Contribution Calendar -> 60 days of counts and Streak
-  const weeks = user.contributionsCollection?.contributionCalendar?.weeks || [];
+  // 3. Live Tech Arsenal aggregation from repositories & language nodes (forks excluded)
+  const langCountMap = new Map();
+  const langColorMap = new Map();
+  const shareMap = new Map();
+  for (const r of [...repos, ...pinnedNodes, ...topNodes]) {
+    if (r.isFork) continue;
+    if (r.primaryLanguage?.name) {
+      langCountMap.set(r.primaryLanguage.name, (langCountMap.get(r.primaryLanguage.name) || 0) + 10);
+      if (r.primaryLanguage.color) langColorMap.set(r.primaryLanguage.name, r.primaryLanguage.color);
+    }
+    const edges = r.languages?.edges || [];
+    for (const { node, size } of edges) {
+      if (node?.name) {
+        langCountMap.set(node.name, (langCountMap.get(node.name) || 0) + (size || 1));
+        if (node.color) langColorMap.set(node.name, node.color);
+      }
+    }
+  }
+  // Language shares: bytes across owned, non-fork repos only (pinned/top lists would double count)
+  for (const r of repos) {
+    if (r.isFork) continue;
+    for (const { node, size } of (r.languages?.edges || [])) {
+      if (node?.name) shareMap.set(node.name, (shareMap.get(node.name) || 0) + (size || 0));
+    }
+  }
+  const shareTotal = Array.from(shareMap.values()).reduce((a, b) => a + b, 0);
+  const langShares = shareTotal > 0
+    ? Array.from(shareMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([lname, bytes]) => ({
+        name: lname,
+        color: langColorMap.get(lname) || '#58a6ff',
+        pct: Math.max(1, Math.round((bytes / shareTotal) * 100)),
+      }))
+    : [];
+  const extractedTech = Array.from(langCountMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([tname]) => tname)
+    .slice(0, 6);
+
+  const tech = extractedTech.length > 0
+    ? extractedTech
+    : ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'];
+
+  // 4. Contribution Calendar -> 60 days of counts and Streak
+  const contribs = user.contributionsCollection || {};
+  const annualCommits = contribs.totalCommitContributions || contribs.contributionCalendar?.totalContributions || 0;
+  const weeks = contribs.contributionCalendar?.weeks || [];
   const allDays = [];
   for (const w of weeks) {
     for (const d of (w.contributionDays || [])) {
@@ -211,31 +626,74 @@ export function normalizeDeveloperData(rawData) {
   // Extract last 60 days of counts
   let counts = allDays.slice(-60).map(d => d.count);
   if (counts.length < 60) {
-    // Fill with default realistic counts if history is short
-    const seed = [3, 4, 0, 5, 6, 2, 8, 4, 0, 3, 5, 2, 7, 0, 4, 3, 6, 5, 9, 2, 0, 4, 5, 7, 3, 6, 0, 4, 2, 5];
     while (counts.length < 60) {
-      counts.unshift(seed[counts.length % seed.length]);
+      counts.unshift(0);
     }
   }
+
+  // 5. Honest calendar insights (longest streak, peak day, weekday rhythm, active days)
+  let longestStreak = 0;
+  let run = 0;
+  let peakDay = null;
+  let activeDays = 0;
+  const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
+  for (const d of allDays) {
+    if (d.count > 0) {
+      run++;
+      activeDays++;
+      if (run > longestStreak) longestStreak = run;
+    } else {
+      run = 0;
+    }
+    if (!peakDay || d.count > peakDay.count) peakDay = { count: d.count, date: d.date };
+    const wd = new Date(`${d.date}T12:00:00Z`).getUTCDay();
+    if (Number.isInteger(wd)) weekdayTotals[wd] += d.count;
+  }
+  const totalContribs = weekdayTotals.reduce((a, b) => a + b, 0);
+  const busiestWeekday = totalContribs > 0 ? weekdayTotals.indexOf(Math.max(...weekdayTotals)) : -1;
+  if (peakDay && peakDay.count === 0) peakDay = null;
+  const accountDays = user.createdAt
+    ? Math.max(0, Math.floor(((options.now || Date.now()) - new Date(user.createdAt).getTime()) / 86400000))
+    : 0;
+
+  const createdAtYear = user.createdAt ? new Date(user.createdAt).getFullYear() : 2024;
 
   return {
     name: user.name || user.login,
     login: user.login,
     handle: `@${user.login}`,
+    createdAt: user.createdAt || null,
+    joinedYear: createdAtYear,
     role: user.bio ? user.bio.split('.')[0] : 'Full-Stack Engineer & Creative Coder',
-    status: user.status?.message ? `${user.status.emoji || '🟢'} ${user.status.message}` : 'Building cool things 🚀',
-    focus: [
-      user.bio || 'Crafting interactive web apps & reactive UI systems',
-      'with dynamic, game-inspired SVG animation engines.',
-    ],
-    tech: ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'],
+    status: user.status?.message ? user.status.message.replace(/^:[a-z0-9_+-]+:\s*/, '') : `MEMBER SINCE ${createdAtYear}`,
+    focus: user.bio
+      ? (() => {
+          const lines = wrapText(user.bio, 14.5, 468, 2);
+          return [lines[0] || '', lines[1] || ''];
+        })()
+      : [
+          'Crafting interactive web apps & reactive UI systems',
+          'with dynamic, game-inspired SVG animation engines.',
+        ],
+    tech,
     stats: [
       { label: 'REPOSITORIES', value: totalRepos },
       { label: 'TOTAL STARS', value: totalStars },
       { label: 'FOLLOWERS', value: followers },
     ],
-    commit: latestCommit,
-    streak: streak > 0 ? streak : 12,
+    commit: latestCommit || 'No recent public commits',
+    commitSha,
+    annualCommits,
+    streak,
+    longestStreak,
+    activeDays,
+    totalDays: allDays.length,
+    peakDay,
+    busiestWeekday,
+    accountDays,
+    location: user.location || '',
+    company: user.company || '',
+    langShares,
     repos: normalizedRepos.length > 0 ? normalizedRepos : undefined,
     counts,
   };

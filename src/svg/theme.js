@@ -11,6 +11,11 @@ export const themes = {
     barBg: '#e1e4e8',
     cardBg: '#f6f8fa',
     badgeBg: '#eaf5ff',
+    positive: '#28a745',
+    negative: '#d73a49',
+    neutral: '#586069',
+    ringBg: '#e1e4e8',
+    heatmapLevels: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
   },
   dark: {
     bg: '#0d1117',
@@ -23,7 +28,12 @@ export const themes = {
     iconColor: '#58a6ff',
     barBg: '#21262d',
     cardBg: '#161b22',
-    badgeBg: '#1f6feb26',
+    badgeBg: '#13233a',
+    positive: '#3fb950',
+    negative: '#f85149',
+    neutral: '#8b949e',
+    ringBg: '#21262d',
+    heatmapLevels: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
   },
   radical: {
     bg: '#141321',
@@ -31,12 +41,17 @@ export const themes = {
     subtleBorder: '#242238',
     title: '#fe428e',
     text: '#a9fef7',
-    secondaryText: '#7b729e',
+    secondaryText: '#8c83b0',
     accent: '#f8d847',
     iconColor: '#fe428e',
     barBg: '#2a273f',
     cardBg: '#1d1b2e',
-    badgeBg: '#fe428e26',
+    badgeBg: '#2b1838',
+    positive: '#f8d847',
+    negative: '#fe428e',
+    neutral: '#7b729e',
+    ringBg: '#2a273f',
+    heatmapLevels: ['#1d1b2e', '#49284e', '#88316e', '#ca388d', '#fe428e'],
   },
   nord: {
     bg: '#2e3440',
@@ -49,7 +64,12 @@ export const themes = {
     iconColor: '#88c0d0',
     barBg: '#3b4252',
     cardBg: '#3b4252',
-    badgeBg: '#88c0d026',
+    badgeBg: '#384657',
+    positive: '#a3be8c',
+    negative: '#bf616a',
+    neutral: '#d8dee9',
+    ringBg: '#3b4252',
+    heatmapLevels: ['#3b4252', '#434c5e', '#4c566a', '#81a1c1', '#88c0d0'],
   },
   gruvbox: {
     bg: '#282828',
@@ -62,7 +82,12 @@ export const themes = {
     iconColor: '#fabd2f',
     barBg: '#3c3836',
     cardBg: '#32302f',
-    badgeBg: '#fabd2f26',
+    badgeBg: '#3c362a',
+    positive: '#b8bb26',
+    negative: '#fb4934',
+    neutral: '#a89984',
+    ringBg: '#3c3836',
+    heatmapLevels: ['#32302f', '#504945', '#7c6f64', '#d79921', '#fabd2f'],
   },
   dracula: {
     bg: '#282a36',
@@ -70,12 +95,17 @@ export const themes = {
     subtleBorder: '#44475a',
     title: '#ff79c6',
     text: '#f8f8f2',
-    secondaryText: '#6272a4',
+    secondaryText: '#8c9bcc',
     accent: '#50fa7b',
     iconColor: '#bd93f9',
     barBg: '#44475a',
     cardBg: '#343746',
-    badgeBg: '#ff79c626',
+    badgeBg: '#3c324a',
+    positive: '#50fa7b',
+    negative: '#ff5555',
+    neutral: '#6272a4',
+    ringBg: '#44475a',
+    heatmapLevels: ['#343746', '#44475a', '#6272a4', '#bd93f9', '#ff79c6'],
   },
   tokyonight: {
     bg: '#1a1b26',
@@ -83,12 +113,17 @@ export const themes = {
     subtleBorder: '#24283b',
     title: '#7aa2f7',
     text: '#a9b1d6',
-    secondaryText: '#565f89',
+    secondaryText: '#8089b6',
     accent: '#73daca',
     iconColor: '#7aa2f7',
     barBg: '#24283b',
     cardBg: '#1f2335',
-    badgeBg: '#7aa2f726',
+    badgeBg: '#232b45',
+    positive: '#73daca',
+    negative: '#f7768e',
+    neutral: '#565f89',
+    ringBg: '#24283b',
+    heatmapLevels: ['#1f2335', '#292e42', '#3b4261', '#565f89', '#7aa2f7'],
   },
   catppuccin: {
     bg: '#1e1e2e',
@@ -101,7 +136,12 @@ export const themes = {
     iconColor: '#cba6f7',
     barBg: '#313244',
     cardBg: '#181825',
-    badgeBg: '#cba6f726',
+    badgeBg: '#2a263d',
+    positive: '#a6e3a1',
+    negative: '#f38ba8',
+    neutral: '#a6adc8',
+    ringBg: '#313244',
+    heatmapLevels: ['#181825', '#313244', '#45475a', '#a6adc8', '#cba6f7'],
   },
   synthwave: {
     bg: '#2b213a',
@@ -114,7 +154,49 @@ export const themes = {
     iconColor: '#f78c6c',
     barBg: '#372a4b',
     cardBg: '#241b30',
-    badgeBg: '#ef65b026',
+    badgeBg: '#382246',
+    positive: '#ef65b0',
+    negative: '#ff5555',
+    neutral: '#b094b8',
+    ringBg: '#372a4b',
+    heatmapLevels: ['#241b30', '#372a4b', '#5a3d75', '#a44d93', '#ef65b0'],
+  },
+  cobalt: {
+    bg: '#0A2A8C',
+    border: '#0A2A8C',
+    subtleBorder: '#2747A6',
+    title: '#FFD2B0',
+    text: '#F6F2E7',
+    secondaryText: '#B4C5F0',
+    accent: '#FF7A2F',
+    iconColor: '#FF7A2F',
+    barBg: '#1E3D9E',
+    cardBg: '#12338F',
+    badgeBg: '#12338F',
+    positive: '#FFB547',
+    negative: '#FF7A2F',
+    neutral: '#B4C5F0',
+    ringBg: '#1E3D9E',
+    heatmapLevels: ['#12338F', '#7A3E6B', '#B84F4F', '#E5642F', '#FF7A2F'],
+    flame: ['#FFC24B', '#FFA63D', '#FF8A33', '#FF7A2F', '#F4611F', '#FFD36B'],
+  },
+  obsidian: {
+    bg: '#06080F',
+    border: '#232f42',
+    subtleBorder: '#162032',
+    title: '#38BDF8',
+    text: '#F8FAFC',
+    secondaryText: '#94A3B8',
+    accent: '#818CF8',
+    iconColor: '#38BDF8',
+    barBg: '#131929',
+    cardBg: '#0D111C',
+    badgeBg: '#102338',
+    positive: '#34D399',
+    negative: '#EF4444',
+    neutral: '#94A3B8',
+    ringBg: '#131929',
+    heatmapLevels: ['#0D111C', '#0E3A5A', '#135882', '#2288B8', '#38BDF8'],
   },
 };
 
@@ -126,4 +208,48 @@ export const themes = {
 export function getTheme(name = 'light') {
   const normalized = (name || '').toLowerCase();
   return themes[normalized] || themes.light;
+}
+
+/**
+ * Resolves theme with optional query overrides (accent color, transparent background).
+ * @param {string|object} [themeInput='light'] - Theme name or palette object
+ * @param {object} [options={}] - Query options
+ * @param {string} [options.accent] - Accent hex color override
+ * @param {string} [options.bg] - Background color override (e.g., 'transparent')
+ * @returns {object} Resolved theme object
+ */
+export function resolveTheme(themeInput = 'light', options = {}) {
+  let base;
+  if (typeof themeInput === 'string') {
+    base = getTheme(themeInput);
+  } else if (themeInput && typeof themeInput === 'object') {
+    base = themeInput;
+  } else {
+    base = themes.light;
+  }
+
+  const resolved = { ...base };
+
+  if (options.accent) {
+    let accentStr = String(options.accent).trim();
+    if (!accentStr.startsWith('#') && !accentStr.startsWith('rgb')) {
+      accentStr = `#${accentStr}`;
+    }
+    resolved.title = accentStr;
+    resolved.accent = accentStr;
+    resolved.iconColor = accentStr;
+  }
+
+  if (options.bg === 'transparent') {
+    resolved.bg = 'transparent';
+    resolved.cardBg = 'rgba(255, 255, 255, 0.04)';
+  } else if (options.bg) {
+    let bgStr = String(options.bg).trim();
+    if (!bgStr.startsWith('#') && !bgStr.startsWith('rgb')) {
+      bgStr = `#${bgStr}`;
+    }
+    resolved.bg = bgStr;
+  }
+
+  return resolved;
 }

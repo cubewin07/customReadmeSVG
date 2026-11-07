@@ -26,80 +26,74 @@ export function renderActCity(counts = []) {
         3, 6, 0, 5, 7, 8, 6, 4, 0,
       ];
 
-  // Grid line coordinates with glowing intersection points
-  let gridLinesSvg = '';
+  // Grid line coordinates as a single compact path
+  let gridPathD = '';
   for (let i = 0; i < 8; i++) {
     const x1 = i * 13;
     const y1 = i * 7.5;
-    const x2 = i * 13 - 91;
-    const y2 = i * 7.5 + 52.5;
-    gridLinesSvg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
-
-    const negX1 = -i * 13;
-    const negY1 = i * 7.5;
-    const negX2 = -i * 13 + 91;
-    const negY2 = i * 7.5 + 52.5;
-    gridLinesSvg += `<line x1="${negX1}" y1="${negY1}" x2="${negX2}" y2="${negY2}"/>`;
+    gridPathD += `M${x1} ${y1}L${x1 - 91} ${y1 + 52.5}M${-x1} ${y1}L${-x1 + 91} ${y1 + 52.5}`;
   }
 
-  // 3D Voxel Cubes ordered by depth
-  const cubes = [];
+  // 3D Voxel Building Columns ordered by isometric depth
+  const columns = [];
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 7; j++) {
       const idx = i * 7 + j;
       const hh = cubeHeight(cData[idx]);
-      for (let k = 0; k < hh; k++) {
-        cubes.push({
-          depth: i + j,
-          k,
-          i,
-          j,
-          hh,
-        });
+      if (hh > 0) {
+        columns.push({ depth: i + j, i, j, hh });
       }
     }
   }
 
-  // Sort by isometric draw order: depth first, then height k
-  cubes.sort((a, b) => (a.depth - b.depth) || (a.k - b.k));
+  // Sort by isometric draw order: depth first
+  columns.sort((a, b) => a.depth - b.depth);
 
-  let cubesSvg = '';
-  for (const c of cubes) {
-    const px = (c.i - c.j) * 13;
-    const py = (c.i + c.j) * 7.5 - (c.k + 1) * 12;
-    const ts = parseFloat((18.6 + (c.i + c.j) * 0.17 + c.k * 0.1).toFixed(2));
-    const isRoof = c.k === c.hh - 1;
-    const isSkyscraper = c.hh >= 3;
-
-    cubesSvg += `<use href="#c${c.hh}" x="${px}" y="${py}" opacity="0">
-      ${anim('opacity', [[ts, 0], [ts + 0.06, 1]])}
-      ${anim('y', [
-        [ts, parseFloat((py - 110).toFixed(1))],
-        [ts + 0.28, parseFloat((py + 3).toFixed(1))],
-        [ts + 0.38, parseFloat(py.toFixed(1))],
-      ])}
-    </use>`;
-
-    if (isRoof && isSkyscraper) {
-      cubesSvg += `
-        <!-- Rooftop Satellite Relay Antenna & Warning Beacon -->
-        <g opacity="0">
-          ${anim('opacity', [[ts + 0.38, 0], [ts + 0.44, 1]])}
-          <line x1="${px}" y1="${py}" x2="${px}" y2="${py - 9}" stroke="#ffffff" stroke-width="0.9"/>
-          <circle cx="${px}" cy="${py - 9}" r="1.6" fill="#ff5f56">
-            <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
-          </circle>
-        </g>`;
+  // Group columns by isometric depth
+  const depthGroups = new Map();
+  for (const col of columns) {
+    if (!depthGroups.has(col.depth)) {
+      depthGroups.set(col.depth, []);
     }
+    depthGroups.get(col.depth).push(col);
+  }
+
+  let towerDefsSvg = '<defs>';
+  for (let hh = 1; hh <= 4; hh++) {
+    let stack = '';
+    for (let k = 0; k < hh; k++) {
+      stack += `<use href="#c${hh}" y="${-(k + 1) * 12}"/>`;
+    }
+    if (hh >= 3) {
+      const roofY = -hh * 12;
+      stack += `<line y1="${roofY}" y2="${roofY - 9}" stroke="#fff" stroke-width="0.9"/><circle cy="${roofY - 9}" r="1.6" fill="#ff5f56"/>`;
+    }
+    towerDefsSvg += `<g id="tw${hh}">${stack}</g>`;
+  }
+  towerDefsSvg += '</defs>';
+
+  let cubesSvg = towerDefsSvg;
+  for (const [depth, cols] of depthGroups.entries()) {
+    const ts = parseFloat((18.6 + depth * 0.17).toFixed(2));
+    let groupContent = '';
+    for (const col of cols) {
+      const px = (col.i - col.j) * 13;
+      const baseY = (col.i + col.j) * 7.5;
+      groupContent += `<use href="#tw${col.hh}" x="${px}" y="${baseY}"/>`;
+    }
+
+    cubesSvg += `<g opacity="0">
+      ${anim('opacity', [[ts, 0], [ts + 0.06, 1]])}
+      ${tr([[ts, 0, -110], [ts + 0.28, 0, 3], [ts + 0.38, 0, 0]])}
+      ${groupContent}
+    </g>`;
   }
 
   // Floating Anti-Gravity Data Shards / Crystals around Island
   const crystalCoords = [
-    [-110, 70, 2.8, 0],
-    [-80, 126, 3.4, 0.8],
+    [-95, 78, 2.8, 0],
     [92, 76, 3.1, 0.4],
-    [114, 120, 2.6, 1.2],
-    [0, 138, 3.8, 1.6],
+    [0, 138, 3.6, 1.2],
   ];
   let crystalsSvg = '';
   for (const [cx, cy, cDur, cDel] of crystalCoords) {
@@ -122,7 +116,7 @@ export function renderActCity(counts = []) {
     ${anim('opacity', [[0, 0], [17.6, 0], [18.2, 1], [23.5, 1], [24, 0]])}
 
     <!-- 3D Isometric City Floating Island Stage -->
-    <g transform="translate(352,112) scale(1.6)">
+    <g transform="translate(364,112) scale(1.56)">
       <!-- Anti-Gravity Reactor Glow Beneath Island -->
       <ellipse cx="0" cy="115" rx="80" ry="24" fill="url(#antiGravCore)"/>
 
@@ -143,9 +137,7 @@ export function renderActCity(counts = []) {
       <polygon points="0,1 89,52.5 0,103 -89,52.5" fill="none" stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.3"/>
 
       <!-- Isometric Floor Grid Lines -->
-      <g stroke="#1c2636" stroke-width="0.6">
-        ${gridLinesSvg}
-      </g>
+      <path d="${gridPathD}" stroke="#1c2636" stroke-width="0.6" fill="none"/>
 
       <!-- Impact Shockwave Ripple during City Drop -->
       <ellipse cx="0" cy="52.5" rx="15" ry="8.5" fill="none" stroke="#4fd1ff" stroke-width="1.5" opacity="0">
@@ -179,21 +171,21 @@ export function renderActCity(counts = []) {
     </g>
 
     <!-- Conductor Holographic Symphony Resonance Waves -->
-    <g transform="translate(130,265)">
-      <ellipse cx="20" cy="-10" rx="10" ry="16" fill="none" stroke="#38c9a0" stroke-width="1.2" opacity="0">
-        ${anim('rx', [[18.6, 10], [19.8, 55], [21.0, 10], [22.2, 55]])}
-        ${anim('ry', [[18.6, 16], [19.8, 80], [21.0, 16], [22.2, 80]])}
+    <g transform="translate(98,265)">
+      <ellipse cx="16" cy="-10" rx="10" ry="16" fill="none" stroke="#38c9a0" stroke-width="1.2" opacity="0">
+        ${anim('rx', [[18.6, 10], [19.8, 44], [21.0, 10], [22.2, 44]])}
+        ${anim('ry', [[18.6, 16], [19.8, 70], [21.0, 16], [22.2, 70]])}
         ${anim('opacity', [[18.6, 0.6], [19.8, 0], [21.0, 0.6], [22.2, 0]])}
       </ellipse>
-      <ellipse cx="20" cy="-10" rx="10" ry="16" fill="none" stroke="#4c8dff" stroke-width="1.2" opacity="0">
-        ${anim('rx', [[19.2, 10], [20.4, 65], [21.6, 10], [22.8, 65]])}
-        ${anim('ry', [[19.2, 16], [20.4, 90], [21.6, 16], [22.8, 90]])}
+      <ellipse cx="16" cy="-10" rx="10" ry="16" fill="none" stroke="#4c8dff" stroke-width="1.2" opacity="0">
+        ${anim('rx', [[19.2, 10], [20.4, 52], [21.6, 10], [22.8, 52]])}
+        ${anim('ry', [[19.2, 16], [20.4, 78], [21.6, 16], [22.8, 78]])}
         ${anim('opacity', [[19.2, 0.6], [20.4, 0], [21.6, 0.6], [22.8, 0]])}
       </ellipse>
     </g>
 
     <!-- Conductor / Architect Podium & Holographic Control Console -->
-    <g transform="translate(130,299)">
+    <g transform="translate(98,299)">
       <!-- Multi-tier Illuminated Stage -->
       <rect x="-32" y="0" width="64" height="8" rx="3" fill="#141a24" stroke="#38bdf8" stroke-width="1"/>
       <line x1="-30" y1="1" x2="30" y2="1" stroke="#fff" stroke-opacity="0.25"/>
@@ -251,7 +243,5 @@ export function renderActCity(counts = []) {
       </text>
     </g>
 
-    <!-- CLI Step Prompt HUD -->
-    <text class="m" x="20" y="27" font-size="11" fill="#7d8590">&gt; build --world</text>
   </g>`;
 }

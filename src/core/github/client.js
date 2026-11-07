@@ -11,6 +11,15 @@ export function getGithubToken(tokenOverride) {
   if (env) {
     if (env.GITHUB_TOKEN) return env.GITHUB_TOKEN;
     if (env.VITE_GITHUB_TOKEN) return env.VITE_GITHUB_TOKEN;
+    if (typeof globalThis.process?.loadEnvFile === 'function') {
+      try {
+        globalThis.process.loadEnvFile();
+        if (env.GITHUB_TOKEN) return env.GITHUB_TOKEN;
+        if (env.VITE_GITHUB_TOKEN) return env.VITE_GITHUB_TOKEN;
+      } catch {
+        // .env file not present or already loaded
+      }
+    }
   }
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     if (import.meta.env.VITE_GITHUB_TOKEN) return import.meta.env.VITE_GITHUB_TOKEN;
@@ -44,28 +53,37 @@ export async function graphql(query, variables = {}, options = {}) {
     'User-Agent': 'customReadmeSVG-App',
   };
 
-  if (!token) {
-    throw new Error('Set GITHUB_TOKEN or VITE_GITHUB_TOKEN (GitHub GraphQL API requires authentication).');
+  try {
+    if (!token) {
+      throw new Error('Set GITHUB_TOKEN or VITE_GITHUB_TOKEN (GitHub GraphQL API requires authentication).');
+    }
+
+    headers['Authorization'] = `Bearer ${token}`;
+    const response = await axios.post(
+      'https://api.github.com/graphql',
+      { query, variables },
+      { headers, timeout: 10000 }
+    );
+
+    if (response.data.errors && response.data.errors.length > 0) {
+      const errMessage = response.data.errors.map(e => e.message).join('; ');
+      throw new Error(`GitHub GraphQL API Error: ${errMessage}`);
+    }
+
+    const data = response.data.data;
+
+    if (cache && cacheKey && data) {
+      cache.set(cacheKey, data, ttlMs);
+    }
+
+    return data;
+  } catch (err) {
+    if (cache && cacheKey && typeof cache.getStale === 'function') {
+      const stale = cache.getStale(cacheKey);
+      if (stale) {
+        return stale;
+      }
+    }
+    throw err;
   }
-
-  headers['Authorization'] = `Bearer ${token}`;
-
-  const response = await axios.post(
-    'https://api.github.com/graphql',
-    { query, variables },
-    { headers, timeout: 10000 }
-  );
-
-  if (response.data.errors && response.data.errors.length > 0) {
-    const errMessage = response.data.errors.map(e => e.message).join('; ');
-    throw new Error(`GitHub GraphQL API Error: ${errMessage}`);
-  }
-
-  const data = response.data.data;
-
-  if (cache && cacheKey && data) {
-    cache.set(cacheKey, data, ttlMs);
-  }
-
-  return data;
 }

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="224" viewBox="0 0 495 224" fill="none" role="img" aria-label="Repositories by cubewin07">
+  <title>Repositories by cubewin07</title>
+  
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; }
+    .ink { fill: #c9d1d9; }
+    .mut { fill: #8b949e; }
+    .lnk { fill: #58a6ff; }
+    .lbl { font-size: 11px; fill: #8b949e; }
+    .num { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; fill: #c9d1d9; }
+    .ci { animation: cellIn .4s ease-out both; }
+    @keyframes cellIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .ci { animation: none; } }
+  </style>
+  <rect x="0.5" y="0.5" width="494" height="223" rx="10" fill="#0d1117" stroke="#30363d" />
+  
+    <g transform="translate(24, 28)">
+      <rect x="0" y="-9" width="9" height="9" rx="2" fill="#3fb950" />
+      <text x="16" y="0" class="card-header-title" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" font-weight="600" font-size="13.5" fill="#c9d1d9"><tspan fill="#8b949e" font-weight="400">cubewin07 / </tspan>repositories</text>
+      <text x="447" y="0" text-anchor="end" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" fill="#8b949e">4 shown</text>
+    </g>
+      
+      
+      <text x="24" y="66" class="lnk" font-size="13" font-weight="600">customReadmeSVG</text>
+      <text x="24" y="84" class="mut" font-size="11.5">Dynamic game-inspired SVG cards</text><text x="24" y="99.5" class="mut" font-size="11.5">for GitHub READMEs</text>
+      <rect x="24.0" y="111.5" width="9" height="9" rx="2" fill="#f1e05a" /><text x="38" y="120" class="mut" font-size="11">JavaScript</text><g transform="translate(103.3, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
+    </svg></g><text x="117" y="120" class="mono mut" font-size="11">128</text><g transform="translate(147.4, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
+    </svg></g><text x="161" y="120" class="mono mut" font-size="11">24</text><text x="185" y="120" class="mut" font-size="11">5d ago</text>
+      
+      <line x1="248" y1="52" x2="248" y2="124" stroke="#21262d" />
+      <text x="262" y="66" class="lnk" font-size="13" font-weight="600">reactive-portfolio</text>
+      <text x="262" y="84" class="mut" font-size="11.5">High performance GSAP-animated</text><text x="262" y="99.5" class="mut" font-size="11.5">portfolio site</text>
+      <rect x="262.0" y="111.5" width="9" height="9" rx="2" fill="#3178c6" /><text x="276" y="120" class="mut" font-size="11">TypeScript</text><g transform="translate(342.5, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
+    </svg></g><text x="357" y="120" class="mono mut" font-size="11">94</text><g transform="translate(380.0, 110) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
+    </svg></g><text x="394" y="120" class="mono mut" font-size="11">12</text><text x="417" y="120" class="mut" font-size="11">20d ago</text>
+      <line x1="24" y1="132" x2="471" y2="132" stroke="#21262d" />
+      
+      <text x="24" y="154" class="lnk" font-size="13" font-weight="600">neural-canvas</text>
+      <text x="24" y="172" class="mut" font-size="11.5">Real-time procedural voxel generation</text><text x="24" y="187.5" class="mut" font-size="11.5">in WebGL</text>
+      <rect x="24.0" y="199.5" width="9" height="9" rx="2" fill="#dea584" /><text x="38" y="208" class="mut" font-size="11">Rust</text><g transform="translate(71.7, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
+    </svg></g><text x="86" y="208" class="mono mut" font-size="11">65</text><g transform="translate(109.1, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
+    </svg></g><text x="123" y="208" class="mono mut" font-size="11">8</text><text x="140" y="208" class="mut" font-size="11">1mo ago</text>
+      
+      <line x1="248" y1="140" x2="248" y2="212" stroke="#21262d" />
+      <text x="262" y="154" class="lnk" font-size="13" font-weight="600">cloud-task-orchestrator</text>
+      <text x="262" y="172" class="mut" font-size="11.5">Distributed workflow automation</text><text x="262" y="187.5" class="mut" font-size="11.5">runner</text>
+      <rect x="262.0" y="199.5" width="9" height="9" rx="2" fill="#00ADD8" /><text x="276" y="208" class="mut" font-size="11">Go</text><g transform="translate(300.9, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M8 .25a.75 .75 0 0 1 .673 .418l1.882 3.815 4.21 .612a.75 .75 0 0 1 .416 1.279l-3.046 2.97 .719 4.192a.75 .75 0 0 1 -1.088 .791L8 12.347l-3.766 1.98a.75 .75 0 0 1 -1.088 -.79l.72 -4.194L.818 6.374a.75 .75 0 0 1 .416 -1.28l4.21 -.611L7.327 .668A.75 .75 0 0 1 8 .25z"></path>
+    </svg></g><text x="315" y="208" class="mono mut" font-size="11">42</text><g transform="translate(338.3, 198) scale(0.82)">
+    <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="#8b949e" style="display:inline-block;vertical-align:text-top;">
+      <path fill-rule="evenodd" d="M5 3.25a.75 .75 0 1 1 -1.5 0 .75 .75 0 0 1 1.5 0zm0 2.122a2.25 2.25 0 1 0 -1.5 0v.878A2.25 2.25 0 0 0 5.75 8.5h1.5v2.128a2.251 2.251 0 1 0 1.5 0V8.5h1.5A2.25 2.25 0 0 0 12 6.25v-.878a2.25 2.25 0 1 0 -1.5 0v.878a.75 .75 0 0 1 -.75 .75h-3.5a.75 .75 0 0 1 -.75 -.75v-.878zM10.25 4a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5zm-2 9a.75 .75 0 1 0 0 -1.5 .75 .75 0 0 0 0 1.5z"></path>
+    </svg></g><text x="352" y="208" class="mono mut" font-size="11">5</text><text x="369" y="208" class="mut" font-size="11">2mo ago</text>
+</svg>

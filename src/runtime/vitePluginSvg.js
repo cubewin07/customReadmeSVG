@@ -1,7 +1,6 @@
-import { handleRequest } from './handleRequest.js';
-
 /**
  * Vite plugin middleware that intercepts SVG card requests during dev.
+ * Uses ssrLoadModule so edits to card renderers and rank algorithms hot-reload immediately.
  */
 export function vitePluginSvg() {
   return {
@@ -32,6 +31,7 @@ export function vitePluginSvg() {
           }
 
           const query = Object.fromEntries(url.searchParams.entries());
+          const { handleRequest } = await server.ssrLoadModule('/src/runtime/handleRequest.js');
           const result = await handleRequest(pathname, { query });
 
           if (result) {
@@ -39,6 +39,8 @@ export function vitePluginSvg() {
             for (const [key, val] of Object.entries(result.headers || {})) {
               res.setHeader(key, val);
             }
+            // Prevent browser from caching old SVG renders during local dev
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             return res.end(result.body);
           }
         } catch (err) {

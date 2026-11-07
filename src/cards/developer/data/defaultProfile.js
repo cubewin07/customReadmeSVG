@@ -7,12 +7,34 @@ export const DEFAULT_DEVELOPER_PROFILE = {
   login: 'cubewin07',
   handle: '@cubewin07',
   role: 'Full-Stack Engineer & Creative Coder',
-  status: 'Building cool things 🚀',
+  createdAt: '2024-11-21T13:12:05Z',
+  joinedYear: 2024,
+  status: 'MEMBER SINCE 2024',
   focus: [
     'Crafting interactive web apps & reactive UI systems',
     'with dynamic, game-inspired SVG animation engines.',
   ],
   tech: ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Next.js'],
+  skillGroups: [
+    {
+      category: 'FRONTEND & CREATIVE ENGINE',
+      color: '#38bdf8',
+      items: [
+        { name: 'React / Next.js', level: '95%' },
+        { name: 'TypeScript', level: '92%' },
+        { name: 'SVG / Canvas', level: '96%' },
+      ],
+    },
+    {
+      category: 'BACKEND & SYSTEMS',
+      color: '#818cf8',
+      items: [
+        { name: 'Node.js', level: '90%' },
+        { name: 'Python', level: '88%' },
+        { name: 'GraphQL / REST', level: '92%' },
+      ],
+    },
+  ],
   stats: [
     { label: 'REPOSITORIES', value: 28 },
     { label: 'TOTAL STARS', value: 64 },

@@ -4,6 +4,8 @@ import {
   nightPairs,
   sl,
   sla,
+  frac,
+  T,
   SW,
   SH,
 } from '../utils/timeline.js';
@@ -17,28 +19,22 @@ const SKY_COLORS = [
   [20.4, '#0a0e17'], // Deep nightfall
 ];
 
-// 20 deterministic stars with seeded positions and durations
+// 14 deterministic stars with seeded positions and durations
 const STAR_DATA = [
   { x: 38, y: 32, r: 1.2, dur: 2.3, delay: 0.4 },
   { x: 88, y: 74, r: 0.9, dur: 3.1, delay: 1.2 },
   { x: 142, y: 28, r: 1.4, dur: 2.1, delay: 0.7 },
   { x: 195, y: 92, r: 0.8, dur: 3.6, delay: 2.1 },
-  { x: 236, y: 44, r: 1.1, dur: 2.7, delay: 0.1 },
-  { x: 282, y: 112, r: 1.3, dur: 3.4, delay: 1.5 },
+  { x: 260, y: 22, r: 1.5, dur: 3.7, delay: 1.4 },
   { x: 324, y: 36, r: 0.9, dur: 2.5, delay: 0.9 },
   { x: 376, y: 68, r: 1.5, dur: 2.9, delay: 2.4 },
   { x: 418, y: 24, r: 1.1, dur: 3.2, delay: 0.3 },
   { x: 462, y: 84, r: 0.8, dur: 2.2, delay: 1.7 },
   { x: 512, y: 48, r: 1.4, dur: 3.8, delay: 1.1 },
   { x: 554, y: 96, r: 1.0, dur: 2.6, delay: 0.6 },
-  { x: 64, y: 138, r: 1.2, dur: 3.3, delay: 2.0 },
   { x: 120, y: 162, r: 0.8, dur: 2.4, delay: 0.8 },
-  { x: 182, y: 144, r: 1.1, dur: 3.5, delay: 1.3 },
   { x: 310, y: 156, r: 1.3, dur: 2.8, delay: 0.2 },
-  { x: 446, y: 132, r: 0.9, dur: 3.0, delay: 1.9 },
   { x: 498, y: 164, r: 1.2, dur: 2.7, delay: 0.5 },
-  { x: 260, y: 22, r: 1.5, dur: 3.7, delay: 1.4 },
-  { x: 532, y: 18, r: 0.9, dur: 2.2, delay: 1.0 },
 ];
 
 /**
@@ -49,13 +45,17 @@ const STAR_DATA = [
  * - Volumetric dust motes in desk lamp beam
  * - Streak Flame HUD badge with rising ember sparks
  */
-export function renderSkyAtmosphere(streak = 14) {
-  let starsSvg = '';
-  for (const s of STAR_DATA) {
-    starsSvg += `<circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="#dfe7f5">
-      ${sla('opacity', ['.25', '1', '.25'], s.dur, s.delay)}
-    </circle>`;
+export function renderSkyAtmosphere() {
+  let g1 = '';
+  let g2 = '';
+  for (let i = 0; i < STAR_DATA.length; i++) {
+    const s = STAR_DATA[i];
+    const circle = `<circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="#dfe7f5"/>`;
+    if (i % 2 === 0) g1 += circle;
+    else g2 += circle;
   }
+  const starsSvg = `<g opacity="0.3">${sla('opacity', ['.25', '1', '.25'], 2.4)}${g1}</g>`
+    + `<g opacity="0.4">${sla('opacity', ['.3', '1', '.3'], 3.1, 1.2)}${g2}</g>`;
 
   return `<!-- ============================= SKY & ATMOSPHERE ============================= -->
   <!-- Dynamic Day/Night Sky -->
@@ -105,9 +105,9 @@ export function renderSkyAtmosphere(streak = 14) {
   </g>
 
   <!-- Celestial Sun Orbit with Solar Flares -->
-  <g>
+  <g opacity="0">
     ${anim('opacity', [[0, 0], [2.4, 0], [3.6, 1], [15.6, 1], [17, 0]])}
-    <animateMotion dur="24s" repeatCount="indefinite" path="M40 240 Q292 -110 544 240" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.1;0.7;1"/>
+    <animateMotion dur="${T}s" repeatCount="indefinite" path="M40 240 Q292 -110 544 240" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;${frac(2.4).toFixed(3)};${frac(16.8).toFixed(3)};1"/>
     <!-- Outer Solar Flare Atmosphere -->
     <circle r="36" fill="url(#sunGlowGrad)"/>
     <circle r="14" fill="#ffe885"/>
@@ -115,9 +115,9 @@ export function renderSkyAtmosphere(streak = 14) {
   </g>
 
   <!-- Celestial Crescent Moon Orbit with Subtle Craters -->
-  <g>
+  <g opacity="0">
     ${anim('opacity', [[0, 0], [16.3, 0], [17.5, 1], [22.2, 1], [23.3, 0]])}
-    <animateMotion dur="24s" repeatCount="indefinite" path="M60 230 Q292 -100 524 230" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.68;0.97;1"/>
+    <animateMotion dur="${T}s" repeatCount="indefinite" path="M60 230 Q292 -100 524 230" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;${frac(16.3).toFixed(3)};${frac(23.3).toFixed(3)};1"/>
     <!-- Moon Ambient Glow -->
     <circle r="26" fill="#9db7e8" opacity="0.12"/>
     <!-- Crescent Moon Silhouette -->
@@ -137,26 +137,5 @@ export function renderSkyAtmosphere(streak = 14) {
       ${sl('translate', ['0 0', '-12 -16', '0 0'], 4.1, 1.2)}
       ${sla('opacity', ['0.2', '0.8', '0.2'], 4.1, 1.2)}
     </circle>
-  </g>
-
-  <!-- HUD: Streak Flame Badge with Rising Ember Particles -->
-  <g transform="translate(486,26)">
-    <g>
-      ${sl('scale', ['1 1', '1.07 .93', '.95 1.06', '1 1'], 0.9)}
-      <!-- Outer Flame -->
-      <path d="M0 -13 C3 -8 9 -4 8 3 C7 9 2 12 0 12 C-3 12 -8 9 -8 3 C-8 -2 -4 -4 -3 -9 C-1 -7 0 -10 0 -13Z" fill="#ff8a3d"/>
-      <!-- Inner Flame Core -->
-      <path d="M0 -3 C2 0 5 2 4 6 C3 9 1 10 0 10 C-2 10 -4 9 -4 6 C-4 3 -1 2 0 -3Z" fill="#ffd76a"/>
-    </g>
-    <!-- Floating Embers -->
-    <circle cx="0" cy="-14" r="0.9" fill="#ffd76a">
-      ${sl('translate', ['0 0', '2 -10'], 1.6)}
-      ${sla('opacity', ['1', '0'], 1.6)}
-    </circle>
-    <circle cx="-3" cy="-12" r="0.7" fill="#ff8a3d">
-      ${sl('translate', ['0 0', '-3 -8'], 1.4, 0.4)}
-      ${sla('opacity', ['1', '0'], 1.4, 0.4)}
-    </circle>
-    <text class="t" x="14" y="4" font-size="12" font-weight="700" fill="#ffb86b">${streak}-day streak</text>
   </g>`;
 }

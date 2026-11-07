@@ -188,6 +188,7 @@ export function normalizeLanguages(rawData) {
         const existing = langMap.get(name);
         existing.size += size;
         existing.repoCount += 1;
+        existing.repos.push({ name: repo.name, size, isPrivate: Boolean(repo.isPrivate) });
         if (monthsAgo < existing.lastUsedMonthsAgo) {
           existing.lastUsedMonthsAgo = monthsAgo;
         }
@@ -201,6 +202,7 @@ export function normalizeLanguages(rawData) {
           size,
           recentSize: isRecent ? size : 0,
           repoCount: 1,
+          repos: [{ name: repo.name, size, isPrivate: Boolean(repo.isPrivate) }],
           lastUsedMonthsAgo: monthsAgo,
         });
       }
@@ -223,6 +225,30 @@ export function normalizeLanguages(rawData) {
     totalRepos: repos.length,
     totalLanguages: languages.length,
   };
+}
+
+/**
+ * Normalizes TRACE_QUERY into repositories with commit timestamps, busiest first.
+ * @param {object} rawData
+ * @returns {{ login: string, name: string, repos: Array }}
+ */
+export function normalizeTrace(rawData) {
+  if (!rawData || !rawData.user) return { login: '', name: '', repos: [] };
+  const repos = (rawData.user.repositories?.nodes || [])
+    .map((repo) => {
+      const history = repo.defaultBranchRef?.target?.history;
+      return {
+        name: repo.name,
+        pushedAt: repo.pushedAt || null,
+        language: repo.primaryLanguage || null,
+        commitCount: history?.totalCount || 0,
+        commitDates: (history?.nodes || []).map((node) => node.committedDate).filter(Boolean),
+        nextCursor: history?.pageInfo?.hasNextPage ? history.pageInfo.endCursor : null,
+      };
+    })
+    .filter((repo) => repo.commitCount > 0)
+    .sort((a, b) => b.commitCount - a.commitCount);
+  return { login: rawData.user.login, name: rawData.user.name || rawData.user.login, repos };
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;

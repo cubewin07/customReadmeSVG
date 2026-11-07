@@ -116,6 +116,7 @@ export const LANGUAGES_QUERY = `
         }
         nodes {
           name
+          isPrivate
           pushedAt
           languages(first: 20, orderBy: { field: SIZE, direction: DESC }) {
             edges {
@@ -408,3 +409,80 @@ export const DEVELOPER_QUERY = `
   }
 `;
 
+/**
+ * TRACE_QUERY
+ * Fetches recently pushed public, non-fork repositories with their commit timestamps for the
+ * last year. Private repositories are excluded because their names appear on the card.
+ */
+export const TRACE_QUERY = `
+  query GetUserTrace($login: String!, $since: GitTimestamp!, $first: Int = 20) {
+    user(login: $login) {
+      login
+      name
+      repositories(
+        ownerAffiliations: [OWNER]
+        privacy: PUBLIC
+        isFork: false
+        orderBy: { field: PUSHED_AT, direction: DESC }
+        first: $first
+      ) {
+        nodes {
+          name
+          pushedAt
+          primaryLanguage {
+            name
+            color
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 100, since: $since) {
+                  totalCount
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+                  nodes {
+                    committedDate
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      limit
+      cost
+      remaining
+      resetAt
+    }
+  }
+`;
+
+/**
+ * TRACE_HISTORY_QUERY
+ * Pages through one repository's commit timestamps for repositories with over 100 commits.
+ */
+export const TRACE_HISTORY_QUERY = `
+  query GetRepoCommitDates($owner: String!, $name: String!, $since: GitTimestamp!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            history(first: 100, since: $since, after: $after) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
+                committedDate
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
